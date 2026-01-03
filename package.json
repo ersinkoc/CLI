@@ -34,13 +34,18 @@
   "sideEffects": false,
   "scripts": {
     "build": "tsup",
+    "dev": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build && npm run test:coverage"
+    "prepublishOnly": "npm run build && npm run test:coverage",
+    "release": "npm run build && npm publish",
+    "release:dry": "npm run build && npm publish --dry-run"
   },
   "keywords": [
     "cli",
