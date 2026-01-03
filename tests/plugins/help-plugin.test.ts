@@ -119,4 +119,71 @@ describe('Help Plugin', () => {
     // The important part is that app.commands.size > 0 check was executed
     expect(mockApp.commands.size).toBeGreaterThan(0);
   });
+
+  it('should format help with app name when no description provided', async () => {
+    const plugin = helpPlugin();
+    plugin.install(kernel);
+
+    const appWithoutDescription = {
+      ...mockApp,
+      description: () => '',
+    } as any;
+
+    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    await kernel.emit('help', { app: appWithoutDescription });
+
+    // Should show the app name in bold when no description is provided
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('myapp'));
+
+    consoleLogSpy.mockRestore();
+  });
+
+  it('should handle commands with empty description', async () => {
+    // Test the code path at help.ts:92 - when cmd.description is undefined/null
+    const plugin = helpPlugin();
+    plugin.install(kernel);
+
+    const appWithNoDescriptionCommand = {
+      ...mockApp,
+      commands: new Map([
+        ['build', { name: 'build' }], // No description
+        ['test', { name: 'test', description: 'Run tests' }],
+      ]),
+    } as any;
+
+    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    await kernel.emit('help', { app: appWithNoDescriptionCommand });
+
+    // Should show both commands even if one has no description
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('build'));
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('test'));
+
+    consoleLogSpy.mockRestore();
+  });
+
+  it('should handle options with empty description', async () => {
+    // Test the code path at help.ts:103 - when opt.description is undefined/null
+    const plugin = helpPlugin();
+    plugin.install(kernel);
+
+    const appWithNoDescriptionOption = {
+      ...mockApp,
+      options: [
+        { name: 'verbose' }, // No description
+        { name: 'help', description: 'Show help' },
+      ],
+    } as any;
+
+    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    await kernel.emit('help', { app: appWithNoDescriptionOption });
+
+    // Should show both options even if one has no description
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('verbose'));
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('help'));
+
+    consoleLogSpy.mockRestore();
+  });
 });

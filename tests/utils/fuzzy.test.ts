@@ -53,6 +53,12 @@ describe('Fuzzy Search', () => {
       expect(result.match).toBe(false);
       expect(result.score).toBe(0);
     });
+
+    it('should handle single character pattern', () => {
+      const result = fuzzyMatch('t', 'test');
+      expect(result.match).toBe(true);
+      expect(result.score).toBeGreaterThan(0);
+    });
   });
 
   describe('fuzzyFilter', () => {

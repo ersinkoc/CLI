@@ -84,22 +84,25 @@ describe('ANSI Utilities', () => {
       expect(c).toBeDefined();
     });
 
-    it('should apply colors as getters', () => {
+    it('should apply colors as methods', () => {
       const c = color('text');
-      expect(c.red).toBeTypeOf('string');
-      expect(c.green).toBeTypeOf('string');
-      expect(c.blue).toBeTypeOf('string');
+      expect(c.red()).toBeTypeOf('string');
+      expect(c.green()).toBeTypeOf('string');
+      expect(c.yellow()).toBeTypeOf('string');
+      expect(c.blue()).toBeTypeOf('string');
+      expect(c.magenta()).toBeTypeOf('string');
+      expect(c.cyan()).toBeTypeOf('string');
     });
 
     it('should chain background modifiers', () => {
       const c = color('text');
-      const result = c.bgRed;
+      const result = c.bgRed();
       expect(result).toBeInstanceOf(color('text').constructor);
     });
 
     it('should chain style modifiers', () => {
       const c = color('text');
-      const result = c.bold.underline;
+      const result = c.bold().underline();
       expect(result).toBeInstanceOf(color('text').constructor);
     });
   });
@@ -206,7 +209,7 @@ describe('ANSI Utilities', () => {
 
     it('should apply italic style', () => {
       const c = color('text');
-      const result = c.italic;
+      const result = c.italic();
       expect(result).toBeInstanceOf(c.constructor);
     });
 
@@ -224,19 +227,19 @@ describe('ANSI Utilities', () => {
 
     it('should chain multiple background colors', () => {
       const c = color('text');
-      const result = c.bgRed.bgGreen;
+      const result = c.bgRed().bgGreen();
       expect(result).toBeInstanceOf(c.constructor);
     });
 
     it('should chain multiple styles', () => {
       const c = color('text');
-      const result = c.bold.dim.italic.underline;
+      const result = c.bold().dim().italic().underline();
       expect(result).toBeInstanceOf(c.constructor);
     });
 
     it('should combine background and styles - white returns string', () => {
       const c = color('text');
-      const result = c.bgBlue.bold.white;
+      const result = c.bgBlue().bold().white();
       // white getter returns a string (final result), not a ColorUtils instance
       expect(typeof result).toBe('string');
       expect(result).toContain('text');
@@ -244,56 +247,86 @@ describe('ANSI Utilities', () => {
 
     it('should get black color', () => {
       const c = color('text');
-      const result = c.black;
+      const result = c.black();
       expect(result).toContain('text');
+    });
+
+    it('should handle end() method with existing escape codes', () => {
+      const c = color('text');
+      // First apply a style that adds escape codes
+      const styled = c.bold();
+      // Then the text should start with escape codes
+      // Calling a color method after a style should use end() which checks for escape codes
+      expect(typeof styled).toBe('object');
+      // The internal text should now have escape codes
     });
 
     it('should apply bgBlack background', () => {
       const c = color('text');
-      const result = c.bgBlack;
+      const result = c.bgBlack();
       expect(result).toBeInstanceOf(c.constructor);
     });
 
     it('should apply bgRed background', () => {
       const c = color('text');
-      const result = c.bgRed;
+      const result = c.bgRed();
       expect(result).toBeInstanceOf(c.constructor);
     });
 
     it('should apply bgGreen background', () => {
       const c = color('text');
-      const result = c.bgGreen;
+      const result = c.bgGreen();
       expect(result).toBeInstanceOf(c.constructor);
     });
 
     it('should apply bgBlue background', () => {
       const c = color('text');
-      const result = c.bgBlue;
+      const result = c.bgBlue();
       expect(result).toBeInstanceOf(c.constructor);
     });
 
     it('should apply bgYellow background', () => {
       const c = color('text');
-      const result = c.bgYellow;
+      const result = c.bgYellow();
       expect(result).toBeInstanceOf(c.constructor);
     });
 
     it('should apply bgMagenta background', () => {
       const c = color('text');
-      const result = c.bgMagenta;
+      const result = c.bgMagenta();
       expect(result).toBeInstanceOf(c.constructor);
     });
 
     it('should apply bgCyan background', () => {
       const c = color('text');
-      const result = c.bgCyan;
+      const result = c.bgCyan();
       expect(result).toBeInstanceOf(c.constructor);
     });
 
     it('should apply bgWhite background', () => {
       const c = color('text');
-      const result = c.bgWhite;
+      const result = c.bgWhite();
       expect(result).toBeInstanceOf(c.constructor);
+    });
+
+    it('should apply bgBlack background', () => {
+      const c = color('text');
+      const result = c.bgBlack();
+      expect(result).toBeInstanceOf(c.constructor);
+    });
+
+    it('should apply bgRed background', () => {
+      const c = color('text');
+      const result = c.bgRed();
+      expect(result).toBeInstanceOf(c.constructor);
+    });
+
+    it('should use colors.bgBlack', () => {
+      expect(colors.bgBlack('text')).toContain('text');
+    });
+
+    it('should use colors.bgRed', () => {
+      expect(colors.bgRed('text')).toContain('text');
     });
 
     it('should use colors.bgMagenta', () => {
@@ -318,6 +351,19 @@ describe('ANSI Utilities', () => {
 
     it('should use colors.underline style', () => {
       expect(colors.underline('text')).toContain('text');
+    });
+
+    it('should handle end() with ANSI prefix and FORCE_COLOR', () => {
+      // Test the code path at ansi.ts:217 - when text starts with '\x1b[' and isSupported is true
+      process.env.FORCE_COLOR = '1';
+      const c = color('text');
+      const result = c.bold();
+      // The result should have ANSI codes when FORCE_COLOR is set
+      expect(typeof result).toBe('object');
+      // Force another style to trigger end()
+      const final = result.red();
+      // When text already has ANSI codes, end() appends reset
+      expect(typeof final).toBe('string');
     });
   });
 

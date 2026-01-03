@@ -85,6 +85,23 @@ export function parseOptions(
       continue;
     }
 
+    // Check if value is attached to short flag (e.g., -p3000)
+    // This check must happen before looking up the definition
+    if (token.type === 'flag' && name.length > 1) {
+      const flagName = name[0];
+      const attachedValue = name.slice(1);
+
+      const flagDef = byName.get(flagName) ?? byAlias.get(flagName);
+      if (flagDef && flagDef.type !== 'boolean') {
+        // This is an attached value, not a flag group
+        const value = attachedValue;
+        values[flagDef.name] = coerceOptionValue(value, flagDef, errors);
+        processed.add(flagDef.name);
+        i++;
+        continue;
+      }
+    }
+
     // Find definition
     let def = byName.get(name) ?? byAlias.get(name);
 
@@ -144,21 +161,6 @@ export function parseOptions(
 
     // Get value from next token or from attached value
     let value: string;
-
-    // Check if value is attached (e.g., -p3000)
-    if (token.type === 'flag' && name.length > 1) {
-      // First char is the flag, rest is value
-      const flagName = name[0];
-      const attachedValue = name.slice(1);
-
-      const flagDef = byName.get(flagName) ?? byAlias.get(flagName);
-      if (flagDef) {
-        value = attachedValue;
-        values[flagDef.name] = coerceOptionValue(value, flagDef, errors);
-      }
-      i++;
-      continue;
-    }
 
     // Check next token for value
     const nextToken = tokens[i + 1];

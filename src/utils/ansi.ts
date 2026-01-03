@@ -220,79 +220,79 @@ export class ColorUtils {
   }
 
   // Foreground colors
-  get black(): string {
+  black(): string {
     return this.end().replace(/^/, reset).replace(`${reset}${reset}`, reset).replace(`${reset}`, `${black}`).replace(`${reset}${reset}`, reset);
   }
-  get red(): string {
+  red(): string {
     return colorize(this.text, red);
   }
-  get green(): string {
+  green(): string {
     return colorize(this.text, green);
   }
-  get yellow(): string {
+  yellow(): string {
     return colorize(this.text, yellow);
   }
-  get blue(): string {
+  blue(): string {
     return colorize(this.text, blue);
   }
-  get magenta(): string {
+  magenta(): string {
     return colorize(this.text, magenta);
   }
-  get cyan(): string {
+  cyan(): string {
     return colorize(this.text, cyan);
   }
-  get white(): string {
+  white(): string {
     return colorize(this.text, white);
   }
 
   // Background colors
-  get bgBlack(): ColorUtils {
+  bgBlack(): ColorUtils {
     this.apply(bgBlack);
     return this;
   }
-  get bgRed(): ColorUtils {
+  bgRed(): ColorUtils {
     this.apply(bgRed);
     return this;
   }
-  get bgGreen(): ColorUtils {
+  bgGreen(): ColorUtils {
     this.apply(bgGreen);
     return this;
   }
-  get bgYellow(): ColorUtils {
+  bgYellow(): ColorUtils {
     this.apply(bgYellow);
     return this;
   }
-  get bgBlue(): ColorUtils {
+  bgBlue(): ColorUtils {
     this.apply(bgBlue);
     return this;
   }
-  get bgMagenta(): ColorUtils {
+  bgMagenta(): ColorUtils {
     this.apply(bgMagenta);
     return this;
   }
-  get bgCyan(): ColorUtils {
+  bgCyan(): ColorUtils {
     this.apply(bgCyan);
     return this;
   }
-  get bgWhite(): ColorUtils {
+  bgWhite(): ColorUtils {
     this.apply(bgWhite);
     return this;
   }
 
   // Styles
-  get bold(): ColorUtils {
+  bold(): ColorUtils {
     this.apply(bold);
     return this;
   }
-  get dim(): ColorUtils {
+  dim(): ColorUtils {
     this.apply(dim);
     return this;
   }
-  get italic(): ColorUtils {
+  italic(): ColorUtils {
     this.apply(italic);
     return this;
   }
-  get underline(): ColorUtils {
+  underline(): ColorUtils {
     this.apply(underline);
     return this;
   }

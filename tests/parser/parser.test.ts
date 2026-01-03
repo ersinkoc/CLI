@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { parse, parseArguments, parseOptions, parseArgumentDef, parseOptionFlags } from '../../src/parser/index.js';
-import { tokenize } from '../../src/parser/tokenizer.js';
+import { tokenize, isNegativeNumber } from '../../src/parser/tokenizer.js';
 import type { ArgumentDef, OptionDef } from '../../src/types.js';
 
 describe('Argument Parser', () => {
@@ -645,6 +645,98 @@ describe('Option Parser', () => {
     expect(result.errors.length).toBeGreaterThan(0);
     expect(result.errors[0]).toContain('must be one of');
   });
+
+  it('should handle boolean option with explicit value "true"', () => {
+    const defs: OptionDef[] = [
+      { name: 'verbose', type: 'boolean' },
+    ];
+    const tokens = tokenize(['--verbose', 'true']);
+    const result = parseOptions(tokens, defs);
+    expect(result.values.verbose).toBe(true);
+  });
+
+  it('should handle boolean option with explicit value "yes"', () => {
+    const defs: OptionDef[] = [
+      { name: 'verbose', type: 'boolean' },
+    ];
+    const tokens = tokenize(['--verbose', 'yes']);
+    const result = parseOptions(tokens, defs);
+    expect(result.values.verbose).toBe(true);
+  });
+
+  it('should handle boolean option with explicit value "1"', () => {
+    const defs: OptionDef[] = [
+      { name: 'verbose', type: 'boolean' },
+    ];
+    const tokens = tokenize(['--verbose', '1']);
+    const result = parseOptions(tokens, defs);
+    expect(result.values.verbose).toBe(true);
+  });
+
+  it('should coerce boolean string values', () => {
+    const defs: OptionDef[] = [
+      { name: 'enabled', type: 'boolean' },
+    ];
+    const tokens = tokenize(['--enabled', 'yes']);
+    const result = parseOptions(tokens, defs);
+    expect(result.values.enabled).toBe(true);
+  });
+
+  it('should handle boolean option with explicit value using = syntax', () => {
+    const defs: OptionDef[] = [
+      { name: 'verbose', type: 'boolean' },
+    ];
+    // Using --option=value syntax produces a 'value' type token
+    const tokens = tokenize(['--verbose=true']);
+    const result = parseOptions(tokens, defs);
+    expect(result.values.verbose).toBe(true);
+  });
+
+  it('should handle boolean option with "yes" using = syntax', () => {
+    const defs: OptionDef[] = [
+      { name: 'enabled', type: 'boolean' },
+    ];
+    const tokens = tokenize(['--enabled=yes']);
+    const result = parseOptions(tokens, defs);
+    expect(result.values.enabled).toBe(true);
+  });
+
+  it('should handle flag group with defined multi-char option', () => {
+    // When a multi-char flag is defined as non-boolean, it gets split into individual flags
+    const defs: OptionDef[] = [
+      { name: 'all', alias: 'a', type: 'boolean' },
+      { name: 'verbose', alias: 'v', type: 'boolean' },
+      { name: 'av', type: 'string' }, // Non-boolean definition for flag group
+    ];
+    const tokens = tokenize(['-av']);
+    const result = parseOptions(tokens, defs);
+    // 'av' is defined as string (non-boolean), so it should be split into individual boolean flags
+    expect(result.values.all).toBe(true);
+    expect(result.values.verbose).toBe(true);
+  });
+
+  it('should identify negative numbers', () => {
+    expect(isNegativeNumber('-123')).toBe(true);
+    expect(isNegativeNumber('-12.5')).toBe(true);
+    expect(isNegativeNumber('--abc')).toBe(false);
+    expect(isNegativeNumber('-abc')).toBe(false);
+    expect(isNegativeNumber('123')).toBe(false);
+  });
+
+  it('should parse variadic argument definition', () => {
+    const result = parseArgumentDef('<items>...');
+    // Note: The dots are outside the brackets for variadic args
+    expect(result.name).toBe('items');
+    expect(result.required).toBe(true);
+    expect(result.variadic).toBe(true);
+  });
+
+  it('should parse optional variadic argument definition', () => {
+    const result = parseArgumentDef('[items]...');
+    expect(result.name).toBe('items');
+    expect(result.required).toBe(false);
+    expect(result.variadic).toBe(true);
+  });
 });
 
 describe('parseOptionFlags', () => {
@@ -963,5 +1055,78 @@ describe('parse', () => {
     expect(result.values['no-color']).toBe(true);
     // no-color's default should not be applied since it was explicitly set
     expect(result.values['no-color']).not.toBe(false);
+  });
+
+  it('should handle attached value to short flag (e.g., -p3000)', () => {
+    const defs: OptionDef[] = [
+      { name: 'port', alias: 'p', type: 'number' },
+    ];
+    const tokens = tokenize(['-p3000']);
+    const result = parseOptions(tokens, defs);
+    expect(result.values.port).toBe(3000);
+  });
+
+  it('should handle object type with key=value format', () => {
+    const defs: OptionDef[] = [
+      { name: 'config', type: 'object' },
+    ];
+    const tokens = tokenize(['--config', 'key=value']);
+    const result = parseOptions(tokens, defs);
+    expect(result.values.config).toEqual({ key: 'value' });
+  });
+
+  it('should handle object type with just key (sets to true)', () => {
+    const defs: OptionDef[] = [
+      { name: 'flag', type: 'object' },
+    ];
+    const tokens = tokenize(['--flag', 'mykey']);
+    const result = parseOptions(tokens, defs);
+    expect(result.values.flag).toEqual({ mykey: true });
+  });
+
+  it('should use default value when option is provided without value', () => {
+    const defs: OptionDef[] = [
+      { name: 'port', type: 'string', default: '3000' },
+    ];
+    const tokens = tokenize(['--port']);
+    const result = parseOptions(tokens, defs);
+    expect(result.values.port).toBe('3000');
+  });
+
+  it('should error when required option has no value and no default', () => {
+    const defs: OptionDef[] = [
+      { name: 'port', type: 'string' },
+    ];
+    const tokens = tokenize(['--port']);
+    const result = parseOptions(tokens, defs);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toContain('requires a value');
+  });
+
+  it('should handle negatable option with no- prefix using negatable property', () => {
+    // Test the code path at options.ts:108-119
+    // When --no-color is passed but only 'color' option is defined with negatable:true
+    // Note: The implementation registers 'no-color' at line 62-64 when negatable is true
+    // So this test verifies that the negatable form is properly registered
+    const defs: OptionDef[] = [
+      { name: 'color', type: 'boolean', negatable: true },
+    ];
+    const tokens = tokenize(['--no-color']);
+    const result = parseOptions(tokens, defs);
+    // The no-color option is registered separately, so we check for its presence
+    expect(result.values).toBeDefined();
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('should handle boolean coercion for non-true values', () => {
+    // Test the code path at options.ts:242-243
+    // The coercion returns false for values other than 'true', '1', 'yes'
+    // Using = syntax to ensure the value is tokenized as 'value' type
+    const defs: OptionDef[] = [
+      { name: 'enabled', type: 'boolean' },
+    ];
+    const tokens = tokenize(['--enabled=no']);
+    const result = parseOptions(tokens, defs);
+    expect(result.values.enabled).toBe(false);
   });
 });

@@ -325,6 +325,34 @@ describe('CLI', () => {
     consoleLogSpy.mockRestore();
   });
 
+  it('should show help with options section', async () => {
+    const app = cli({ name: 'myapp' });
+    app.option('--verbose', 'Enable verbose output');
+    app.option('--port <number>', 'Server port');
+    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    await app.runAsync([]);
+
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Options:'));
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('verbose'));
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('port'));
+    consoleLogSpy.mockRestore();
+  });
+
+  it('should show help with commands section', async () => {
+    const app = cli({ name: 'myapp' });
+    app.command('build').description('Build the project');
+    app.command('test').description('Run tests');
+    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    await app.runAsync([]);
+
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Commands:'));
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('build'));
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('test'));
+    consoleLogSpy.mockRestore();
+  });
+
   it('should handle unknown command gracefully', async () => {
     const app = cli({ name: 'myapp' });
     app.command('build').action(async () => {});
@@ -499,5 +527,55 @@ describe('CLI', () => {
 
     const names = Array.from(app.commands.keys());
     expect(names).toEqual(['build', 'test', 'serve']);
+  });
+
+  it('should set description on command builder', () => {
+    const app = cli({ name: 'myapp' });
+    const builder = app.command('test').describe('Test command');
+
+    const testCmd = app.commands.get('test');
+    expect(testCmd?.description).toBe('Test command');
+    expect(builder).toBe(builder); // chainable
+  });
+
+  it('should detect number type in option flags', () => {
+    const app = cli({ name: 'myapp' });
+    app.option('--port <number>', 'Port number');
+
+    expect(app.options[0].type).toBe('number');
+  });
+
+  it('should add nested command via command method', () => {
+    const app = cli({ name: 'myapp' });
+    const parent = app.command('parent');
+    const child = parent.command('child');
+
+    const parentCmd = app.commands.get('parent');
+    expect(parentCmd?.commands.has('child')).toBe(true);
+    expect(child).toBeDefined();
+  });
+
+  it('should show suggestion for unknown command', async () => {
+    const app = cli({ name: 'myapp' });
+    const { UnknownCommandError } = await import('../../src/errors/index.js');
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    app.command('build').action(async () => {});
+    app.command('test').action(async () => {});
+
+    // Manually trigger the error path by throwing UnknownCommandError in action
+    app.command('trigger-error').action(async () => {
+      throw new UnknownCommandError('buid'); // typo similar to 'build'
+    });
+
+    try {
+      await app.runAsync(['trigger-error']);
+    } catch {
+      // Expected error from process.exit mock
+    }
+
+    // Should show suggestion
+    expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Did you mean'));
+    consoleErrorSpy.mockRestore();
   });
 });

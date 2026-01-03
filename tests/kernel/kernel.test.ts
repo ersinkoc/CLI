@@ -309,4 +309,29 @@ describe('CLIKernel', () => {
     expect(count1).toBe(1); // Should not increment
     expect(count2).toBe(1); // Should not increment
   });
+
+  it('should handle plugin install error with onError callback', () => {
+    let errorHandled = false;
+    const testError = new Error('Install failed');
+    const plugin: CLIPlugin<TestContext> = {
+      name: 'test',
+      version: '1.0.0',
+      install: () => {
+        throw testError;
+      },
+      onError: (error) => {
+        if (error === testError) {
+          errorHandled = true;
+        }
+      },
+    };
+
+    expect(() => kernel.register(plugin)).toThrow(testError);
+    expect(errorHandled).toBe(true);
+  });
+
+  it('should unregister non-existent plugin gracefully', () => {
+    // Should not throw, just return silently
+    expect(() => kernel.unregister('nonexistent')).not.toThrow();
+  });
 });

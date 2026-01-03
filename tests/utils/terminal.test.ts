@@ -202,6 +202,31 @@ describe('Terminal Utilities', () => {
         configurable: true,
       });
     });
+
+    it('should handle Windows with undefined OS_VER', () => {
+      const originalPlatform = process.platform;
+      const originalOsVer = process.env.OS_VER;
+
+      Object.defineProperty(process, 'platform', {
+        value: 'win32',
+        writable: true,
+        configurable: true,
+      });
+      delete process.env.OS_VER;
+
+      const result = supportsUnicode();
+      expect(typeof result).toBe('boolean');
+
+      // Restore original values
+      Object.defineProperty(process, 'platform', {
+        value: originalPlatform,
+        writable: true,
+        configurable: true,
+      });
+      if (originalOsVer !== undefined) {
+        process.env.OS_VER = originalOsVer;
+      }
+    });
   });
 
   describe('supportsColor', () => {

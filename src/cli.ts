@@ -247,24 +247,39 @@ export class CLIImplementation implements CLI {
     return findBestMatch(name, candidates, 0.6);
   }
 
-  private async showHelp(): Promise<void> {
-    await this.kernel.emit('help', { app: this });
+  private buildHelpText(): string[] {
+    const lines: string[] = [];
 
-    console.log(`Usage: ${this.name} [command] [options]`);
+    // Usage
+    lines.push(`Usage: ${this.name} [command] [options]`);
 
+    // Commands
     if (this.commands.size > 0) {
-      console.log('\nCommands:');
+      lines.push('');
+      lines.push('Commands:');
       for (const cmd of this.commands.values()) {
-        console.log(`  ${cmd.name.padEnd(20)} ${cmd.description || ''}`);
+        lines.push(`  ${cmd.name.padEnd(20)} ${cmd.description || ''}`);
       }
     }
 
+    // Options
     if (this.options.length > 0) {
-      console.log('\nOptions:');
+      lines.push('');
+      lines.push('Options:');
       for (const opt of this.options) {
         const flags = this.formatOptionFlags(opt);
-        console.log(`  ${flags.padEnd(20)} ${opt.description || ''}`);
+        lines.push(`  ${flags.padEnd(20)} ${opt.description || ''}`);
       }
+    }
+
+    return lines;
+  }
+
+  private async showHelp(): Promise<void> {
+    await this.kernel.emit('help', { app: this });
+    const lines = this.buildHelpText();
+    for (const line of lines) {
+      console.log(line);
     }
   }
 
