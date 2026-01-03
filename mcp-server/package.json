@@ -1,0 +1,25 @@
+{
+  "name": "@oxog/cli-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for @oxog/cli - enables AI assistants to generate CLI code",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "cli",
+    "code-generation",
+    "ai"
+  ],
+  "author": "Ersin Koç",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,0 +1,112 @@
+# Dependencies
+node_modules/
+node_modules/.cache/
+.pnp.*
+.pnp.js
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# Temporary files
+*.tmp
+.cache/
+.parcel-cache/
+.vite/
+.turbo/
+
+# OS files
+Thumbs.db
+.DS_Store
+*.pem
+
+# Website build
+website/dist/
+website/.astro/
+website/node_modules/
+
+# MCP Server
+mcp-server/dist/
+mcp-server/node_modules/
+
+# Package manager locks (keep package-lock.json)
+# yarn.lock
+# pnpm-lock.yaml
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variable files
+.env.test
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Temporary folders
+tmp/
+temp/
+
+# Build artifacts
+*.tsbuildinfo
+*.d.ts.map
+*.js.map
+
+# Testing
+.vitest/
+*.test.ts.snap

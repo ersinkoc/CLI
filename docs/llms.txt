@@ -1,0 +1,111 @@
+# @oxog/cli
+
+> Zero-dependency CLI framework with type-safe commands, beautiful output, and plugin architecture
+
+## Install
+
+```bash
+npm install @oxog/cli
+```
+
+## Basic Usage
+
+```typescript
+import { cli } from '@oxog/cli';
+
+const app = cli('myapp').version('1.0.0');
+app.command('greet').argument('<name>').action(({ args }) => console.log(`Hello, ${args.name}!`));
+app.run();
+```
+
+## API Summary
+
+### Core
+- `cli(name | options)` - Create CLI application
+- `.version(v)` - Set version
+- `.describe(d)` - Set description
+- `.command(name)` - Add command
+- `.argument(def, desc?)` - Add argument
+- `.option(flags, desc?, opts?)` - Add option
+- `.action(handler)` - Set action handler
+- `.use(plugin)` - Register plugin
+- `.run(argv?)` - Execute CLI
+
+### Core Plugins
+- `helpPlugin()` - Auto-generated help output
+- `versionPlugin()` - Version display
+- `validationPlugin()` - Type validation
+
+### Optional Plugins
+- `colorPlugin()` - ANSI colorized output
+- `spinnerPlugin()` - Loading spinners & progress bars
+- `loggerPlugin({ level })` - Leveled logging (debug, info, warn, error)
+- `middlewarePlugin()` - Command middleware/hooks
+
+## Common Patterns
+
+### Basic Command
+```typescript
+app.command('init')
+  .describe('Initialize project')
+  .argument('<name>', 'Project name')
+  .option('-t, --template <type>', 'Template', 'default')
+  .action(({ args, options }) => {
+    console.log(`Creating ${args.name} with template ${options.template}`);
+  });
+```
+
+### With Plugins
+```typescript
+import { colorPlugin, spinnerPlugin, loggerPlugin } from '@oxog/cli/plugins';
+
+const app = cli('myapp')
+  .use(colorPlugin())
+  .use(spinnerPlugin())
+  .use(loggerPlugin());
+
+app.command('deploy').action(async ({ spinner, logger }) => {
+  const s = spinner.start('Deploying...');
+  logger.info('Starting deployment...');
+  await deploy();
+  s.succeed('Deployed!');
+});
+```
+
+### Nested Commands
+```typescript
+app.command('config')
+  .command('get')
+    .argument('<key>')
+    .action(({ args }) => getConfig(args.key))
+  .parent()
+  .command('set')
+    .argument('<key>')
+    .argument('<value>')
+    .action(({ args }) => setConfig(args.key, args.value));
+```
+
+### Middleware
+```typescript
+app.command('deploy')
+  .use(async (ctx, next) => {
+    console.log('Before deploy');
+    await next();
+    console.log('After deploy');
+  })
+  .action(() => { /* ... */ });
+```
+
+## Errors
+
+| Code | Meaning | Solution |
+|------|---------|----------|
+| `UNKNOWN_COMMAND` | Command not found | Check command name, see help |
+| `MISSING_ARGUMENT` | Required argument missing | Provide required argument |
+| `INVALID_OPTION` | Invalid option value | Check option type/choices |
+| `VALIDATION_ERROR` | Validation failed | Check value format |
+
+## Links
+
+- Docs: https://cli.oxog.dev
+- GitHub: https://github.com/ersinkoc/cli
