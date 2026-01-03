@@ -1,0 +1,27 @@
+# Source files
+src/
+tests/
+examples/
+
+# Build config
+tsconfig.json
+tsup.config.ts
+
+# CI/CD
+.github/
+
+# Development
+.vitest/
+vitest.config.ts
+eslint.config.js
+.prettierrc*
+
+# Documentation
+website/
+docs/
+
+# Misc
+*.log
+.DS_Store
+.vscode/
+.idea/

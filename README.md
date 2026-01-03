@@ -4,7 +4,7 @@
 
 [![npm version](https://badge.fury.io/js/%40oxog%2Fcli.svg)](https://www.npmjs.com/package/@oxog/cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/ersinkoc/oxog-cli)
+[![Test Coverage](https://img.shields.io/badge/coverage-97.8%25-brightgreen)](https://github.com/ersinkoc/oxog-cli)
 
 **@oxog/cli** is a comprehensive command-line interface framework designed for modern TypeScript applications. It provides a fluent builder API, full TypeScript support, built-in spinner and logging utilities, and a micro-kernel plugin architecture.
 
@@ -91,7 +91,7 @@ app.command('deploy')
 
 ## 🧪 Testing
 
-The project has 100% test coverage with 606 passing tests.
+The project has 97.8% test coverage with 642 passing tests.
 
 ```bash
 npm test
