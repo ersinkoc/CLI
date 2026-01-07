@@ -214,6 +214,21 @@ export interface ActionContext {
 
   /** Logger utilities (if logger plugin enabled) */
   logger?: LoggerUtils;
+
+  /** Color utilities (if color plugin enabled) */
+  color?: ColorUtils;
+
+  /** Progress bar utilities (if progress plugin enabled) */
+  progress?: ProgressUtils;
+
+  /** Table utilities (if table plugin enabled) */
+  table?: TableUtils;
+
+  /** Config utilities (if config plugin enabled) */
+  config?: ConfigUtils;
+
+  /** Completion utilities (if completion plugin enabled) */
+  completion?: CompletionUtils;
 }
 
 /**
@@ -475,6 +490,12 @@ export interface CommandBuilder {
   description(description: string): this;
 
   /**
+   * Set description (alias for description)
+   * @param description - Command description
+   */
+  describe(description: string): this;
+
+  /**
    * Add an argument
    * @param def - Argument definition (e.g., "<name>" or "[file]")
    * @param description - Argument description
@@ -658,4 +679,294 @@ export interface PromptWizardOptions<T> {
     prompt: unknown;
     when?: (answers: T) => boolean;
   }>;
+}
+
+// ============================================================================
+// Event Types
+// ============================================================================
+
+/**
+ * Event data for command:before event
+ */
+export interface CommandBeforeEvent {
+  /** The command being executed */
+  command: Command;
+  /** The action context */
+  context: ActionContext;
+}
+
+/**
+ * Event data for command:after event
+ */
+export interface CommandAfterEvent {
+  /** The command that was executed */
+  command: Command;
+  /** The action context */
+  context: ActionContext;
+  /** Result from the action (if any) */
+  result?: unknown;
+}
+
+/**
+ * Event data for help event
+ */
+export interface HelpEvent {
+  /** The CLI application */
+  app: CLI;
+  /** The command to show help for (if any) */
+  command?: Command;
+  /** Raw argv array */
+  argv?: string[];
+}
+
+/**
+ * Event data for version event
+ */
+export interface VersionEvent {
+  /** Version string */
+  version: string;
+}
+
+/**
+ * Event data for error event
+ */
+export interface ErrorEvent {
+  /** The error that occurred */
+  error: Error;
+  /** The command being executed (if any) */
+  command?: Command;
+  /** The action context (if any) */
+  context?: ActionContext;
+}
+
+/**
+ * All event types mapped by event name
+ */
+export interface CLIEvents {
+  'command:before': CommandBeforeEvent;
+  'command:after': CommandAfterEvent;
+  'help': HelpEvent;
+  'version': VersionEvent;
+  'error': ErrorEvent;
+}
+
+/**
+ * Typed event handler
+ */
+export type TypedEventHandler<T> = (data: T) => void | Promise<void>;
+
+// ============================================================================
+// Progress Bar Types
+// ============================================================================
+
+// ============================================================================
+// Color Types
+// ============================================================================
+
+/**
+ * Color function type
+ */
+export type ColorFn = (text: string) => string;
+
+/**
+ * Color utilities interface
+ * Provides ANSI color functions for terminal output
+ */
+export interface ColorUtils {
+  /** Black text */
+  black: ColorFn;
+  /** Red text */
+  red: ColorFn;
+  /** Green text */
+  green: ColorFn;
+  /** Yellow text */
+  yellow: ColorFn;
+  /** Blue text */
+  blue: ColorFn;
+  /** Magenta text */
+  magenta: ColorFn;
+  /** Cyan text */
+  cyan: ColorFn;
+  /** White text */
+  white: ColorFn;
+  /** Gray text */
+  gray: ColorFn;
+
+  /** Black background */
+  bgBlack: ColorFn;
+  /** Red background */
+  bgRed: ColorFn;
+  /** Green background */
+  bgGreen: ColorFn;
+  /** Yellow background */
+  bgYellow: ColorFn;
+  /** Blue background */
+  bgBlue: ColorFn;
+  /** Magenta background */
+  bgMagenta: ColorFn;
+  /** Cyan background */
+  bgCyan: ColorFn;
+  /** White background */
+  bgWhite: ColorFn;
+
+  /** Hex color function */
+  hex: (hexColor: string, text: string) => string;
+  /** RGB color function */
+  rgb: (r: number, g: number, b: number, text: string) => string;
+
+  /** Bold text */
+  bold: ColorFn;
+  /** Dim text */
+  dim: ColorFn;
+  /** Italic text */
+  italic: ColorFn;
+  /** Underlined text */
+  underline: ColorFn;
+}
+
+// ============================================================================
+// Progress Types
+// ============================================================================
+
+/**
+ * Progress bar interface
+ */
+export interface ProgressBar {
+  /** Current value */
+  current: number;
+  /** Total value */
+  total: number;
+  /** Update progress */
+  update(value: number): void;
+  /** Increment progress */
+  increment(delta?: number): void;
+  /** Set total */
+  setTotal(total: number): void;
+  /** Stop the progress bar */
+  stop(): void;
+  /** Mark as complete */
+  complete(): void;
+}
+
+/**
+ * Progress bar options
+ */
+export interface ProgressBarOptions {
+  /** Total value */
+  total: number;
+  /** Initial value */
+  current?: number;
+  /** Bar width (characters) */
+  width?: number;
+  /** Completed character */
+  completeChar?: string;
+  /** Incomplete character */
+  incompleteChar?: string;
+  /** Show percentage */
+  showPercentage?: boolean;
+  /** Show ETA */
+  showETA?: boolean;
+  /** Custom format string */
+  format?: string;
+}
+
+/**
+ * Progress utilities interface
+ */
+export interface ProgressUtils {
+  /** Create a single progress bar */
+  create(options: ProgressBarOptions): ProgressBar;
+}
+
+// ============================================================================
+// Table Types
+// ============================================================================
+
+/**
+ * Table border styles
+ */
+export type TableBorderStyle = 'none' | 'single' | 'double' | 'rounded' | 'heavy' | 'ascii';
+
+/**
+ * Table alignment
+ */
+export type TableAlignment = 'left' | 'center' | 'right';
+
+/**
+ * Table column definition
+ */
+export interface TableColumnDef {
+  /** Column key in data */
+  key: string;
+  /** Column header */
+  header?: string;
+  /** Column width (characters) */
+  width?: number;
+  /** Text alignment */
+  align?: TableAlignment;
+  /** Format function */
+  format?: (value: unknown, row: Record<string, unknown>) => string;
+}
+
+/**
+ * Table options
+ */
+export interface TableOptions {
+  /** Column definitions */
+  columns?: Array<string | TableColumnDef>;
+  /** Show header row */
+  header?: boolean;
+  /** Border style */
+  border?: TableBorderStyle;
+  /** Padding inside cells */
+  padding?: number;
+}
+
+/**
+ * Table utilities interface
+ */
+export interface TableUtils {
+  /** Render data as table string */
+  render(data: Array<Record<string, unknown>>, options?: TableOptions): string;
+  /** Print data as table */
+  print(data: Array<Record<string, unknown>>, options?: TableOptions): void;
+}
+
+// ============================================================================
+// Config Types
+// ============================================================================
+
+/**
+ * Config utilities interface
+ */
+export interface ConfigUtils {
+  /** Loaded configuration */
+  config: Record<string, unknown>;
+  /** Path to config file */
+  filePath?: string;
+  /** Get a config value by path */
+  get<T = unknown>(path: string, defaultValue?: T): T;
+  /** Reload configuration */
+  reload(): Promise<void>;
+}
+
+// ============================================================================
+// Completion Types
+// ============================================================================
+
+/**
+ * Shell types for completion
+ */
+export type ShellType = 'bash' | 'zsh' | 'fish';
+
+/**
+ * Completion utilities interface
+ */
+export interface CompletionUtils {
+  /** Generate completion script for a shell */
+  generate(shell?: ShellType): string;
+  /** Get installation instructions */
+  instructions(shell?: ShellType): string;
+  /** Detect current shell */
+  detectShell(): ShellType;
 }

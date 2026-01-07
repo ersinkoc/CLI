@@ -75,6 +75,8 @@ app.run();
 │  help   │ version │ validation │  spinner  │  logger        │
 │  (core) │ (core)  │  (core)    │  color    │  middleware    │
 ├─────────┴─────────┴────────────┴───────────┴────────────────┤
+│     prompt  │  progress  │  table  │  config  │ completion  │
+├─────────────┴────────────┴─────────┴──────────┴─────────────┤
 │                       Micro Kernel                            │
 │   Command Router · Arg Parser · Event Bus · Error Boundary   │
 └──────────────────────────────────────────────────────────────┘
@@ -333,10 +335,14 @@ The context object passed to action handlers.
 | `argv` | `string[]` | Raw argv array |
 | `command` | `Command` | Current command instance |
 | `app` | `CLI` | CLI application instance |
-| `prompt?` | `PromptUtils` | Prompt utilities (if prompt plugin enabled) |
+| `prompt?` | `PromptUtils` | Interactive prompt utilities (if prompt plugin enabled) |
 | `spinner?` | `SpinnerUtils` | Spinner utilities (if spinner plugin enabled) |
 | `logger?` | `LoggerUtils` | Logger utilities (if logger plugin enabled) |
 | `color?` | `ColorUtils` | Color utilities (if color plugin enabled) |
+| `progress?` | `ProgressUtils` | Progress bar utilities (if progress plugin enabled) |
+| `table?` | `TableUtils` | Table formatting utilities (if table plugin enabled) |
+| `config?` | `ConfigUtils` | Config file utilities (if config plugin enabled) |
+| `completion?` | `CompletionUtils` | Shell completion utilities (if completion plugin enabled) |
 
 ---
 
@@ -451,13 +457,20 @@ Import plugins from `@oxog/cli/plugins`:
 
 ```typescript
 import {
+  // Core plugins
   helpPlugin,
   versionPlugin,
   validationPlugin,
+  // Optional plugins
   colorPlugin,
   spinnerPlugin,
   loggerPlugin,
-  middlewarePlugin
+  middlewarePlugin,
+  promptPlugin,
+  progressPlugin,
+  tablePlugin,
+  configPlugin,
+  completionPlugin
 } from '@oxog/cli/plugins';
 ```
 
@@ -566,6 +579,164 @@ app.command('deploy')
   .use(authMiddleware)
   .use(loggingMiddleware)
   .action(() => { /* ... */ });
+```
+
+#### `promptPlugin(options?)`
+
+Interactive command-line prompts with 10 prompt types.
+
+```typescript
+app.use(promptPlugin());
+
+app.command('init').action(async ({ prompt }) => {
+  // Text input
+  const name = await prompt.input({ message: 'Project name:' });
+
+  // Password (masked)
+  const password = await prompt.password({ message: 'Enter password:' });
+
+  // Confirmation
+  const confirmed = await prompt.confirm({ message: 'Continue?', default: true });
+
+  // Select from choices
+  const framework = await prompt.select({
+    message: 'Select framework:',
+    choices: ['React', 'Vue', 'Svelte']
+  });
+
+  // Multi-select
+  const features = await prompt.multiselect({
+    message: 'Select features:',
+    choices: ['TypeScript', 'ESLint', 'Prettier', 'Testing']
+  });
+
+  // Number input
+  const port = await prompt.number({ message: 'Port:', default: 3000 });
+
+  // Autocomplete with fuzzy search
+  const dep = await prompt.autocomplete({
+    message: 'Search package:',
+    choices: packages
+  });
+});
+```
+
+#### `progressPlugin()`
+
+Progress bars with ETA and rate display.
+
+```typescript
+app.use(progressPlugin());
+
+app.command('download').action(async ({ progress }) => {
+  const bar = progress.create({
+    total: 100,
+    format: ':bar :percent :eta',
+    width: 40
+  });
+
+  for (let i = 0; i <= 100; i++) {
+    await delay(50);
+    bar.update(i);
+  }
+});
+
+// Multi-progress bars
+app.command('parallel').action(async ({ progress }) => {
+  const multi = progress.multi();
+
+  const bar1 = multi.create({ total: 100 });
+  const bar2 = multi.create({ total: 50 });
+
+  // Update bars independently
+  bar1.increment();
+  bar2.increment(5);
+
+  multi.stop();
+});
+```
+
+#### `tablePlugin()`
+
+Formatted table output with multiple border styles.
+
+```typescript
+app.use(tablePlugin());
+
+app.command('list').action(({ table }) => {
+  const data = [
+    { name: 'Alice', age: 30, city: 'NYC' },
+    { name: 'Bob', age: 25, city: 'LA' },
+    { name: 'Charlie', age: 35, city: 'Chicago' }
+  ];
+
+  // Print with default settings
+  table.print(data);
+
+  // Custom options
+  table.print(data, {
+    columns: ['name', 'age'],
+    border: 'rounded',  // 'none' | 'single' | 'double' | 'rounded' | 'heavy' | 'ascii'
+    header: true,
+    padding: 1
+  });
+
+  // Custom column definitions
+  table.print(data, {
+    columns: [
+      { key: 'name', header: 'Name', align: 'left' },
+      { key: 'age', header: 'Age', align: 'right', format: (v) => `${v} years` }
+    ]
+  });
+});
+```
+
+#### `configPlugin(options?)`
+
+Configuration file support (JSON, YAML, TOML, .env).
+
+```typescript
+app.use(configPlugin({
+  name: 'myapp',           // App name for config lookup
+  defaults: { port: 3000 }, // Default values
+  envPrefix: 'MYAPP'        // Env var prefix (MYAPP_PORT)
+}));
+
+// Searches for: myapp.config.json, .myapprc, .myapprc.yaml, .env, package.json
+
+app.command('start').action(async ({ config }) => {
+  // Get config value by path
+  const port = config.get('port', 3000);
+  const dbHost = config.get('database.host', 'localhost');
+
+  // Access full config
+  console.log(config.config);
+
+  // Reload configuration
+  await config.reload();
+});
+```
+
+#### `completionPlugin(options?)`
+
+Shell completion script generation.
+
+```typescript
+app.use(completionPlugin());
+
+// This adds a 'completion' command automatically
+// Usage:
+//   myapp completion bash > ~/.bashrc
+//   myapp completion zsh > ~/.zshrc
+//   myapp completion fish > ~/.config/fish/completions/myapp.fish
+//   myapp completion --install   # Show installation instructions
+
+// Programmatic access
+app.command('setup').action(({ completion }) => {
+  const shell = completion.detectShell();  // 'bash' | 'zsh' | 'fish'
+  const script = completion.generate(shell);
+  const instructions = completion.instructions(shell);
+});
 ```
 
 ---
@@ -952,6 +1123,7 @@ const app = cli({
 
 ```typescript
 import type {
+  // Core types
   CLI,
   CLIOptions,
   CLIPlugin,
@@ -965,10 +1137,23 @@ import type {
   ActionContext,
   ActionHandler,
   Middleware,
+  // Plugin utility types
   Spinner,
   SpinnerUtils,
   LoggerUtils,
-  PromptUtils
+  PromptUtils,
+  ColorUtils,
+  ProgressBar,
+  ProgressBarOptions,
+  ProgressUtils,
+  TableUtils,
+  TableOptions,
+  TableColumnDef,
+  TableBorderStyle,
+  TableAlignment,
+  ConfigUtils,
+  CompletionUtils,
+  ShellType
 } from '@oxog/cli';
 ```
 
@@ -1025,6 +1210,11 @@ app.use(myPlugin);
 | Built-in colors | Yes | No | No |
 | Built-in spinners | Yes | No | No |
 | Built-in logging | Yes | No | No |
+| Progress bars | Yes | No | No |
+| Table formatting | Yes | No | No |
+| Interactive prompts | Yes | No | No |
+| Config file support | Yes | No | No |
+| Shell completions | Yes | Manual | Yes |
 | Fluent API | Yes | Yes | Yes |
 | Nested commands | Yes | Yes | Yes |
 | Middleware | Yes | No | Yes |
@@ -1112,6 +1302,8 @@ app.command('db')
 ## Document Metadata
 
 - **Generated:** 2026-01-07
+- **Updated:** 2026-01-07
 - **Package Version:** 1.0.0
-- **Documentation Version:** 1.0
+- **Documentation Version:** 1.1
 - **Format:** LLM-Optimized Markdown
+- **New in 1.1:** Added promptPlugin, progressPlugin, tablePlugin, configPlugin, completionPlugin

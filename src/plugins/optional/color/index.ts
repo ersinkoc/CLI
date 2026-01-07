@@ -35,4 +35,4 @@ export function colorPlugin(): CLIPlugin {
 
 // Re-export color utilities
 export { colors } from '../../../utils/ansi.js';
-export type { ColorUtils } from '../../../utils/ansi.js';
+export type { ColorUtils } from '../../../types.js';
