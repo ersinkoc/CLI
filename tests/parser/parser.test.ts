@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { parse, parseArguments, parseOptions, parseArgumentDef, parseOptionFlags } from '../../src/parser/index.js';
+import { parse, parseArguments, parseOptions, parseArgumentDef, parseOptionFlags, coerceOptionValue } from '../../src/parser/index.js';
 import { tokenize, isNegativeNumber } from '../../src/parser/tokenizer.js';
 import type { ArgumentDef, OptionDef } from '../../src/types.js';
 
@@ -1128,5 +1128,98 @@ describe('parse', () => {
     const tokens = tokenize(['--enabled=no']);
     const result = parseOptions(tokens, defs);
     expect(result.values.enabled).toBe(false);
+  });
+
+  it('should handle boolean coercion with true string value', () => {
+    const defs: OptionDef[] = [
+      { name: 'flag', type: 'boolean' },
+    ];
+    const tokens = tokenize(['--flag=true']);
+    const result = parseOptions(tokens, defs);
+    expect(result.values.flag).toBe(true);
+  });
+
+  it('should handle boolean coercion with 1 value', () => {
+    const defs: OptionDef[] = [
+      { name: 'flag', type: 'boolean' },
+    ];
+    const tokens = tokenize(['--flag=1']);
+    const result = parseOptions(tokens, defs);
+    expect(result.values.flag).toBe(true);
+  });
+
+  it('should handle boolean coercion with yes value', () => {
+    const defs: OptionDef[] = [
+      { name: 'flag', type: 'boolean' },
+    ];
+    const tokens = tokenize(['--flag=yes']);
+    const result = parseOptions(tokens, defs);
+    expect(result.values.flag).toBe(true);
+  });
+
+  it('should skip already processed options', () => {
+    // Test the code path at options.ts:84-86
+    // When the same option is passed twice, the second occurrence should be skipped
+    const defs: OptionDef[] = [
+      { name: 'verbose', type: 'boolean' },
+    ];
+    const tokens = tokenize(['--verbose', '--verbose']);
+    const result = parseOptions(tokens, defs);
+    // First --verbose sets it to true, second is skipped
+    expect(result.values.verbose).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('should skip processed negatable option when both forms are passed', () => {
+    // When both --color and --no-color are passed, the second should be skipped
+    const defs: OptionDef[] = [
+      { name: 'color', type: 'boolean', negatable: true },
+    ];
+    const tokens = tokenize(['--color', '--no-color']);
+    const result = parseOptions(tokens, defs);
+    // First --color sets it to true, --no-color should be skipped via processed check
+    expect(result.values.color).toBe(true);
+  });
+});
+
+describe('coerceOptionValue', () => {
+  it('should coerce boolean type with true value', () => {
+    const errors: string[] = [];
+    const def: OptionDef = { name: 'flag', type: 'boolean' };
+    const result = coerceOptionValue('true', def, errors);
+    expect(result).toBe(true);
+    expect(errors).toHaveLength(0);
+  });
+
+  it('should coerce boolean type with 1 value', () => {
+    const errors: string[] = [];
+    const def: OptionDef = { name: 'flag', type: 'boolean' };
+    const result = coerceOptionValue('1', def, errors);
+    expect(result).toBe(true);
+    expect(errors).toHaveLength(0);
+  });
+
+  it('should coerce boolean type with yes value', () => {
+    const errors: string[] = [];
+    const def: OptionDef = { name: 'flag', type: 'boolean' };
+    const result = coerceOptionValue('yes', def, errors);
+    expect(result).toBe(true);
+    expect(errors).toHaveLength(0);
+  });
+
+  it('should coerce boolean type with false value', () => {
+    const errors: string[] = [];
+    const def: OptionDef = { name: 'flag', type: 'boolean' };
+    const result = coerceOptionValue('false', def, errors);
+    expect(result).toBe(false);
+    expect(errors).toHaveLength(0);
+  });
+
+  it('should coerce boolean type with no value', () => {
+    const errors: string[] = [];
+    const def: OptionDef = { name: 'flag', type: 'boolean' };
+    const result = coerceOptionValue('no', def, errors);
+    expect(result).toBe(false);
+    expect(errors).toHaveLength(0);
   });
 });

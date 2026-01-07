@@ -103,20 +103,8 @@ export function parseOptions(
     }
 
     // Find definition
-    let def = byName.get(name) ?? byAlias.get(name);
-
-    // Check for negatable option
-    if (!def && name.startsWith('no-')) {
-      const baseName = name.slice(3);
-      const baseDef = byName.get(baseName);
-      if (baseDef?.negatable) {
-        def = baseDef;
-        values[baseName] = false;
-        processed.add(name);
-        i++;
-        continue;
-      }
-    }
+    // Note: negatable options (--no-xxx) are auto-registered at lines 62-64
+    const def = byName.get(name) ?? byAlias.get(name);
 
     if (!def) {
       if (strict) {

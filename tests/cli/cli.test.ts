@@ -41,10 +41,46 @@ describe('CLI', () => {
     expect(app).toBe(app); // chainable
   });
 
+  it('should set version using version() setter overload', () => {
+    const app = cli({ name: 'myapp' });
+    // Use the version(v) setter overload directly
+    const result = app.version('2.0.0');
+    expect(result).toBe(app); // chainable
+    expect(app.version()).toBe('2.0.0');
+  });
+
   it('should set description', () => {
     const app = cli({ name: 'myapp' }).describe('My app');
     expect(app.description()).toBe('My app');
     expect(app).toBe(app); // chainable
+  });
+
+  it('should get description with description() method', () => {
+    const app = cli({ name: 'myapp' });
+    // First set description using the setter overload
+    app.description('Test description');
+    // Then get it back using the getter overload (no argument)
+    const desc = app.description();
+    expect(desc).toBe('Test description');
+  });
+
+  it('should add middleware via middleware() method', () => {
+    const app = cli({ name: 'myapp' });
+    const mw = vi.fn();
+    // Call middleware before any plugin is registered
+    const result = app.middleware(mw);
+    expect(result).toBe(app); // chainable
+  });
+
+  it('should add middleware when _use is available (plugin installed)', async () => {
+    const { middlewarePlugin } = await import('../../src/plugins/optional/middleware/index.js');
+    const app = cli({ name: 'myapp' });
+    // Install middleware plugin first
+    app.use(middlewarePlugin());
+    // Now _use should be available on the app
+    const mw = vi.fn();
+    const result = app.middleware(mw);
+    expect(result).toBe(app); // chainable
   });
 
   it('should add command', () => {
@@ -577,5 +613,123 @@ describe('CLI', () => {
     // Should show suggestion
     expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Did you mean'));
     consoleErrorSpy.mockRestore();
+  });
+
+  it('should execute run() synchronously', async () => {
+    const app = cli({ name: 'myapp' });
+    let executed = false;
+
+    app.command('test').action(async () => {
+      executed = true;
+    });
+
+    // The run() method is async internally but returns void
+    app.run(['test']);
+
+    // Wait for async execution to complete
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(executed).toBe(true);
+  });
+
+  it('should handle validation errors during execution', async () => {
+    const app = cli({ name: 'myapp' });
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    app.command('test')
+      .argument('<required>', 'Required argument')
+      .action(async () => {});
+
+    try {
+      await app.runAsync(['test']); // Missing required argument
+    } catch {
+      // Expected error from process.exit mock
+    }
+
+    // Should have logged validation error
+    expect(consoleErrorSpy).toHaveBeenCalled();
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should handle generic errors in catch block', async () => {
+    const app = cli({ name: 'myapp' });
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    app.command('test').action(async () => {
+      throw new Error('Generic error');
+    });
+
+    try {
+      await app.runAsync(['test']);
+    } catch {
+      // Expected error from process.exit mock
+    }
+
+    // Error is logged with prefix "Unexpected error:" and then the message
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Unexpected error:', 'Generic error');
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should complete catch block when error is handled without exit', async () => {
+    // Save original process.exit
+    const originalExit = process.exit;
+    // Mock process.exit to not throw, allowing the catch block to complete
+    let exitCalled = false;
+    let exitCodeUsed: number | undefined;
+    process.exit = ((code?: number) => {
+      exitCalled = true;
+      exitCodeUsed = code;
+    }) as any;
+
+    const app = cli({ name: 'myapp' });
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    app.command('test').action(async () => {
+      throw new Error('Test error for coverage');
+    });
+
+    // Run the command - this time process.exit won't throw
+    await app.runAsync(['test']);
+
+    // Verify the error was handled
+    expect(exitCalled).toBe(true);
+    expect(exitCodeUsed).toBe(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Unexpected error:', 'Test error for coverage');
+
+    // Restore
+    consoleErrorSpy.mockRestore();
+    process.exit = originalExit;
+  });
+
+  it('should register plugins from constructor options', () => {
+    const plugin = {
+      name: 'test-plugin',
+      version: '1.0.0',
+      install: vi.fn(),
+    };
+    const app = cli({ name: 'myapp', plugins: [plugin] });
+    expect(plugin.install).toHaveBeenCalled();
+    expect(app.name).toBe('myapp');
+  });
+
+  it('should call _use when middleware is added after plugin initialized', async () => {
+    const { middlewarePlugin } = await import('../../src/plugins/optional/middleware/index.js');
+    const app = cli({ name: 'myapp' });
+
+    // Install middleware plugin first
+    app.use(middlewarePlugin());
+
+    // Set app in context (as done by run/runAsync)
+    (app as any).kernel.setContextValue('app', app);
+
+    // Initialize the kernel to ensure plugin is fully set up
+    await (app as any).kernel.initialize();
+
+    // Now add middleware - this should trigger the _use path (line 116-117 in cli.ts)
+    const mw = vi.fn();
+    const result = app.middleware(mw);
+    expect(result).toBe(app);
+
+    // Verify _use was set by the plugin
+    expect((app as any)._use).toBeDefined();
   });
 });

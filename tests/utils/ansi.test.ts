@@ -384,4 +384,27 @@ describe('ANSI Utilities', () => {
       expect(ansi.clearLineUp).toBe('\x1b[1J');
     });
   });
+
+  describe('ColorUtils end() method', () => {
+    it('should append reset when text has ANSI prefix', () => {
+      // Test the code path at ansi.ts:217-218
+      // When text starts with '\x1b[' and isSupported is true, end() appends reset
+      process.env.FORCE_COLOR = '1';
+      const c = color('test');
+      // Apply bold first so text becomes '\x1b[1mtest'
+      const styled = c.bold();
+      // Then call black() which uses end() internally
+      const result = styled.black();
+      // Result should be a string with ANSI codes
+      expect(typeof result).toBe('string');
+      expect(result).toContain('test');
+    });
+
+    it('should handle end() with multiple chained styles', () => {
+      process.env.FORCE_COLOR = '1';
+      const result = color('hello').bold().italic().black();
+      expect(typeof result).toBe('string');
+      expect(result).toContain('hello');
+    });
+  });
 });

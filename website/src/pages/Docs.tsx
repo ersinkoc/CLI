@@ -875,121 +875,163 @@ app.use(configPlugin({ apiKey: 'xxx' }));
 
 const corePluginsContent = String.raw`# Core Plugins
 
-@oxog/cli includes several built-in plugins for common CLI tasks.
+@oxog/cli includes several built-in core plugins that are automatically loaded and provide essential CLI functionality.
 
-## Prompt Plugin
+## Help Plugin
 
-Interactive prompts for user input:
+Automatic help text generation for all commands:
 
 \`\`\`typescript
-import { prompt } from '@oxog/cli/plugins';
+import { cli } from '@oxog/cli';
 
-app.use(prompt());
+const app = cli('myapp')
+  .version('1.0.0')
+  .description('My awesome CLI');
 
-app.command('init')
-  .action(async () => {
-    const name = await prompt.input({
-      message: 'Project name:',
-      default: 'my-project'
-    });
+app.command('build')
+  .description('Build the project')
+  .option('--watch', 'Watch for changes')
+  .action(() => {});
 
-    const framework = await prompt.select({
-      message: 'Choose framework:',
-      choices: ['react', 'vue', 'svelte']
-    });
+app.run();
 
-    const features = await prompt.multiselect({
-      message: 'Select features:',
-      choices: ['typescript', 'eslint', 'prettier']
-    });
+// Usage:
+// myapp --help          Show global help
+// myapp build --help    Show command-specific help
+\`\`\`
 
-    const confirm = await prompt.confirm({
-      message: 'Create project?'
-    });
+### Help Output
+
+\`\`\`
+myapp v1.0.0
+
+My awesome CLI
+
+Usage:
+  myapp <command> [options]
+
+Commands:
+  build     Build the project
+  help      Display help for a command
+
+Options:
+  -h, --help      Display help
+  -v, --version   Display version
+
+Run 'myapp <command> --help' for more information on a command.
+\`\`\`
+
+### Customizing Help
+
+\`\`\`typescript
+app.configureHelp({
+  showUsage: true,
+  showDescription: true,
+  showCommands: true,
+  showOptions: true,
+  sortCommands: true,
+  sortOptions: true
+});
+\`\`\`
+
+## Version Plugin
+
+Automatic version display:
+
+\`\`\`typescript
+const app = cli('myapp')
+  .version('1.0.0')          // Set version
+  .version('1.0.0', '-V');   // Custom flag
+
+// Usage:
+// myapp --version
+// myapp -v
+\`\`\`
+
+### Dynamic Version
+
+\`\`\`typescript
+import pkg from './package.json';
+
+const app = cli('myapp')
+  .version(pkg.version);
+\`\`\`
+
+## Validation Plugin
+
+Automatic argument and option validation:
+
+\`\`\`typescript
+app.command('deploy')
+  .argument('<env>', 'Environment', {
+    choices: ['staging', 'production'],
+    validate: (v) => v !== 'production' || process.env.ALLOW_PROD
+  })
+  .option('--port <number>', 'Port number', {
+    coerce: Number,
+    validate: (v) => v > 0 && v < 65536 || 'Invalid port'
+  })
+  .action(({ args, options }) => {
+    console.log(\`Deploying to \${args.env} on port \${options.port}\`);
   });
 \`\`\`
 
-## Spinner Plugin
+### Validation Features
 
-Loading spinners for async operations:
+- **Required arguments**: Validated automatically
+- **Choices**: Values restricted to allowed set
+- **Custom validators**: Return true or error message
+- **Type coercion**: Automatic type conversion
+- **Default values**: Applied when not provided
+
+### Validation Errors
 
 \`\`\`typescript
-import { spinner } from '@oxog/cli/plugins';
-
-app.use(spinner());
-
-app.command('install')
-  .action(async () => {
-    const spin = spinner();
-    spin.start('Installing dependencies...');
-
-    await installDeps();
-
-    spin.succeed('Dependencies installed!');
-  });
+// If validation fails:
+// Error: Invalid value 'invalid' for argument 'env'.
+// Allowed values: staging, production
 \`\`\`
 
-## Table Plugin
+## Error Boundary Plugin
 
-Formatted table output:
+Global error handling for the CLI:
 
 \`\`\`typescript
-import { table } from '@oxog/cli/plugins';
+app.setErrorHandler((error, context) => {
+  if (error.code === 'VALIDATION_ERROR') {
+    console.error(\`Validation failed: \${error.message}\`);
+  } else {
+    console.error(\`Error: \${error.message}\`);
+  }
 
-app.use(table());
+  if (context.options.verbose) {
+    console.error(error.stack);
+  }
 
-app.command('list')
-  .action(() => {
-    table([
-      { name: 'app-1', status: 'running', port: 3000 },
-      { name: 'app-2', status: 'stopped', port: 3001 },
-      { name: 'app-3', status: 'running', port: 3002 },
-    ], {
-      columns: ['name', 'status', 'port']
-    });
-  });
+  process.exit(error.exitCode || 1);
+});
 \`\`\`
 
-## Progress Plugin
+## Built-in Commands
 
-Progress bars for long operations:
+### Help Command
 
-\`\`\`typescript
-import { progress } from '@oxog/cli/plugins';
-
-app.use(progress());
-
-app.command('download')
-  .action(async () => {
-    const bar = progress({ total: 100 });
-
-    for (let i = 0; i <= 100; i++) {
-      await delay(50);
-      bar.update(i);
-    }
-  });
+\`\`\`bash
+myapp help              # Show general help
+myapp help build        # Show help for 'build' command
+myapp build --help      # Same as above
 \`\`\`
 
-## Color Plugin
+### Version Command
 
-ANSI color utilities:
-
-\`\`\`typescript
-import { color } from '@oxog/cli/plugins';
-
-app.use(color());
-
-app.command('status')
-  .action(() => {
-    console.log(color.green('✓ Success'));
-    console.log(color.red('✗ Error'));
-    console.log(color.yellow('⚠ Warning'));
-    console.log(color.blue('ℹ Info'));
-  });
+\`\`\`bash
+myapp --version         # Show version
+myapp -v                # Short form
 \`\`\`
 
 ## Next Steps
 
+- Explore [Optional Plugins](/docs/optional-plugins) for additional features
 - Learn [Creating Plugins](/docs/creating-plugins)
 `;
 
@@ -1669,6 +1711,383 @@ export function CorePluginsPage() {
 
 export function CreatingPluginsPage() {
   return <DocsLayout content={creatingPluginsContent} title="Creating Plugins" />;
+}
+
+const optionalPluginsContent = String.raw`# Optional Plugins
+
+@oxog/cli provides a rich set of optional plugins that extend your CLI with powerful features.
+
+## Installation
+
+Optional plugins are included in the main package:
+
+\`\`\`typescript
+import { cli } from '@oxog/cli';
+import {
+  promptPlugin,
+  progressPlugin,
+  tablePlugin,
+  configPlugin,
+  completionPlugin,
+  colorPlugin,
+  spinnerPlugin,
+  loggerPlugin
+} from '@oxog/cli/plugins';
+\`\`\`
+
+## Prompt Plugin
+
+Interactive command-line prompts with 10 different prompt types:
+
+\`\`\`typescript
+import { promptPlugin } from '@oxog/cli/plugins';
+
+app.use(promptPlugin());
+
+app.command('init')
+  .action(async ({ prompt }) => {
+    // Text input
+    const name = await prompt.input({
+      message: 'Project name:',
+      default: 'my-project',
+      validate: (v) => v.length > 0 || 'Name is required'
+    });
+
+    // Password input (masked)
+    const token = await prompt.password({
+      message: 'API Token:',
+      mask: '*'
+    });
+
+    // Single selection
+    const framework = await prompt.select({
+      message: 'Choose framework:',
+      choices: [
+        { value: 'react', label: 'React', hint: 'Popular UI library' },
+        { value: 'vue', label: 'Vue', hint: 'Progressive framework' },
+        { value: 'svelte', label: 'Svelte', hint: 'Compiler-based' }
+      ]
+    });
+
+    // Multiple selection
+    const features = await prompt.multiselect({
+      message: 'Select features:',
+      choices: ['typescript', 'eslint', 'prettier', 'testing'],
+      required: true
+    });
+
+    // Confirmation
+    const confirm = await prompt.confirm({
+      message: 'Create project?',
+      default: true
+    });
+
+    // Number input
+    const port = await prompt.number({
+      message: 'Port:',
+      default: 3000,
+      min: 1,
+      max: 65535
+    });
+
+    // Autocomplete with search
+    const country = await prompt.autocomplete({
+      message: 'Select country:',
+      choices: ['USA', 'UK', 'Germany', 'France', 'Japan'],
+      limit: 5
+    });
+  });
+\`\`\`
+
+## Progress Plugin
+
+Progress bars with ETA and rate display:
+
+\`\`\`typescript
+import { progressPlugin } from '@oxog/cli/plugins';
+
+app.use(progressPlugin());
+
+app.command('download')
+  .action(async ({ progress }) => {
+    // Simple progress bar
+    const bar = progress.create({
+      total: 100,
+      format: 'Downloading [:bar] :percent :etas'
+    });
+
+    for (let i = 0; i <= 100; i++) {
+      await delay(50);
+      bar.update(i);
+    }
+    bar.stop();
+
+    // Multi-bar progress
+    const multi = progress.multi();
+    const bar1 = multi.create(100, 0, { task: 'Task 1' });
+    const bar2 = multi.create(100, 0, { task: 'Task 2' });
+
+    // Update independently
+    bar1.increment(10);
+    bar2.increment(20);
+
+    multi.stop();
+  });
+\`\`\`
+
+### Progress Options
+
+- **total**: Total value for progress
+- **format**: Custom format string with tokens
+- **barCompleteChar**: Character for completed portion (default: '█')
+- **barIncompleteChar**: Character for incomplete portion (default: '░')
+- **hideCursor**: Hide cursor during progress (default: true)
+- **clearOnComplete**: Clear bar when done (default: false)
+
+### Format Tokens
+
+- \`:bar\` - The progress bar
+- \`:percent\` - Percentage complete
+- \`:current\` - Current value
+- \`:total\` - Total value
+- \`:eta\` - Estimated time remaining
+- \`:etas\` - ETA in seconds
+- \`:elapsed\` - Elapsed time
+- \`:rate\` - Rate per second
+
+## Table Plugin
+
+Formatted table output with 6 border styles:
+
+\`\`\`typescript
+import { tablePlugin } from '@oxog/cli/plugins';
+
+app.use(tablePlugin());
+
+app.command('list')
+  .action(({ table }) => {
+    // Basic table
+    table.render([
+      { name: 'app-1', status: 'running', port: 3000 },
+      { name: 'app-2', status: 'stopped', port: 3001 },
+      { name: 'app-3', status: 'running', port: 3002 }
+    ]);
+
+    // Custom columns
+    table.render(data, {
+      columns: [
+        { key: 'name', header: 'Name', width: 20 },
+        { key: 'status', header: 'Status', align: 'center' },
+        { key: 'port', header: 'Port', align: 'right' }
+      ]
+    });
+
+    // Different border styles
+    table.render(data, { style: 'rounded' });
+    // Styles: 'simple', 'rounded', 'bold', 'double', 'ascii', 'none'
+  });
+\`\`\`
+
+### Table Options
+
+- **columns**: Column definitions with key, header, width, align
+- **style**: Border style (simple, rounded, bold, double, ascii, none)
+- **header**: Show/hide header row (default: true)
+- **padding**: Cell padding (default: 1)
+
+## Config Plugin
+
+Configuration file support for JSON, YAML, TOML, and .env files:
+
+\`\`\`typescript
+import { configPlugin } from '@oxog/cli/plugins';
+
+app.use(configPlugin({
+  name: 'myapp',           // Config file name (myapp.config.json, etc.)
+  searchPlaces: [          // Where to look for config
+    'myapp.config.json',
+    'myapp.config.yaml',
+    '.myapprc',
+    'package.json'
+  ],
+  defaults: {              // Default values
+    port: 3000,
+    host: 'localhost'
+  },
+  envPrefix: 'MYAPP'       // Environment variable prefix
+}));
+
+app.command('start')
+  .action(async ({ config }) => {
+    // Get single value with default
+    const port = config.get('port', 3000);
+
+    // Get nested value
+    const dbHost = config.get('database.host', 'localhost');
+
+    // Get all config
+    const allConfig = config.getAll();
+
+    // Check if key exists
+    if (config.has('apiKey')) {
+      // ...
+    }
+
+    // Set value (runtime only)
+    config.set('debug', true);
+
+    // Environment variables override config
+    // MYAPP_PORT=8080 will override config.port
+  });
+\`\`\`
+
+### Supported Formats
+
+- **JSON**: \`myapp.config.json\`, \`.myapprc\`
+- **YAML**: \`myapp.config.yaml\`, \`myapp.config.yml\`
+- **TOML**: \`myapp.config.toml\`
+- **ENV**: \`.env\`, \`.env.local\`
+
+## Completion Plugin
+
+Shell completion generation for bash, zsh, and fish:
+
+\`\`\`typescript
+import { completionPlugin } from '@oxog/cli/plugins';
+
+app.use(completionPlugin());
+
+// This automatically adds a 'completion' command:
+// myapp completion bash   - Output bash completion script
+// myapp completion zsh    - Output zsh completion script
+// myapp completion fish   - Output fish completion script
+\`\`\`
+
+### Installation
+
+\`\`\`bash
+# Bash
+myapp completion bash >> ~/.bashrc
+source ~/.bashrc
+
+# Zsh
+myapp completion zsh >> ~/.zshrc
+source ~/.zshrc
+
+# Fish
+myapp completion fish > ~/.config/fish/completions/myapp.fish
+\`\`\`
+
+### Custom Completions
+
+Add custom completions to your commands:
+
+\`\`\`typescript
+app.command('deploy')
+  .argument('<env>', 'Environment', {
+    complete: () => ['staging', 'production', 'development']
+  })
+  .option('--region <region>', 'AWS Region', {
+    complete: () => ['us-east-1', 'us-west-2', 'eu-west-1']
+  })
+  .action(({ args }) => {
+    console.log(\`Deploying to \${args.env}\`);
+  });
+\`\`\`
+
+## Color Plugin
+
+ANSI color utilities for terminal output:
+
+\`\`\`typescript
+import { colorPlugin } from '@oxog/cli/plugins';
+
+app.use(colorPlugin());
+
+app.command('status')
+  .action(({ color }) => {
+    console.log(color.green('✓ Success'));
+    console.log(color.red('✗ Error'));
+    console.log(color.yellow('⚠ Warning'));
+    console.log(color.blue('ℹ Info'));
+    console.log(color.bold(color.cyan('Important')));
+
+    // Hex colors
+    console.log(color.hex('#ff6600', 'Orange text'));
+
+    // RGB colors
+    console.log(color.rgb(255, 100, 0, 'Custom color'));
+
+    // Background colors
+    console.log(color.bgRed(color.white('Error badge')));
+  });
+\`\`\`
+
+## Spinner Plugin
+
+Elegant loading indicators:
+
+\`\`\`typescript
+import { spinnerPlugin } from '@oxog/cli/plugins';
+
+app.use(spinnerPlugin());
+
+app.command('install')
+  .action(async ({ spinner }) => {
+    const spin = spinner.create('Installing dependencies...');
+    spin.start();
+
+    try {
+      await installDeps();
+      spin.succeed('Dependencies installed!');
+    } catch (error) {
+      spin.fail('Installation failed');
+    }
+  });
+\`\`\`
+
+### Spinner Methods
+
+- **start(text?)**: Start spinning with optional text
+- **stop()**: Stop spinner
+- **succeed(text?)**: Stop with success mark (✓)
+- **fail(text?)**: Stop with failure mark (✗)
+- **warn(text?)**: Stop with warning mark (⚠)
+- **info(text?)**: Stop with info mark (ℹ)
+- **text**: Update spinner text
+
+## Logger Plugin
+
+Structured logging with levels:
+
+\`\`\`typescript
+import { loggerPlugin } from '@oxog/cli/plugins';
+
+app.use(loggerPlugin({ level: 'debug' }));
+
+app.command('build')
+  .action(({ logger }) => {
+    logger.debug('Starting build...');
+    logger.info('Building project');
+    logger.warn('Deprecated API detected');
+    logger.error('Build failed');
+
+    // With metadata
+    logger.info('Request completed', {
+      duration: 150,
+      status: 200
+    });
+  });
+\`\`\`
+
+## Next Steps
+
+- Learn [Creating Plugins](/docs/creating-plugins)
+- Explore [Core Plugins](/docs/core-plugins)
+`;
+
+export function OptionalPluginsPage() {
+  return <DocsLayout content={optionalPluginsContent} title="Optional Plugins" />;
 }
 
 export function ErrorHandlingPage() {

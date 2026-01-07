@@ -41,6 +41,7 @@ export const docsNavigation = [
     items: [
       { title: 'Plugin System', href: '/docs/plugins', id: 'plugins' },
       { title: 'Core Plugins', href: '/docs/core-plugins', id: 'core-plugins' },
+      { title: 'Optional Plugins', href: '/docs/optional-plugins', id: 'optional-plugins' },
       { title: 'Creating Plugins', href: '/docs/creating-plugins', id: 'creating-plugins' },
     ],
   },

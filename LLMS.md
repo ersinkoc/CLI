@@ -2,7 +2,7 @@
 
 > Zero-dependency CLI framework with type-safe commands, beautiful output, and plugin architecture
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **License:** MIT
 **Repository:** https://github.com/ersinkoc/cli
 **Homepage:** https://cli.oxog.dev
@@ -1303,7 +1303,7 @@ app.command('db')
 
 - **Generated:** 2026-01-07
 - **Updated:** 2026-01-07
-- **Package Version:** 1.0.0
+- **Package Version:** 1.1.0
 - **Documentation Version:** 1.1
 - **Format:** LLM-Optimized Markdown
 - **New in 1.1:** Added promptPlugin, progressPlugin, tablePlugin, configPlugin, completionPlugin

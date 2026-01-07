@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-01-07
+
+### Added
+- 🎨 **promptPlugin** - Interactive command-line prompts with 10 prompt types
+  - `input()` - Text input
+  - `password()` - Masked password input
+  - `confirm()` - Yes/no confirmation
+  - `select()` - Single choice selection
+  - `multiselect()` - Multiple choice selection
+  - `autocomplete()` - Fuzzy search autocomplete
+  - `number()` - Numeric input with validation
+  - `date()` - Date input
+  - `editor()` - Multi-line text editor
+  - `wizard()` - Multi-step form wizard
+- 📊 **progressPlugin** - Progress bars with ETA and rate display
+  - Single progress bar support
+  - Multi-progress bar manager
+  - Customizable format strings (:bar, :percent, :eta, :rate)
+- 📋 **tablePlugin** - Formatted table output
+  - 6 border styles: none, single, double, rounded, heavy, ascii
+  - Column alignment (left, center, right)
+  - Custom formatters
+  - Auto-width calculation
+- ⚙️ **configPlugin** - Configuration file support
+  - JSON, YAML, TOML, .env file parsing (zero dependencies)
+  - Environment variable override with prefix
+  - Nested path access (e.g., `config.get('database.host')`)
+  - Hot reload support
+- 🔧 **completionPlugin** - Shell completion generation
+  - Bash, Zsh, Fish support
+  - Auto-detection of current shell
+  - Built-in `completion` command
+
+### Changed
+- Added `describe()` method alias to CommandBuilder (now both `description()` and `describe()` work)
+- Improved type definitions with explicit utility interfaces
+- Updated LLMS.md documentation with new plugins
+
+### Fixed
+- Fixed `ColorUtils` type not being exported from types.ts
+- Fixed fuzzyFilter return type handling in autocomplete
+
 ## [1.0.0] - 2026-01-03
 
 ### Added

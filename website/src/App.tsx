@@ -16,6 +16,7 @@ import {
   DecoratorAPIPage,
   PluginsPage,
   CorePluginsPage,
+  OptionalPluginsPage,
   CreatingPluginsPage,
   ErrorHandlingPage,
   TypeSafetyPage,
@@ -46,6 +47,7 @@ function App() {
         <Route path="docs/decorator-api" element={<DecoratorAPIPage />} />
         <Route path="docs/plugins" element={<PluginsPage />} />
         <Route path="docs/core-plugins" element={<CorePluginsPage />} />
+        <Route path="docs/optional-plugins" element={<OptionalPluginsPage />} />
         <Route path="docs/creating-plugins" element={<CreatingPluginsPage />} />
         <Route path="docs/error-handling" element={<ErrorHandlingPage />} />
         <Route path="docs/type-safety" element={<TypeSafetyPage />} />
