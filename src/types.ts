@@ -1,3 +1,61 @@
+// ============================================================================
+// Re-exports from @oxog ecosystem
+// ============================================================================
+
+/**
+ * Re-export common types from @oxog/types for convenience
+ * Users can import these directly from @oxog/cli instead of @oxog/types
+ */
+export type {
+  MaybePromise,
+  DeepPartial,
+  DeepReadonly,
+  DeepRequired,
+  Prettify,
+  NonEmptyArray,
+  Nullable,
+  Optional,
+  Unsubscribe,
+  JsonValue,
+  JsonObject,
+  JsonArray,
+  JsonPrimitive,
+  Plugin as OxogPlugin,
+  Kernel as OxogKernel,
+  EventMap,
+  EventHandler,
+  TypedEventEmitter,
+} from '@oxog/types';
+
+/**
+ * Re-export from @oxog/emitter for convenience
+ */
+export type {
+  EmitterOptions,
+  EmitterInstance,
+  Handler as EmitterHandler,
+  WildcardHandler,
+  PatternHandler,
+} from '@oxog/emitter';
+
+/**
+ * Re-export from @oxog/pigment for convenience
+ */
+export type {
+  Pigment,
+  PigmentOptions,
+  Styler,
+  ColorSupport,
+} from '@oxog/pigment';
+
+// Import types we need internally
+import type { MaybePromise, Unsubscribe, EventMap } from '@oxog/types';
+import type { Pigment } from '@oxog/pigment';
+
+// ============================================================================
+// CLI-Specific Types
+// ============================================================================
+
 /**
  * CLI application options
  *
@@ -215,8 +273,14 @@ export interface ActionContext {
   /** Logger utilities (if logger plugin enabled) */
   logger?: LoggerUtils;
 
-  /** Color utilities (if color plugin enabled) */
+  /** Color utilities (if color plugin enabled) - legacy API */
   color?: ColorUtils;
+
+  /** Pigment instance (if color plugin enabled) - @oxog/pigment chainable API */
+  pigment?: Pigment;
+
+  /** Chalk-compatible API (if color plugin enabled) - from @oxog/pigment */
+  chalk?: Pigment;
 
   /** Progress bar utilities (if progress plugin enabled) */
   progress?: ProgressUtils;
@@ -234,14 +298,16 @@ export interface ActionContext {
 /**
  * Action handler function
  * Called when command is executed
+ * Uses MaybePromise from @oxog/types for sync/async support
  *
  * @param ctx - Action context with args, options, and utilities
  */
-export type ActionHandler = (ctx: ActionContext) => void | Promise<void>;
+export type ActionHandler = (ctx: ActionContext) => MaybePromise<void>;
 
 /**
  * Middleware function
  * Run before command action
+ * Uses MaybePromise from @oxog/types for sync/async support
  *
  * @example
  * ```typescript
@@ -255,11 +321,12 @@ export type ActionHandler = (ctx: ActionContext) => void | Promise<void>;
  */
 export type Middleware = (
   ctx: ActionContext,
-  next: () => Promise<void>
-) => void | Promise<void>;
+  next: () => MaybePromise<void>
+) => MaybePromise<void>;
 
 /**
  * Plugin interface for extending CLI kernel functionality
+ * Compatible with @oxog/types Plugin interface
  *
  * @example
  * ```typescript
@@ -278,13 +345,13 @@ export type Middleware = (
  */
 export interface CLIPlugin<TContext = CLIContext> {
   /** Unique plugin identifier (kebab-case) */
-  name: string;
+  readonly name: string;
 
   /** Semantic version (e.g., "1.0.0") */
-  version: string;
+  readonly version: string;
 
   /** Other plugins this plugin depends on */
-  dependencies?: string[];
+  readonly dependencies?: readonly string[];
 
   /**
    * Called when plugin is registered
@@ -294,14 +361,16 @@ export interface CLIPlugin<TContext = CLIContext> {
 
   /**
    * Called after all plugins are installed
+   * Uses MaybePromise from @oxog/types for sync/async support
    * @param context - Shared context object
    */
-  onInit?: (context: TContext) => void | Promise<void>;
+  onInit?: (context: TContext) => MaybePromise<void>;
 
   /**
    * Called when plugin is unregistered
+   * Uses MaybePromise from @oxog/types for sync/async support
    */
-  onDestroy?: () => void | Promise<void>;
+  onDestroy?: () => MaybePromise<void>;
 
   /**
    * Called on error in this plugin
@@ -320,6 +389,7 @@ export interface CLIContext {
 /**
  * CLI kernel interface
  * Core orchestration and plugin management
+ * Compatible with @oxog/types Kernel interface
  */
 export interface CLIKernel<TContext = CLIContext> {
   /**
@@ -340,25 +410,39 @@ export interface CLIKernel<TContext = CLIContext> {
   list(): CLIPlugin<TContext>[];
 
   /**
+   * Check if plugin is registered
+   * @param name - Plugin name
+   */
+  has(name: string): boolean;
+
+  /**
+   * Get a plugin by name
+   * @param name - Plugin name
+   */
+  get(name: string): CLIPlugin<TContext> | undefined;
+
+  /**
    * Emit an event
+   * Uses @oxog/emitter internally
    * @param event - Event name
    * @param data - Event data
    */
-  emit(event: string, data: unknown): void;
+  emit(event: string, data: unknown): MaybePromise<void>;
 
   /**
    * Register event listener
+   * Returns Unsubscribe function from @oxog/types
    * @param event - Event name
    * @param handler - Event handler
    */
-  on(event: string, handler: (...args: unknown[]) => void): void;
+  on(event: string, handler: (...args: unknown[]) => MaybePromise<void>): Unsubscribe;
 
   /**
    * Unregister event listener
    * @param event - Event name
    * @param handler - Event handler
    */
-  off(event: string, handler?: (...args: unknown[]) => void): void;
+  off(event: string, handler?: (...args: unknown[]) => MaybePromise<void>): void;
 
   /**
    * Get shared context
@@ -741,8 +825,9 @@ export interface ErrorEvent {
 
 /**
  * All event types mapped by event name
+ * Extends EventMap from @oxog/types for type-safe event handling
  */
-export interface CLIEvents {
+export interface CLIEvents extends EventMap {
   'command:before': CommandBeforeEvent;
   'command:after': CommandAfterEvent;
   'help': HelpEvent;
@@ -752,8 +837,9 @@ export interface CLIEvents {
 
 /**
  * Typed event handler
+ * Uses MaybePromise from @oxog/types for sync/async support
  */
-export type TypedEventHandler<T> = (data: T) => void | Promise<void>;
+export type TypedEventHandler<T> = (data: T) => MaybePromise<void>;
 
 // ============================================================================
 // Progress Bar Types

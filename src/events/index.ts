@@ -1,13 +1,36 @@
 /**
+ * Re-export Emitter from @oxog/emitter for users who want direct access
+ */
+export { Emitter, createEmitter } from '@oxog/emitter';
+export type {
+  EmitterOptions,
+  EmitterInstance,
+  EventMap,
+  EventHandler,
+  Handler,
+  WildcardHandler,
+  PatternHandler,
+} from '@oxog/emitter';
+
+/**
  * Event listener type
+ * @deprecated Use Handler from @oxog/emitter instead
  */
 export type EventListener = (...args: unknown[]) => void | Promise<void>;
 
 /**
  * Event bus for inter-component communication
  *
+ * @deprecated Use Emitter from @oxog/emitter instead
+ * This class is kept for backward compatibility
+ *
  * @example
  * ```typescript
+ * // New recommended approach:
+ * import { Emitter } from '@oxog/emitter';
+ * const emitter = new Emitter<MyEvents>();
+ *
+ * // Legacy approach (deprecated):
  * const bus = new EventBus();
  *
  * bus.on('command:start', (data) => {

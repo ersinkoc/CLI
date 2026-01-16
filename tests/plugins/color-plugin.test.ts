@@ -16,7 +16,7 @@ describe('Color Plugin', () => {
   it('should create color plugin', () => {
     const plugin = colorPlugin();
     expect(plugin.name).toBe('color');
-    expect(plugin.version).toBe('1.0.0');
+    expect(plugin.version).toBe('2.0.0');
   });
 
   it('should add color utilities to context', async () => {

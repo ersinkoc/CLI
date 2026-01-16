@@ -1,7 +1,7 @@
 {
   "name": "@oxog/cli",
-  "version": "1.1.0",
-  "description": "Zero-dependency CLI framework with type-safe commands, beautiful output, and plugin architecture",
+  "version": "2.0.0",
+  "description": "Type-safe CLI framework with @oxog ecosystem integration, plugin architecture, and beautiful output",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -59,9 +59,11 @@
     "prompt",
     "interactive",
     "typescript",
-    "zero-dependency",
     "plugin",
-    "micro-kernel"
+    "micro-kernel",
+    "oxog",
+    "oxog-ecosystem",
+    "event-emitter"
   ],
   "author": "Ersin Koç",
   "license": "MIT",
@@ -77,6 +79,10 @@
     "node": ">=18"
   },
   "devDependencies": {
+    "@oxog/emitter": "^1.0.0",
+    "@oxog/pigment": "^1.0.1",
+    "@oxog/plugin": "^1.0.1",
+    "@oxog/types": "^1.0.1",
     "@types/node": "^20.0.0",
     "@vitest/coverage-v8": "^2.0.0",
     "eslint": "^9.0.0",
@@ -84,5 +90,11 @@
     "tsup": "^8.0.0",
     "typescript": "^5.0.0",
     "vitest": "^2.0.0"
+  },
+  "peerDependencies": {
+    "@oxog/emitter": "^1.0.0",
+    "@oxog/pigment": "^1.0.0",
+    "@oxog/plugin": "^1.0.1",
+    "@oxog/types": "^1.0.1"
   }
 }

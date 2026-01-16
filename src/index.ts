@@ -1,7 +1,7 @@
 // Main CLI factory and class
 export { cli, CLIImplementation } from './cli.js';
 
-// Types
+// Types (includes re-exports from @oxog/types)
 export * from './types.js';
 
 // Errors - rename to avoid conflicts
@@ -25,8 +25,12 @@ export { CommandRouter } from './command/router.js';
 // Kernel
 export { CLIKernelImpl as CLIKernel } from './kernel.js';
 
-// Events
-export { EventBus } from './events/index.js';
+// Events - includes @oxog/emitter re-exports
+export { EventBus, Emitter, createEmitter } from './events/index.js';
+export type { EventMap as EmitterEventMap, Handler as EmitterHandler } from './events/index.js';
+
+// Pigment types - @oxog/pigment (use colorPlugin for runtime access)
+// Types are re-exported from types.js (already exported via export * from './types.js')
 
 // Utilities - pick specific exports to avoid conflicts
 export {

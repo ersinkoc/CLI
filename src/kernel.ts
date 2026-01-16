@@ -1,9 +1,10 @@
-import type { CLIKernel, CLIPlugin, CLIContext } from './types.js';
-import { EventBus } from './events/index.js';
+import type { CLIKernel, CLIPlugin, CLIContext, Unsubscribe } from './types.js';
+import { Emitter } from '@oxog/emitter';
 
 /**
  * Micro-kernel for CLI framework
  * Manages plugins, events, and configuration
+ * Uses @oxog/emitter for event handling
  *
  * @example
  * ```typescript
@@ -14,7 +15,13 @@ import { EventBus } from './events/index.js';
  */
 export class CLIKernelImpl<TContext extends CLIContext = CLIContext> implements CLIKernel<TContext> {
   private plugins = new Map<string, CLIPlugin<TContext>>();
-  private eventBus = new EventBus();
+  /**
+   * @oxog/emitter instance for typed event handling
+   * Configured with 'throw' error handling to propagate errors to callers
+   */
+  private emitter = new Emitter<Record<string, unknown>>({
+    errorHandling: 'throw',
+  });
   private context: TContext = {} as TContext;
   private initialized = false;
 
@@ -127,6 +134,7 @@ export class CLIKernelImpl<TContext extends CLIContext = CLIContext> implements 
 
   /**
    * Emit an event
+   * Uses @oxog/emitter's emitAsync for async handler support
    *
    * @param event - Event name
    * @param data - Event data
@@ -137,15 +145,16 @@ export class CLIKernelImpl<TContext extends CLIContext = CLIContext> implements 
    * ```
    */
   async emit(event: string, data: unknown): Promise<void> {
-    await this.eventBus.emit(event, data);
+    await this.emitter.emitAsync(event, data);
   }
 
   /**
    * Register an event listener
+   * Uses @oxog/emitter for typed event handling
    *
    * @param event - Event name
    * @param handler - Event handler (can be async)
-   * @returns Unsubscribe function
+   * @returns Unsubscribe function from @oxog/types
    *
    * @example
    * ```typescript
@@ -154,8 +163,8 @@ export class CLIKernelImpl<TContext extends CLIContext = CLIContext> implements 
    * });
    * ```
    */
-  on(event: string, handler: (...args: unknown[]) => void | Promise<void>): () => void {
-    return this.eventBus.on(event, handler);
+  on(event: string, handler: (data: unknown) => void | Promise<void>): Unsubscribe {
+    return this.emitter.on(event, handler);
   }
 
   /**
@@ -169,8 +178,12 @@ export class CLIKernelImpl<TContext extends CLIContext = CLIContext> implements 
    * kernel.off('command:before', handler);
    * ```
    */
-  off(event: string, handler?: (...args: unknown[]) => void | Promise<void>): void {
-    this.eventBus.off(event, handler);
+  off(event: string, handler?: (data: unknown) => void | Promise<void>): void {
+    if (handler) {
+      this.emitter.off(event, handler);
+    } else {
+      this.emitter.offAll(event);
+    }
   }
 
   /**
@@ -226,7 +239,7 @@ export class CLIKernelImpl<TContext extends CLIContext = CLIContext> implements 
    */
   reset(): void {
     this.plugins.clear();
-    this.eventBus.removeAllListeners();
+    this.emitter.clear();
     this.context = {} as TContext;
     this.initialized = false;
   }

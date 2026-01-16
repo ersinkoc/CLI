@@ -8,8 +8,8 @@ export function Home() {
   const features = [
     {
       icon: Zap,
-      title: 'Zero Dependencies',
-      description: 'No runtime dependencies. Everything implemented from scratch for maximum control and minimal bundle size.',
+      title: '@oxog Ecosystem',
+      description: 'Built on the @oxog ecosystem with optional peer dependencies. Use @oxog/emitter, @oxog/pigment, @oxog/plugin for enhanced functionality.',
     },
     {
       icon: Shield,
@@ -31,13 +31,13 @@ export function Home() {
         <div className="container relative px-4 py-24 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl text-center">
             <div className="mb-6 inline-flex items-center rounded-full border bg-primary/10 px-4 py-1.5 text-sm">
-              <span className="font-semibold text-primary">v1.0.0</span>
+              <span className="font-semibold text-primary">v2.0.0</span>
               <span className="mx-2 text-muted-foreground">·</span>
-              <span className="text-muted-foreground">Now Available</span>
+              <span className="text-muted-foreground">@oxog Ecosystem</span>
             </div>
 
             <h1 className="text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
-              Zero-Dependency{' '}
+              Type-Safe{' '}
               <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
                 CLI Framework
               </span>

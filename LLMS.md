@@ -1,8 +1,8 @@
 # @oxog/cli - LLM Documentation
 
-> Zero-dependency CLI framework with type-safe commands, beautiful output, and plugin architecture
+> Type-safe CLI framework with @oxog ecosystem integration, plugin architecture, and beautiful output
 
-**Version:** 1.1.0
+**Version:** 2.0.0
 **License:** MIT
 **Repository:** https://github.com/ersinkoc/cli
 **Homepage:** https://cli.oxog.dev
@@ -49,13 +49,14 @@ app.run();
 
 ### Purpose
 
-@oxog/cli is a comprehensive command-line interface framework designed for modern TypeScript applications. It provides a fluent builder API, full TypeScript support, built-in spinner and logging utilities, and a micro-kernel plugin architecture - all with zero runtime dependencies.
+@oxog/cli is a comprehensive command-line interface framework designed for modern TypeScript applications. It provides a fluent builder API, full TypeScript support, built-in spinner and logging utilities, and a micro-kernel plugin architecture. Built on the **@oxog ecosystem** for seamless integration with other @oxog packages.
 
 ### Key Features
 
-- **Zero Runtime Dependencies** - Lightweight and fast, everything implemented from scratch
-- **Full TypeScript Support** - Type-safe commands, arguments, and options with strict mode
-- **Plugin Architecture** - Micro-kernel design for easy extensibility
+- **@oxog Ecosystem Integration** - Leverages @oxog/types, @oxog/emitter, @oxog/plugin, and @oxog/pigment for type-safe, consistent APIs
+- **Full TypeScript Support** - Type-safe commands, arguments, and options with utility types from @oxog/types
+- **Plugin Architecture** - Micro-kernel design compatible with @oxog/plugin standards
+- **Event-Driven** - Powered by @oxog/emitter for flexible event handling with wildcard support
 - **Beautiful Output** - Built-in colors, spinners, progress bars, and structured logging
 - **Robust Parsing** - Advanced argument parsing with validation and coercion
 - **Nested Commands** - Support for complex command hierarchies
@@ -84,9 +85,17 @@ app.run();
 
 ### Dependencies
 
-- **Runtime:** Zero runtime dependencies
-- **Peer:** None
+- **Peer:** @oxog/types, @oxog/emitter, @oxog/plugin, @oxog/pigment (required)
 - **Dev:** typescript, vitest, tsup, eslint, prettier
+
+### @oxog Ecosystem Packages
+
+| Package | Purpose |
+|---------|---------|
+| `@oxog/types` | Common TypeScript utilities (MaybePromise, Unsubscribe, DeepPartial, etc.) |
+| `@oxog/emitter` | Type-safe event emitter with async support and wildcard patterns |
+| `@oxog/plugin` | Micro-kernel plugin system interfaces |
+| `@oxog/pigment` | Terminal styling with chainable API (Chalk-compatible) |
 
 ---
 
@@ -101,8 +110,12 @@ app.run();
 | `Command` | class | Command definition class |
 | `CommandRegistry` | class | Command registry |
 | `CommandRouter` | class | Command routing |
-| `CLIKernel` | class | Micro-kernel for plugin management |
-| `EventBus` | class | Event bus for inter-component communication |
+| `CLIKernel` | class | Micro-kernel for plugin management (uses @oxog/emitter) |
+| `EventBus` | class | Event bus (deprecated, use Emitter) |
+| `Emitter` | class | Type-safe event emitter from @oxog/emitter |
+| `createEmitter` | function | Factory for creating emitter instances |
+| `pigment` | object | Default Pigment instance from @oxog/pigment |
+| `createPigment` | function | Factory for creating Pigment instances |
 | `CLIError` | class | Base CLI error class |
 | `UnknownCommandError` | class | Unknown command error |
 | `MissingArgumentError` | class | Missing argument error |
@@ -116,6 +129,23 @@ app.run();
 | `terminal` | object | Terminal utility functions |
 | `levenshtein` | function | Calculate Levenshtein distance |
 | `fuzzyMatch` | function | Fuzzy string matching |
+
+#### Re-exported Types from @oxog Ecosystem
+
+| Type | Source | Description |
+|------|--------|-------------|
+| `MaybePromise<T>` | @oxog/types | Value that may be sync or async |
+| `Unsubscribe` | @oxog/types | Function to unsubscribe from events |
+| `DeepPartial<T>` | @oxog/types | Recursively partial type |
+| `DeepReadonly<T>` | @oxog/types | Recursively readonly type |
+| `JsonValue` | @oxog/types | JSON-serializable value |
+| `EventMap` | @oxog/types | Event name to handler type mapping |
+| `EmitterOptions` | @oxog/emitter | Configuration options for Emitter |
+| `EmitterHandler` | @oxog/emitter | Event handler function type |
+| `Pigment` | @oxog/pigment | Pigment instance type with chainable API |
+| `PigmentOptions` | @oxog/pigment | Configuration options for Pigment |
+| `Styler` | @oxog/pigment | Individual style function type |
+| `ColorSupport` | @oxog/pigment | Color support detection result |
 
 ### Main Entry Point
 
@@ -1204,9 +1234,10 @@ app.use(myPlugin);
 
 | Feature | @oxog/cli | Commander.js | Yargs |
 |---------|-----------|--------------|-------|
-| Zero dependencies | Yes | No | No |
+| @oxog ecosystem | Yes | No | No |
 | TypeScript native | Yes | Types via @types | Yes |
 | Plugin system | Yes (micro-kernel) | Limited | Middleware |
+| Event emitter | Yes (@oxog/emitter) | No | No |
 | Built-in colors | Yes | No | No |
 | Built-in spinners | Yes | No | No |
 | Built-in logging | Yes | No | No |
@@ -1302,8 +1333,8 @@ app.command('db')
 ## Document Metadata
 
 - **Generated:** 2026-01-07
-- **Updated:** 2026-01-07
-- **Package Version:** 1.1.0
-- **Documentation Version:** 1.1
+- **Updated:** 2026-01-16
+- **Package Version:** 2.0.0
+- **Documentation Version:** 2.0
 - **Format:** LLM-Optimized Markdown
-- **New in 1.1:** Added promptPlugin, progressPlugin, tablePlugin, configPlugin, completionPlugin
+- **New in 2.0:** @oxog ecosystem integration (@oxog/types, @oxog/emitter, @oxog/plugin, @oxog/pigment), re-exported types, EventBus deprecated in favor of Emitter, colorPlugin powered by Pigment

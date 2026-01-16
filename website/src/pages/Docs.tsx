@@ -5,15 +5,15 @@ import { codeExamples } from '@/lib/constants';
 
 const docsContent = String.raw`# Introduction
 
-@oxog/cli is a zero-dependency CLI framework for TypeScript that provides type-safe commands, beautiful output formatting, and a powerful plugin architecture.
+@oxog/cli is a type-safe CLI framework for TypeScript that provides type-safe commands, beautiful output formatting, and a powerful plugin architecture. Built on the @oxog ecosystem for enhanced functionality.
 
 ## Why @oxog/cli?
 
-- **Zero Dependencies** - No runtime dependencies, everything implemented from scratch
+- **@oxog Ecosystem** - Integrates with @oxog/types, @oxog/emitter, @oxog/plugin, and @oxog/pigment
 - **Type Safety** - Full TypeScript support with end-to-end type inference
 - **Multiple API Styles** - Fluent builder, object config, or decorator-based
 - **Plugin System** - Micro-kernel architecture for extensibility
-- **Beautiful Output** - Built-in support for spinners, progress bars, tables, and more
+- **Beautiful Output** - Built-in support for spinners, progress bars, tables, and colored output via @oxog/pigment
 
 ## Installation
 
@@ -21,10 +21,19 @@ const docsContent = String.raw`# Introduction
 npm install @oxog/cli
 \`\`\`
 
+### Peer Dependencies (Optional)
+
+@oxog/cli works with the @oxog ecosystem packages as peer dependencies:
+
+\`\`\`bash
+npm install @oxog/types @oxog/emitter @oxog/plugin @oxog/pigment
+\`\`\`
+
 Or with yarn:
 
 \`\`\`bash
 yarn add @oxog/cli
+yarn add @oxog/types @oxog/emitter @oxog/plugin @oxog/pigment
 \`\`\`
 
 ## Basic Usage
@@ -80,6 +89,19 @@ pnpm add @oxog/cli
 \`\`\`bash
 bun add @oxog/cli
 \`\`\`
+
+## Peer Dependencies
+
+@oxog/cli integrates with the @oxog ecosystem. Install peer dependencies for enhanced functionality:
+
+\`\`\`bash
+npm install @oxog/types @oxog/emitter @oxog/plugin @oxog/pigment
+\`\`\`
+
+- **@oxog/types** - Shared TypeScript type definitions
+- **@oxog/emitter** - Type-safe event emitter for the kernel
+- **@oxog/plugin** - Plugin system base interface
+- **@oxog/pigment** - Terminal styling library (Chalk-compatible)
 
 ## TypeScript Configuration
 
@@ -1997,7 +2019,7 @@ app.command('deploy')
 
 ## Color Plugin
 
-ANSI color utilities for terminal output:
+ANSI color utilities for terminal output, powered by @oxog/pigment:
 
 \`\`\`typescript
 import { colorPlugin } from '@oxog/cli/plugins';
@@ -2005,7 +2027,8 @@ import { colorPlugin } from '@oxog/cli/plugins';
 app.use(colorPlugin());
 
 app.command('status')
-  .action(({ color }) => {
+  .action(({ color, pigment }) => {
+    // Legacy API (always available)
     console.log(color.green('✓ Success'));
     console.log(color.red('✗ Error'));
     console.log(color.yellow('⚠ Warning'));
@@ -2020,6 +2043,34 @@ app.command('status')
 
     // Background colors
     console.log(color.bgRed(color.white('Error badge')));
+
+    // @oxog/pigment chainable API (if installed)
+    if (pigment) {
+      console.log(pigment.red.bold('Error!'));
+      console.log(pigment.green.italic('Success!'));
+      console.log(pigment.hex('#ff6600').bold('Custom color!'));
+    }
+  });
+\`\`\`
+
+### @oxog/pigment Integration
+
+When @oxog/pigment is installed as a peer dependency, the color plugin provides additional features:
+
+- **pigment**: Chainable API with proxy-based styling
+- **chalk**: Alias for pigment (Chalk-compatible)
+
+\`\`\`typescript
+// Install @oxog/pigment for enhanced color support
+npm install @oxog/pigment
+
+// Then use the chainable API
+app.command('demo')
+  .action(({ pigment }) => {
+    if (pigment) {
+      console.log(pigment.red.bold.underline('Styled text'));
+      console.log(pigment.bgBlue.white(' Badge '));
+    }
   });
 \`\`\`
 

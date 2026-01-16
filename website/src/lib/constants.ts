@@ -1,6 +1,6 @@
 export const siteConfig = {
   name: '@oxog/cli',
-  description: 'Zero-Dependency CLI Framework with Type Safety',
+  description: 'Type-Safe CLI Framework with @oxog Ecosystem Integration',
   url: 'https://oxog.dev',
   links: {
     github: 'https://github.com/ersinkoc/cli',
