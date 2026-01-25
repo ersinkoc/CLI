@@ -22,16 +22,27 @@ export class CLIKernelImpl<TContext extends CLIContext = CLIContext> implements 
   private emitter = new Emitter<Record<string, unknown>>({
     errorHandling: 'throw',
   });
-  private context: TContext = {} as TContext;
+  /**
+   * Shared context object.
+   * Starts as an empty CLIContext and is populated via setContextValue.
+   * CLIContext is an index signature type (Record<string, unknown>) so empty object is valid.
+   */
+  private context: TContext = Object.create(null) as TContext;
   private initialized = false;
 
   /**
    * Register a plugin
    *
+   * Plugins can be registered in any order. Dependencies are resolved
+   * during initialize() rather than register(), allowing flexible registration.
+   *
    * @param plugin - Plugin to register
    *
    * @example
    * ```typescript
+   * // Plugins can be registered in any order
+   * kernel.register(pluginB); // depends on pluginA
+   * kernel.register(pluginA); // dependencies resolved at initialize()
    * kernel.register({
    *   name: 'my-plugin',
    *   version: '1.0.0',
@@ -40,23 +51,12 @@ export class CLIKernelImpl<TContext extends CLIContext = CLIContext> implements 
    * ```
    */
   register(plugin: CLIPlugin<TContext>): void {
-    // Check for dependency conflicts
-    if (plugin.dependencies) {
-      for (const dep of plugin.dependencies) {
-        if (!this.plugins.has(dep)) {
-          throw new Error(
-            `Plugin "${plugin.name}" depends on "${dep}" which is not registered`
-          );
-        }
-      }
-    }
-
     // Check for existing plugin with same name
     if (this.plugins.has(plugin.name)) {
       throw new Error(`Plugin "${plugin.name}" is already registered`);
     }
 
-    // Install plugin
+    // Install plugin (sets up event listeners)
     try {
       plugin.install(this);
       this.plugins.set(plugin.name, plugin);
@@ -212,7 +212,9 @@ export class CLIKernelImpl<TContext extends CLIContext = CLIContext> implements 
 
   /**
    * Initialize all plugins
-   * Calls onInit for each plugin
+   * Validates dependencies and calls onInit in dependency order
+   *
+   * @throws Error if circular dependencies detected or missing dependencies
    *
    * @example
    * ```typescript
@@ -224,7 +226,11 @@ export class CLIKernelImpl<TContext extends CLIContext = CLIContext> implements 
       return;
     }
 
-    for (const plugin of this.plugins.values()) {
+    // Validate and sort plugins by dependencies
+    const sortedPlugins = this.resolveDependencies();
+
+    // Call onInit in dependency order
+    for (const plugin of sortedPlugins) {
       if (plugin.onInit) {
         await plugin.onInit(this.context);
       }
@@ -234,13 +240,65 @@ export class CLIKernelImpl<TContext extends CLIContext = CLIContext> implements 
   }
 
   /**
+   * Resolve plugin dependencies using topological sort
+   * Validates all dependencies exist and detects circular dependencies
+   *
+   * @returns Plugins sorted in dependency order (dependencies first)
+   * @throws Error if dependencies are missing or circular
+   */
+  private resolveDependencies(): CLIPlugin<TContext>[] {
+    const sorted: CLIPlugin<TContext>[] = [];
+    const visited = new Set<string>();
+    const visiting = new Set<string>();
+
+    const visit = (name: string, path: string[] = []): void => {
+      if (visited.has(name)) {
+        return;
+      }
+
+      if (visiting.has(name)) {
+        throw new Error(
+          `Circular dependency detected: ${[...path, name].join(' -> ')}`
+        );
+      }
+
+      const plugin = this.plugins.get(name);
+      if (!plugin) {
+        throw new Error(
+          `Plugin "${path[path.length - 1]}" depends on "${name}" which is not registered`
+        );
+      }
+
+      visiting.add(name);
+
+      // Visit dependencies first
+      if (plugin.dependencies) {
+        for (const dep of plugin.dependencies) {
+          visit(dep, [...path, name]);
+        }
+      }
+
+      visiting.delete(name);
+      visited.add(name);
+      sorted.push(plugin);
+    };
+
+    // Visit all plugins
+    for (const name of this.plugins.keys()) {
+      visit(name);
+    }
+
+    return sorted;
+  }
+
+  /**
    * Reset the kernel (clear all plugins and context)
    * Primarily used for testing
    */
   reset(): void {
     this.plugins.clear();
     this.emitter.clear();
-    this.context = {} as TContext;
+    this.context = Object.create(null) as TContext;
     this.initialized = false;
   }
 }

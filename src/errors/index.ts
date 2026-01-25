@@ -5,4 +5,7 @@ export {
   InvalidOptionError,
   UnknownOptionError,
   ValidationError,
+  ExitRequest,
+  HelpRequestedExit,
+  VersionRequestedExit,
 } from './cli-error.js';

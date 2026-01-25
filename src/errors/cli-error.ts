@@ -161,3 +161,59 @@ export class ValidationError extends CLIError {
     this.name = 'ValidationError';
   }
 }
+
+/**
+ * Base class for graceful exit requests (not actual errors)
+ * Used when the CLI should exit cleanly (help, version, etc.)
+ * These have exitCode 0 by default.
+ *
+ * @example
+ * ```typescript
+ * if (error instanceof ExitRequest) {
+ *   // This is a graceful exit, not an error
+ *   process.exit(0);
+ * }
+ * ```
+ */
+export class ExitRequest extends CLIError {
+  constructor(message: string, code: string, exitCode = 0) {
+    super(message, code, exitCode);
+    this.name = 'ExitRequest';
+  }
+}
+
+/**
+ * Thrown when help is requested (--help flag)
+ * Not an error - signals that help was displayed and CLI should exit cleanly.
+ *
+ * @example
+ * ```typescript
+ * if (context.options?.help) {
+ *   throw new HelpRequestedExit();
+ * }
+ * ```
+ */
+export class HelpRequestedExit extends ExitRequest {
+  constructor() {
+    super('Help requested', 'HELP_REQUESTED', 0);
+    this.name = 'HelpRequestedExit';
+  }
+}
+
+/**
+ * Thrown when version is requested (--version flag)
+ * Not an error - signals that version was displayed and CLI should exit cleanly.
+ *
+ * @example
+ * ```typescript
+ * if (context.options?.version) {
+ *   throw new VersionRequestedExit();
+ * }
+ * ```
+ */
+export class VersionRequestedExit extends ExitRequest {
+  constructor() {
+    super('Version requested', 'VERSION_REQUESTED', 0);
+    this.name = 'VersionRequestedExit';
+  }
+}

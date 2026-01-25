@@ -1,5 +1,6 @@
 import type { CLIPlugin, CLIKernel } from '../../types.js';
 import { colors } from '../../utils/ansi.js';
+import { VersionRequestedExit } from '../../errors/cli-error.js';
 
 /**
  * Version plugin options
@@ -47,8 +48,9 @@ export function versionPlugin(options: VersionPluginOptions = {}): CLIPlugin {
         const data = args[0] as any;
         const { context } = data;
         if (context.options?.version === true || context.options?.V === true) {
-          kernel.emit('version', { version: context.app.version });
-          process.exit(0);
+          await kernel.emit('version', { version: context.app.version });
+          // Throw instead of process.exit to allow library users to handle gracefully
+          throw new VersionRequestedExit();
         }
       });
     },

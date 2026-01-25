@@ -1,4 +1,5 @@
 import type { CLIPlugin, CLIKernel, CLI, Command } from '../../../types.js';
+import { ValidationError } from '../../../errors/cli-error.js';
 
 /**
  * Completion plugin options
@@ -256,9 +257,9 @@ export function completionPlugin(options: CompletionPluginOptions = {}): CLIPlug
             const shell = (args.shell as ShellType) || detectShell();
 
             if (!['bash', 'zsh', 'fish'].includes(shell)) {
-              console.error(`Unknown shell: ${shell}`);
-              console.error('Supported shells: bash, zsh, fish');
-              process.exit(1);
+              throw new ValidationError(
+                `Unknown shell: ${shell}. Supported shells: bash, zsh, fish`
+              );
             }
 
             if (options.install) {

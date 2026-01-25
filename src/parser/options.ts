@@ -115,7 +115,10 @@ export function parseOptions(
       continue;
     }
 
-    processed.add(def.name);
+    // Mark as processed (but allow array types to be used multiple times)
+    if (def.type !== 'array') {
+      processed.add(def.name);
+    }
 
     // Handle flag group (-abc = -a -b -c)
     if (token.type === 'flag' && name.length > 1 && def.type !== 'boolean') {
@@ -165,7 +168,19 @@ export function parseOptions(
     }
 
     // Apply coercion
-    values[def.name] = coerceOptionValue(value, def, errors);
+    const coercedValue = coerceOptionValue(value, def, errors);
+
+    // For array types, accumulate values (--tag a --tag b -> ['a', 'b'])
+    if (def.type === 'array') {
+      const existing = values[def.name];
+      if (Array.isArray(existing)) {
+        existing.push(coercedValue);
+      } else {
+        values[def.name] = [coercedValue];
+      }
+    } else {
+      values[def.name] = coercedValue;
+    }
   }
 
   // Apply defaults for unset options
@@ -231,8 +246,10 @@ export function coerceOptionValue(
       break;
 
     case 'array':
-      // Split by comma
-      coerced = value.split(',').map((v) => v.trim());
+      // Arrays are accumulated via multiple flag occurrences (--tag a --tag b)
+      // NOT split by comma (which would break "San Francisco, CA")
+      // If you need comma-splitting, use a custom coerce function
+      coerced = value;
       break;
 
     case 'object':

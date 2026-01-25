@@ -1,6 +1,6 @@
 {
   "name": "@oxog/cli",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Type-safe CLI framework with @oxog ecosystem integration, plugin architecture, and beautiful output",
   "type": "module",
   "main": "./dist/index.cjs",

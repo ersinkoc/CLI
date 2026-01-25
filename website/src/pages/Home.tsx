@@ -31,7 +31,7 @@ export function Home() {
         <div className="container relative px-4 py-24 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl text-center">
             <div className="mb-6 inline-flex items-center rounded-full border bg-primary/10 px-4 py-1.5 text-sm">
-              <span className="font-semibold text-primary">v2.0.0</span>
+              <span className="font-semibold text-primary">v2.0.1</span>
               <span className="mx-2 text-muted-foreground">·</span>
               <span className="text-muted-foreground">@oxog Ecosystem</span>
             </div>

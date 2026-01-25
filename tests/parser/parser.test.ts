@@ -320,13 +320,23 @@ describe('Option Parser', () => {
     expect(result.values.list).toEqual(['a', 'b', 'c']);
   });
 
-  it('should parse array options', () => {
+  it('should parse array options via multiple flags', () => {
     const defs: OptionDef[] = [
       { name: 'items', type: 'array' },
     ];
-    const tokens = tokenize(['--items', 'a,b,c']);
+    const tokens = tokenize(['--items', 'a', '--items', 'b', '--items', 'c']);
     const result = parseOptions(tokens, defs);
     expect(result.values.items).toEqual(['a', 'b', 'c']);
+  });
+
+  it('should not split array values by comma (preserves "San Francisco, CA")', () => {
+    const defs: OptionDef[] = [
+      { name: 'items', type: 'array' },
+    ];
+    const tokens = tokenize(['--items', 'San Francisco, CA']);
+    const result = parseOptions(tokens, defs);
+    // Should be single element, not split by comma
+    expect(result.values.items).toEqual(['San Francisco, CA']);
   });
 
   it('should parse object options (key=value)', () => {
@@ -371,7 +381,7 @@ describe('Option Parser', () => {
     const defs: OptionDef[] = [
       { name: 'formats', type: 'array', choices: ['json', 'yaml', 'xml'] },
     ];
-    const tokens = tokenize(['--formats', 'json,yaml']);
+    const tokens = tokenize(['--formats', 'json', '--formats', 'yaml']);
     const result = parseOptions(tokens, defs);
     expect(result.errors).toHaveLength(0);
   });
@@ -380,7 +390,7 @@ describe('Option Parser', () => {
     const defs: OptionDef[] = [
       { name: 'formats', type: 'array', choices: ['json', 'yaml'] },
     ];
-    const tokens = tokenize(['--formats', 'json,xml']);
+    const tokens = tokenize(['--formats', 'json', '--formats', 'xml']);
     const result = parseOptions(tokens, defs);
     expect(result.errors.length).toBeGreaterThan(0);
   });
@@ -618,20 +628,21 @@ describe('Option Parser', () => {
     expect(result.values.config).toEqual({ key: 'value' });
   });
 
-  it('should handle array option with whitespace trimming', () => {
+  it('should preserve whitespace in array values (no trimming)', () => {
     const defs: OptionDef[] = [
       { name: 'items', type: 'array' },
     ];
     const tokens = tokenize(['--items', 'a, b , c']);
     const result = parseOptions(tokens, defs);
-    expect(result.values.items).toEqual(['a', 'b', 'c']);
+    // Values are not split or trimmed - entire string is one array element
+    expect(result.values.items).toEqual(['a, b , c']);
   });
 
   it('should validate choices for array options', () => {
     const defs: OptionDef[] = [
       { name: 'formats', type: 'array', choices: ['json', 'yaml', 'xml'] },
     ];
-    const tokens = tokenize(['--formats', 'json,yaml']);
+    const tokens = tokenize(['--formats', 'json', '--formats', 'yaml']);
     const result = parseOptions(tokens, defs);
     expect(result.errors).toHaveLength(0);
   });
@@ -640,7 +651,7 @@ describe('Option Parser', () => {
     const defs: OptionDef[] = [
       { name: 'formats', type: 'array', choices: ['json', 'yaml'] },
     ];
-    const tokens = tokenize(['--formats', 'json,xml']);
+    const tokens = tokenize(['--formats', 'json', '--formats', 'xml']);
     const result = parseOptions(tokens, defs);
     expect(result.errors.length).toBeGreaterThan(0);
     expect(result.errors[0]).toContain('must be one of');
@@ -1025,13 +1036,14 @@ describe('parse', () => {
     expect(result.values.items).toEqual(['item1']);
   });
 
-  it('should handle array option with spaces around values', () => {
+  it('should handle array option with spaces (preserves full value)', () => {
     const defs: OptionDef[] = [
       { name: 'items', type: 'array' },
     ];
     const tokens = tokenize(['--items', 'a, b , c']);
     const result = parseOptions(tokens, defs);
-    expect(result.values.items).toEqual(['a', 'b', 'c']);
+    // No comma splitting - entire string is one element
+    expect(result.values.items).toEqual(['a, b , c']);
   });
 
   it('should handle negatable options when both forms are registered', () => {

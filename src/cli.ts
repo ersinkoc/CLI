@@ -5,13 +5,14 @@ import type {
   Command as ICommand,
   CommandBuilder,
   ActionHandler,
+  ActionContext,
   Middleware,
   OptionDef,
 } from './types.js';
 import type { Token } from './parser/tokenizer.js';
 import { Command } from './command/command.js';
 import { CLIKernelImpl } from './kernel.js';
-import { tokenize } from './parser/tokenizer.js';
+import { tokenize, TokenType } from './parser/tokenizer.js';
 import { parseArguments } from './parser/arguments.js';
 import { parseOptions } from './parser/options.js';
 import {
@@ -19,6 +20,7 @@ import {
   UnknownCommandError,
   MissingArgumentError,
   ValidationError,
+  ExitRequest,
 } from './errors/cli-error.js';
 import { findBestMatch } from './utils/levenshtein.js';
 
@@ -35,14 +37,34 @@ export class CLIImplementation implements CLI {
 
   private kernel: CLIKernelImpl;
   private _strict = false;
+  private _exitOnError = true;
   private root: Command;
-  private _pendingMiddleware: Middleware[] = [];
+
+  /**
+   * Pending middleware waiting for middleware plugin initialization.
+   * @internal - Used by middleware plugin
+   */
+  _pendingMiddleware: Middleware[] = [];
+
+  /**
+   * Function to add global middleware, set by middleware plugin during onInit.
+   * @internal - Used by middleware plugin
+   */
+  _addGlobalMiddleware?: (mw: Middleware) => void;
+
+  /**
+   * Flag indicating middleware plugin is handling all middleware.
+   * When true, executeCommand skips its built-in middleware handling.
+   * @internal - Set by middleware plugin
+   */
+  _middlewarePluginActive = false;
 
   constructor(options: CLIOptions) {
     this.name = options.name;
     this._version = options.version ?? '0.0.0';
     this._description = options.description ?? '';
     this._strict = options.strict ?? false;
+    this._exitOnError = options.exitOnError ?? true;
 
     this.kernel = new CLIKernelImpl();
     this.root = new Command(options.name);
@@ -111,9 +133,9 @@ export class CLIImplementation implements CLI {
   middleware(mw: Middleware): this {
     // Store pending middleware until plugin is initialized
     this._pendingMiddleware.push(mw);
-    // If _use is already available (plugin initialized), also add there
-    if ((this as any)._use) {
-      (this as any)._use(mw);
+    // If middleware plugin is initialized, also add there directly
+    if (this._addGlobalMiddleware) {
+      this._addGlobalMiddleware(mw);
     }
     return this;
   }
@@ -142,8 +164,8 @@ export class CLIImplementation implements CLI {
         return;
       }
 
-      const { command, tokenIndex } = this.findCommand(tokens);
-      const remainingTokens = tokens.slice(tokenIndex);
+      const { command, consumedIndices } = this.findCommand(tokens);
+      const remainingTokens = tokens.filter((_, i) => !consumedIndices.has(i));
       const parseResult = this.parseCommandTokens(command, remainingTokens);
 
       if (parseResult.errors.length > 0) {
@@ -167,22 +189,43 @@ export class CLIImplementation implements CLI {
     }
   }
 
-  private findCommand(tokens: Token[]): { command: Command; tokenIndex: number } {
+  private findCommand(tokens: Token[]): { command: Command; consumedIndices: Set<number> } {
     let command = this.root;
-    let tokenIndex = 0;
+    const consumedIndices = new Set<number>();
 
-    while (tokenIndex < tokens.length) {
-      const token = tokens[tokenIndex];
-      if (!token || token.type !== 'argument') break;
+    // Navigate through subcommands, skipping option tokens
+    // This allows: cli --verbose build (flags before subcommands)
+    for (let i = 0; i < tokens.length; i++) {
+      const token = tokens[i];
+
+      // Skip option/flag tokens - they'll be processed later
+      if (token.type === TokenType.Option || token.type === TokenType.Flag) {
+        // Also skip the next token if it's a value for this option
+        const nextToken = tokens[i + 1];
+        if (nextToken?.type === TokenType.Value) {
+          i++; // Skip the value token too
+        }
+        continue;
+      }
+
+      // Stop at separator
+      if (token.type === TokenType.Separator) {
+        break;
+      }
+
+      // Only process argument tokens as potential subcommands
+      if (token.type !== TokenType.Argument) {
+        continue;
+      }
 
       const subcommand = command.getByNameOrAlias(token.value);
       if (!subcommand) break;
 
       command = subcommand;
-      tokenIndex++;
+      consumedIndices.add(i);
     }
 
-    return { command, tokenIndex };
+    return { command, consumedIndices };
   }
 
   private parseCommandTokens(
@@ -199,24 +242,25 @@ export class CLIImplementation implements CLI {
     };
   }
 
-  private async executeCommand(command: Command, context: Record<string, unknown>): Promise<void> {
+  private async executeCommand(command: Command, context: ActionContext): Promise<void> {
     await this.kernel.emit('command:before', { command, context });
 
-    // Only execute command middleware if the middleware plugin is NOT installed
-    // The middleware plugin handles both global and command-specific middleware
-    if (!(this as any)._middlewarePluginInstalled && command.middleware.length > 0) {
+    // Only execute command middleware if the middleware plugin is NOT active.
+    // When the middleware plugin is active, it handles both global and command middleware
+    // via the command:before event handler.
+    if (!this._middlewarePluginActive && command.middleware.length > 0) {
       let index = 0;
       const next = async () => {
         if (index < command.middleware.length) {
           const mw = command.middleware[index++];
-          await mw(context as any, next);
+          await mw(context, next);
         }
       };
       await next();
     }
 
     if (command.action) {
-      await command.action(context as any);
+      await command.action(context);
     }
 
     await this.kernel.emit('command:after', { command, context });
@@ -224,6 +268,16 @@ export class CLIImplementation implements CLI {
 
   private async handleError(error: Error): Promise<void> {
     await this.kernel.emit('error', error);
+
+    // Handle graceful exit requests (help, version)
+    // These are not errors - just signals to exit cleanly
+    if (error instanceof ExitRequest) {
+      if (this._exitOnError) {
+        process.exit(error.exitCode);
+        return; // process.exit should never return, but needed for type safety
+      }
+      throw error; // Re-throw for library users to handle
+    }
 
     if (error instanceof CLIError) {
       console.error(error.message);
@@ -235,11 +289,19 @@ export class CLIImplementation implements CLI {
         }
       }
 
-      process.exit(error.exitCode);
-    } else {
-      console.error('Unexpected error:', error.message);
-      process.exit(1);
+      if (this._exitOnError) {
+        process.exit(error.exitCode);
+        return; // process.exit should never return, but needed for type safety
+      }
+      throw error; // Re-throw for library users to handle
     }
+
+    console.error('Unexpected error:', error.message);
+    if (this._exitOnError) {
+      process.exit(1);
+      return; // process.exit should never return, but needed for type safety
+    }
+    throw error; // Re-throw for library users to handle
   }
 
   private suggestCommand(name: string): string | undefined {

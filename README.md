@@ -179,9 +179,35 @@ app.kernel.on('command:before', (data) => {
 await app.kernel.emit('custom:event', { foo: 'bar' });
 ```
 
+## 🛠️ Library Mode
+
+When using @oxog/cli as a library (e.g., inside Electron or a server), you can disable automatic `process.exit()`:
+
+```typescript
+import { cli, ExitRequest, HelpRequestedExit } from '@oxog/cli';
+
+const app = cli({
+  name: 'myapp',
+  exitOnError: false, // Don't call process.exit()
+});
+
+try {
+  await app.runAsync(['--help']);
+} catch (error) {
+  if (error instanceof HelpRequestedExit) {
+    // Help was displayed, handle gracefully
+  } else if (error instanceof ExitRequest) {
+    // Version or other clean exit
+  } else {
+    // Actual error
+    console.error(error);
+  }
+}
+```
+
 ## 🧪 Testing
 
-The project has 100% test coverage with 664 passing tests.
+The project has 100% test coverage with 667 passing tests.
 
 ```bash
 npm test

@@ -711,7 +711,7 @@ describe('CLI', () => {
     expect(app.name).toBe('myapp');
   });
 
-  it('should call _use when middleware is added after plugin initialized', async () => {
+  it('should call _addGlobalMiddleware when middleware is added after plugin initialized', async () => {
     const { middlewarePlugin } = await import('../../src/plugins/optional/middleware/index.js');
     const app = cli({ name: 'myapp' });
 
@@ -724,12 +724,14 @@ describe('CLI', () => {
     // Initialize the kernel to ensure plugin is fully set up
     await (app as any).kernel.initialize();
 
-    // Now add middleware - this should trigger the _use path (line 116-117 in cli.ts)
+    // Now add middleware - this should trigger the _addGlobalMiddleware path in cli.ts
     const mw = vi.fn();
     const result = app.middleware(mw);
     expect(result).toBe(app);
 
-    // Verify _use was set by the plugin
-    expect((app as any)._use).toBeDefined();
+    // Verify _addGlobalMiddleware was set by the plugin
+    expect((app as any)._addGlobalMiddleware).toBeDefined();
+    // Verify _middlewarePluginActive flag was set
+    expect((app as any)._middlewarePluginActive).toBe(true);
   });
 });

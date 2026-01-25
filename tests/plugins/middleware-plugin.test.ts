@@ -16,7 +16,8 @@ describe('Middleware Plugin', () => {
   beforeEach(() => {
     bus = new EventBus();
     mockApp = {
-      _use: undefined as any,
+      _addGlobalMiddleware: undefined as any,
+      _middlewarePluginActive: false,
     };
     mockCommand = {
       name: 'deploy',
@@ -37,19 +38,18 @@ describe('Middleware Plugin', () => {
     expect(plugin.install).toBeInstanceOf(Function);
   });
 
-  it('should add _use method to app on init', async () => {
+  it('should add _addGlobalMiddleware method to app on init', async () => {
     const plugin = middlewarePlugin();
     plugin.install(bus);
     await plugin.onInit(mockContext);
-    expect(mockApp._use).toBeInstanceOf(Function);
+    expect(mockApp._addGlobalMiddleware).toBeInstanceOf(Function);
   });
 
-  it('should return app from _use for chaining', async () => {
+  it('should set _middlewarePluginActive flag on init', async () => {
     const plugin = middlewarePlugin();
     plugin.install(bus);
     await plugin.onInit(mockContext);
-    const result = mockApp._use(() => {});
-    expect(result).toBe(mockApp);
+    expect(mockApp._middlewarePluginActive).toBe(true);
   });
 
   it('should execute global middleware before command', async () => {
@@ -59,7 +59,7 @@ describe('Middleware Plugin', () => {
 
     // Add global middleware
     await plugin.onInit(mockContext);
-    mockApp._use(async (ctx: any, next: () => Promise<void>) => {
+    mockApp._addGlobalMiddleware(async (ctx: any, next: () => Promise<void>) => {
       executed = true;
       await next();
     });
@@ -92,7 +92,7 @@ describe('Middleware Plugin', () => {
 
     await plugin.onInit(mockContext);
 
-    mockApp._use(async (ctx: any, next: () => Promise<void>) => {
+    mockApp._addGlobalMiddleware(async (ctx: any, next: () => Promise<void>) => {
       order.push('global');
       await next();
     });
@@ -115,12 +115,12 @@ describe('Middleware Plugin', () => {
 
     await plugin.onInit(mockContext);
 
-    mockApp._use(async (ctx: any, next: () => Promise<void>) => {
+    mockApp._addGlobalMiddleware(async (ctx: any, next: () => Promise<void>) => {
       order.push('mw1');
       await next();
     });
 
-    mockApp._use(async (ctx: any, next: () => Promise<void>) => {
+    mockApp._addGlobalMiddleware(async (ctx: any, next: () => Promise<void>) => {
       order.push('mw2');
       await next();
     });
@@ -136,7 +136,7 @@ describe('Middleware Plugin', () => {
 
     await plugin.onInit(mockContext);
 
-    mockApp._use(async (ctx: any, next: () => Promise<void>) => {
+    mockApp._addGlobalMiddleware(async (ctx: any, next: () => Promise<void>) => {
       executed = true;
       // Don't call next()
     });
@@ -158,7 +158,7 @@ describe('Middleware Plugin', () => {
 
     await plugin.onInit(mockContext);
 
-    mockApp._use(async (ctx: any, next: () => Promise<void>) => {
+    mockApp._addGlobalMiddleware(async (ctx: any, next: () => Promise<void>) => {
       throw new Error('Middleware error');
     });
 
@@ -186,7 +186,7 @@ describe('Middleware Plugin', () => {
 
     await plugin.onInit(mockContext);
 
-    mockApp._use(async (ctx: any, next: () => Promise<void>) => {
+    mockApp._addGlobalMiddleware(async (ctx: any, next: () => Promise<void>) => {
       executed = true;
       await next();
     });

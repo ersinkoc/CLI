@@ -62,7 +62,7 @@ describe('CLIKernel', () => {
     expect(kernel.has('plugin2')).toBe(true);
   });
 
-  it('should throw on missing dependency', () => {
+  it('should throw on missing dependency during initialize', async () => {
     const plugin: CLIPlugin<TestContext> = {
       name: 'plugin2',
       version: '1.0.0',
@@ -70,7 +70,65 @@ describe('CLIKernel', () => {
       install: () => {},
     };
 
-    expect(() => kernel.register(plugin)).toThrow('not registered');
+    // Registration succeeds - dependency checking is deferred to initialize()
+    kernel.register(plugin);
+    expect(kernel.has('plugin2')).toBe(true);
+
+    // Initialize throws because plugin1 is not registered
+    await expect(kernel.initialize()).rejects.toThrow('not registered');
+  });
+
+  it('should detect circular dependencies', async () => {
+    const pluginA: CLIPlugin<TestContext> = {
+      name: 'pluginA',
+      version: '1.0.0',
+      dependencies: ['pluginB'],
+      install: () => {},
+    };
+
+    const pluginB: CLIPlugin<TestContext> = {
+      name: 'pluginB',
+      version: '1.0.0',
+      dependencies: ['pluginA'],
+      install: () => {},
+    };
+
+    kernel.register(pluginA);
+    kernel.register(pluginB);
+
+    await expect(kernel.initialize()).rejects.toThrow('Circular dependency');
+  });
+
+  it('should allow plugins to be registered in any order', async () => {
+    const initOrder: string[] = [];
+
+    const pluginA: CLIPlugin<TestContext> = {
+      name: 'pluginA',
+      version: '1.0.0',
+      install: () => {},
+      onInit: async () => {
+        initOrder.push('A');
+      },
+    };
+
+    const pluginB: CLIPlugin<TestContext> = {
+      name: 'pluginB',
+      version: '1.0.0',
+      dependencies: ['pluginA'],
+      install: () => {},
+      onInit: async () => {
+        initOrder.push('B');
+      },
+    };
+
+    // Register B before A (dependency order reversed)
+    kernel.register(pluginB);
+    kernel.register(pluginA);
+
+    await kernel.initialize();
+
+    // A should be initialized before B despite registration order
+    expect(initOrder).toEqual(['A', 'B']);
   });
 
   it('should unregister plugin', () => {

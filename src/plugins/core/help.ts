@@ -1,6 +1,7 @@
 import type { CLIPlugin, CLIKernel } from '../../types.js';
 import type { CLI } from '../../types.js';
 import { colors } from '../../utils/ansi.js';
+import { HelpRequestedExit } from '../../errors/cli-error.js';
 
 /**
  * Help plugin options
@@ -55,8 +56,9 @@ export function helpPlugin(options: HelpPluginOptions = {}): CLIPlugin {
         const data = args[0] as any;
         const { context } = data;
         if (context.options?.help === true) {
-          kernel.emit('help', { app: context.app });
-          process.exit(0);
+          await kernel.emit('help', { app: context.app });
+          // Throw instead of process.exit to allow library users to handle gracefully
+          throw new HelpRequestedExit();
         }
       });
     },

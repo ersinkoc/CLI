@@ -87,6 +87,12 @@ export interface CLIOptions {
   /** Enable strict mode (fail on unknown options) */
   strict?: boolean;
 
+  /**
+   * Whether to call process.exit() on errors (default: true)
+   * Set to false when using the CLI as a library to let errors propagate
+   */
+  exitOnError?: boolean;
+
   /** Custom help formatter function */
   helpFormatter?: (context: HelpContext) => string;
 

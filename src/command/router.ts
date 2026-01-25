@@ -1,6 +1,6 @@
 import type { Command } from './command.js';
 import type { Token } from '../parser/tokenizer.js';
-import { tokenize } from '../parser/tokenizer.js';
+import { tokenize, TokenType } from '../parser/tokenizer.js';
 import { UnknownCommandError } from '../errors/cli-error.js';
 import { levenshteinSimilarity } from '../utils/levenshtein.js';
 
@@ -49,21 +49,40 @@ export class CommandRouter {
    * @example
    * ```typescript
    * const result = router.route(['build', 'src', '-o', 'dist']);
+   * // Also works: router.route(['--verbose', 'build', 'src']);
    * ```
    */
   route(argv: string[]): RouteResult {
     const tokens = tokenize(argv);
     const path: string[] = [];
     let command = this.root;
-    let tokenIndex = 0;
 
-    // Navigate through subcommands
-    while (tokenIndex < tokens.length) {
-      const token = tokens[tokenIndex];
+    // Track which argument tokens were consumed as command names
+    const consumedIndices = new Set<number>();
 
-      // Stop at first non-argument token (option or separator)
-      if (token.type !== 'argument') {
-        break;
+    // Navigate through subcommands, skipping option tokens
+    // This allows: cli --verbose build (flags before subcommands)
+    for (let i = 0; i < tokens.length; i++) {
+      const token = tokens[i];
+
+      // Skip option/flag tokens - they'll be processed later
+      if (token.type === TokenType.Option || token.type === TokenType.Flag) {
+        // Also skip the next token if it's a value for this option
+        const nextToken = tokens[i + 1];
+        if (nextToken?.type === TokenType.Value) {
+          i++; // Skip the value token too
+        }
+        continue;
+      }
+
+      // Skip separator tokens
+      if (token.type === TokenType.Separator) {
+        break; // Stop routing at -- separator
+      }
+
+      // Only process argument tokens as potential subcommands
+      if (token.type !== TokenType.Argument) {
+        continue;
       }
 
       const name = token.value;
@@ -71,19 +90,22 @@ export class CommandRouter {
       // Check if this is a subcommand
       const subcommand = command.getByNameOrAlias(name);
       if (!subcommand) {
-        // Not a subcommand, this is the target command
+        // Not a subcommand, stop looking for more subcommands
         break;
       }
 
       // Navigate to subcommand
       path.push(name);
       command = subcommand;
-      tokenIndex++;
+      consumedIndices.add(i);
     }
+
+    // Return remaining tokens (exclude consumed command names)
+    const remaining = tokens.filter((_, i) => !consumedIndices.has(i));
 
     return {
       command,
-      tokens: tokens.slice(tokenIndex),
+      tokens: remaining,
       path,
       argv,
     };

@@ -1,6 +1,16 @@
 import type { CLIPlugin, CLIKernel, Middleware } from '../../../types.js';
 
 /**
+ * Interface for CLI apps that support middleware plugin integration.
+ * @internal
+ */
+interface MiddlewareCapableCLI {
+  _pendingMiddleware?: Middleware[];
+  _addGlobalMiddleware?: (mw: Middleware) => void;
+  _middlewarePluginActive: boolean;
+}
+
+/**
  * Middleware plugin
  * Adds command middleware support
  *
@@ -13,7 +23,7 @@ import type { CLIPlugin, CLIKernel, Middleware } from '../../../types.js';
  *   .use(middlewarePlugin());
  *
  * // Add global middleware
- * app.use(async (ctx, next) => {
+ * app.middleware(async (ctx, next) => {
  *   console.log('Before:', ctx.command.name);
  *   await next();
  *   console.log('After:', ctx.command.name);
@@ -35,8 +45,8 @@ export function middlewarePlugin(): CLIPlugin {
 
     install(kernel: CLIKernel) {
       // Listen for command:before to execute global and command-specific middleware
-      kernel.on('command:before', async (data: any) => {
-        const { command, context } = data;
+      kernel.on('command:before', async (data: unknown) => {
+        const { command, context } = data as { command: { middleware?: Middleware[] }; context: unknown };
 
         // Combine global and command-specific middleware
         const allMiddleware = [...globalMiddleware, ...(command.middleware || [])];
@@ -50,7 +60,7 @@ export function middlewarePlugin(): CLIPlugin {
         const next = async () => {
           if (index < allMiddleware.length) {
             const mw = allMiddleware[index++];
-            await mw(context, next);
+            await mw(context as Parameters<Middleware>[0], next);
           }
         };
 
@@ -58,24 +68,24 @@ export function middlewarePlugin(): CLIPlugin {
       });
     },
 
-    onInit(context: any) {
+    onInit(context: unknown) {
+      const ctx = context as { app?: MiddlewareCapableCLI };
       // Add use method to CLI and process any pending middleware
-      if (context.app) {
-        const app = context.app as any;
+      if (ctx.app) {
+        const app = ctx.app;
 
         // Move any pending middleware to global middleware
         if (Array.isArray(app._pendingMiddleware)) {
           globalMiddleware.push(...app._pendingMiddleware);
         }
 
-        // Set up _use method for future middleware
-        app._use = (middleware: Middleware) => {
+        // Set up _addGlobalMiddleware for future middleware additions
+        app._addGlobalMiddleware = (middleware: Middleware) => {
           globalMiddleware.push(middleware);
-          return app;
         };
 
-        // Set flag to indicate middleware plugin is installed
-        app._middlewarePluginInstalled = true;
+        // Set flag to indicate middleware plugin is handling all middleware
+        app._middlewarePluginActive = true;
       }
     },
   };
