@@ -2,7 +2,6 @@ import type {
   CLI,
   CLIOptions,
   CLIPlugin,
-  Command as ICommand,
   CommandBuilder,
   ActionHandler,
   ActionContext,
@@ -18,7 +17,6 @@ import { parseOptions } from './parser/options.js';
 import {
   CLIError,
   UnknownCommandError,
-  MissingArgumentError,
   ValidationError,
   ExitRequest,
 } from './errors/cli-error.js';
@@ -274,7 +272,7 @@ export class CLIImplementation implements CLI {
     if (error instanceof ExitRequest) {
       if (this._exitOnError) {
         process.exit(error.exitCode);
-        return; // process.exit should never return, but needed for type safety
+        return;
       }
       throw error; // Re-throw for library users to handle
     }
@@ -291,7 +289,7 @@ export class CLIImplementation implements CLI {
 
       if (this._exitOnError) {
         process.exit(error.exitCode);
-        return; // process.exit should never return, but needed for type safety
+        return;
       }
       throw error; // Re-throw for library users to handle
     }
@@ -299,7 +297,7 @@ export class CLIImplementation implements CLI {
     console.error('Unexpected error:', error.message);
     if (this._exitOnError) {
       process.exit(1);
-      return; // process.exit should never return, but needed for type safety
+      return;
     }
     throw error; // Re-throw for library users to handle
   }

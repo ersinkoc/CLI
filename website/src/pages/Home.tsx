@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Download, Github, Zap, Shield, Puzzle } from 'lucide-react';
+import { ArrowRight, Github, Zap, Shield, Puzzle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CodeBlock } from '@/components/CodeBlock';
 import { codeExamples } from '@/lib/constants';

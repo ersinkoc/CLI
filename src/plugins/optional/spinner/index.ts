@@ -19,7 +19,7 @@ class SpinnerImpl implements Spinner {
   private _text = '';
   private readonly isTTY: boolean;
 
-  constructor(private readonly kernel: CLIKernel) {
+  constructor(_kernel: CLIKernel) {
     this.isTTY = process.stdout.isTTY === true;
   }
 

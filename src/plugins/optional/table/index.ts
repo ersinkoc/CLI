@@ -148,34 +148,6 @@ function truncate(str: string, width: number): string {
 }
 
 /**
- * Wrap text to width
- */
-function wrapText(str: string, width: number): string[] {
-  if (visibleLength(str) <= width) return [str];
-
-  const words = str.split(' ');
-  const lines: string[] = [];
-  let currentLine = '';
-
-  for (const word of words) {
-    if (currentLine.length === 0) {
-      currentLine = word;
-    } else if (visibleLength(currentLine) + 1 + visibleLength(word) <= width) {
-      currentLine += ' ' + word;
-    } else {
-      lines.push(currentLine);
-      currentLine = word;
-    }
-  }
-
-  if (currentLine) {
-    lines.push(currentLine);
-  }
-
-  return lines;
-}
-
-/**
  * Table class
  */
 export class Table {

@@ -1,5 +1,5 @@
 import type { OptionDef } from '../types.js';
-import type { Token, TokenType } from './tokenizer.js';
+import type { Token } from './tokenizer.js';
 
 /**
  * Parsed option result

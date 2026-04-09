@@ -1,4 +1,4 @@
-import type { CLIPlugin, CLIKernel, CLI, Command } from '../../../types.js';
+import type { CLIPlugin, CLIKernel, CLI } from '../../../types.js';
 import { ValidationError } from '../../../errors/cli-error.js';
 
 /**

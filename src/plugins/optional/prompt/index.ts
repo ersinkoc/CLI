@@ -32,46 +32,6 @@ export interface PromptPluginOptions {
 }
 
 /**
- * Read a single keypress from stdin
- */
-async function readKey(): Promise<{ key: string; ctrl: boolean; shift: boolean; raw: string }> {
-  return new Promise((resolve) => {
-    const stdin = process.stdin;
-    const wasRaw = stdin.isRaw;
-
-    stdin.setRawMode(true);
-    stdin.resume();
-    stdin.setEncoding('utf8');
-
-    const onData = (data: string) => {
-      stdin.removeListener('data', onData);
-      stdin.setRawMode(wasRaw);
-      stdin.pause();
-
-      const ctrl = data.charCodeAt(0) < 32 && data !== '\r' && data !== '\n';
-      const shift = data !== data.toLowerCase();
-
-      // Handle special keys
-      let key = data;
-      if (data === '\x1b[A') key = 'up';
-      else if (data === '\x1b[B') key = 'down';
-      else if (data === '\x1b[C') key = 'right';
-      else if (data === '\x1b[D') key = 'left';
-      else if (data === '\r' || data === '\n') key = 'enter';
-      else if (data === '\x7f' || data === '\b') key = 'backspace';
-      else if (data === '\x1b') key = 'escape';
-      else if (data === '\t') key = 'tab';
-      else if (data === ' ') key = 'space';
-      else if (data === '\x03') key = 'ctrl+c';
-
-      resolve({ key, ctrl, shift, raw: data });
-    };
-
-    stdin.on('data', onData);
-  });
-}
-
-/**
  * Read a line of input
  */
 async function readLine(options: {

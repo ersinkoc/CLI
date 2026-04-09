@@ -1,7 +1,6 @@
 import type { Command } from './command.js';
 import type { Token } from '../parser/tokenizer.js';
 import { tokenize, TokenType } from '../parser/tokenizer.js';
-import { UnknownCommandError } from '../errors/cli-error.js';
 import { levenshteinSimilarity } from '../utils/levenshtein.js';
 
 /**

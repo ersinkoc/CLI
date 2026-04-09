@@ -48,7 +48,6 @@ function parseMarkdown(content: string): React.ReactNode {
     while (remaining.length > 0) {
       const codeMatch = remaining.match(/`([^`]+)`/);
       const linkMatch = remaining.match(/\[([^\]]+)\]\(([^)]+)\)/);
-      const boldMatch = remaining.match(/\*\*([^*]+)\*\*/g);
 
       if (codeMatch && (!linkMatch || codeMatch.index < linkMatch.index)) {
         if (codeMatch.index > 0) {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Copy, Check, Play, ArrowLeft } from 'lucide-react';
+import { Copy, Check, ArrowLeft } from 'lucide-react';
 import { CodeBlock } from '@/components/CodeBlock';
 import { codeExamples } from '@/lib/constants';
 

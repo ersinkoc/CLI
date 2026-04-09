@@ -119,9 +119,7 @@ app.run();
 `;
 }
 
-function handleCliExplain(params: { code: string }): string {
-  const { code } = params;
-
+function handleCliExplain(_params: { code: string }): string {
   return `@oxog/cli Code Explanation:
 
 This code uses the @oxog/cli framework which provides:
