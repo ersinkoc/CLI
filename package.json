@@ -1,7 +1,7 @@
 {
   "name": "@oxog/cli",
   "version": "2.0.2",
-  "description": "Type-safe CLI framework with @oxog ecosystem integration, plugin architecture, and beautiful output",
+  "description": "Zero-dependency, type-safe CLI framework with plugin architecture, interactive prompts, and beautiful output",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -25,6 +25,26 @@
       "require": {
         "types": "./dist/plugins/index.d.cts",
         "default": "./dist/plugins/index.cjs"
+      }
+    },
+    "./config": {
+      "import": {
+        "types": "./dist/api/config.d.ts",
+        "default": "./dist/api/config.js"
+      },
+      "require": {
+        "types": "./dist/api/config.d.cts",
+        "default": "./dist/api/config.cjs"
+      }
+    },
+    "./decorator": {
+      "import": {
+        "types": "./dist/api/decorator.d.ts",
+        "default": "./dist/api/decorator.js"
+      },
+      "require": {
+        "types": "./dist/api/decorator.d.cts",
+        "default": "./dist/api/decorator.cjs"
       }
     }
   },
@@ -79,22 +99,14 @@
     "node": ">=18"
   },
   "devDependencies": {
-    "@oxog/emitter": "^1.0.0",
-    "@oxog/pigment": "^1.0.1",
-    "@oxog/plugin": "^1.0.1",
-    "@oxog/types": "^1.0.1",
     "@types/node": "^20.0.0",
     "@vitest/coverage-v8": "^2.0.0",
     "eslint": "^9.0.0",
     "prettier": "^3.0.0",
     "tsup": "^8.0.0",
     "typescript": "^5.0.0",
+    "typescript-eslint": "^8.67.0",
     "vitest": "^2.0.0"
   },
-  "peerDependencies": {
-    "@oxog/emitter": "^1.0.0",
-    "@oxog/pigment": "^1.0.0",
-    "@oxog/plugin": "^1.0.1",
-    "@oxog/types": "^1.0.1"
-  }
+  "peerDependenciesMeta": {}
 }

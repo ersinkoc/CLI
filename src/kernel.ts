@@ -1,5 +1,5 @@
 import type { CLIKernel, CLIPlugin, CLIContext, Unsubscribe } from './types.js';
-import { Emitter } from '@oxog/emitter';
+import { Emitter } from './events/emitter.js';
 
 /**
  * Micro-kernel for CLI framework

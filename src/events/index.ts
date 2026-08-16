@@ -1,33 +1,37 @@
 /**
- * Re-export Emitter from @oxog/emitter for users who want direct access
+ * Zero-dependency event emitter
+ * Re-exported for users who want direct access
  */
-export { Emitter, createEmitter } from '@oxog/emitter';
+export { Emitter, createEmitter } from './emitter.js';
 export type {
   EmitterOptions,
   EmitterInstance,
+  EmitterLogger,
+  ErrorHandling,
   EventMap,
   EventHandler,
   Handler,
   WildcardHandler,
   PatternHandler,
-} from '@oxog/emitter';
+  MaybePromise as EmitterMaybePromise,
+} from './emitter.js';
 
 /**
  * Event listener type
- * @deprecated Use Handler from @oxog/emitter instead
+ * @deprecated Use Handler from '@oxog/cli' instead
  */
 export type EventListener = (...args: unknown[]) => void | Promise<void>;
 
 /**
  * Event bus for inter-component communication
  *
- * @deprecated Use Emitter from @oxog/emitter instead
+ * @deprecated Use Emitter from '@oxog/cli' instead
  * This class is kept for backward compatibility
  *
  * @example
  * ```typescript
  * // New recommended approach:
- * import { Emitter } from '@oxog/emitter';
+ * import { Emitter } from '@oxog/cli';
  * const emitter = new Emitter<MyEvents>();
  *
  * // Legacy approach (deprecated):

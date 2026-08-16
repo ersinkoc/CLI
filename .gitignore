@@ -110,3 +110,8 @@ temp/
 # Testing
 .vitest/
 *.test.ts.snap
+
+.wrongstack/
+!/.wrongstack/
+/.wrongstack/*
+!/.wrongstack/project.json

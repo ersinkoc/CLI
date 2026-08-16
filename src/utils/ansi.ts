@@ -133,9 +133,31 @@ export function colorize(text: string, code: string): string {
 }
 
 /**
+ * Normalize a hex color string to #rrggbb form.
+ * Expands 3-digit shorthand (#f60 -> #ff6600) and validates format.
+ * Returns a safe fallback (#000000) for invalid input.
+ */
+function normalizeHex(hex: string): string {
+  let value = hex.trim().replace(/^#/, '');
+
+  if (/^[0-9a-fA-F]{3}$/.test(value)) {
+    value = value
+      .split('')
+      .map((ch) => ch + ch)
+      .join('');
+  }
+
+  if (!/^[0-9a-fA-F]{6}$/.test(value)) {
+    return '#000000';
+  }
+
+  return `#${value.toLowerCase()}`;
+}
+
+/**
  * Convert hex color to ANSI 256-color code
  *
- * @param hex - Hex color (e.g., "#ff6600")
+ * @param hex - Hex color (e.g., "#ff6600" or shorthand "#f60")
  * @returns ANSI color code
  *
  * @example
@@ -144,9 +166,11 @@ export function colorize(text: string, code: string): string {
  * ```
  */
 export function hexToAnsi(hex: string): string {
-  const r = Number.parseInt(hex.slice(1, 3), 16);
-  const g = Number.parseInt(hex.slice(3, 5), 16);
-  const b = Number.parseInt(hex.slice(5, 7), 16);
+  const normalized = normalizeHex(hex);
+
+  const r = Number.parseInt(normalized.slice(1, 3), 16);
+  const g = Number.parseInt(normalized.slice(3, 5), 16);
+  const b = Number.parseInt(normalized.slice(5, 7), 16);
 
   // Convert to 256-color mode
   if (r === g && g === b) {

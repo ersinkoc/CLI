@@ -1,56 +1,252 @@
 // ============================================================================
-// Re-exports from @oxog ecosystem
+// Utility types (vendored — zero-dependency)
+// ============================================================================
+//
+// Event/utility types are single-sourced in ./events/emitter.ts and
+// re-exported here to preserve the historical public surface of
+// importing them from '@oxog/cli'.
+
+// Used internally below
+import type { MaybePromise, Unsubscribe, EventMap } from './events/emitter.js';
+
+export type { MaybePromise, Unsubscribe, EventMap };
+
+/**
+ * Deep partial - all nested properties optional.
+ */
+export type DeepPartial<T> = T extends object ? { [P in keyof T]?: DeepPartial<T[P]> } : T;
+
+/**
+ * Deep readonly - all nested properties readonly.
+ */
+export type DeepReadonly<T> = T extends object ? { readonly [P in keyof T]: DeepReadonly<T[P]> } : T;
+
+/**
+ * Deep required - all nested properties required.
+ */
+export type DeepRequired<T> = T extends object ? { [P in keyof T]-?: DeepRequired<T[P]> } : T;
+
+/**
+ * Make type prettier in IDE.
+ */
+export type Prettify<T> = { [K in keyof T]: T[K] } & {};
+
+/**
+ * Array with at least one element.
+ */
+export type NonEmptyArray<T> = [T, ...T[]];
+
+/**
+ * Value that can be null.
+ */
+export type Nullable<T> = T | null;
+
+/**
+ * Value that can be undefined.
+ */
+export type Optional<T> = T | undefined;
+
+/**
+ * JSON primitive types.
+ */
+export type JsonPrimitive = string | number | boolean | null;
+
+/**
+ * JSON array type.
+ */
+export type JsonArray = JsonValue[];
+
+/**
+ * JSON object type.
+ */
+export type JsonObject = { [key: string]: JsonValue };
+
+/**
+ * Any valid JSON value.
+ */
+export type JsonValue = JsonPrimitive | JsonArray | JsonObject;
+
+// ============================================================================
+// Event types (compatibility with @oxog/types shapes)
 // ============================================================================
 
 /**
- * Re-export common types from @oxog/types for convenience
- * Users can import these directly from @oxog/cli instead of @oxog/types
+ * Event handler for a specific event.
  */
-export type {
-  MaybePromise,
-  DeepPartial,
-  DeepReadonly,
-  DeepRequired,
-  Prettify,
-  NonEmptyArray,
-  Nullable,
-  Optional,
-  Unsubscribe,
-  JsonValue,
-  JsonObject,
-  JsonArray,
-  JsonPrimitive,
-  Plugin as OxogPlugin,
-  Kernel as OxogKernel,
-  EventMap,
-  EventHandler,
-  TypedEventEmitter,
-} from '@oxog/types';
+export type EventHandler<TEvents extends EventMap, K extends keyof TEvents> = (
+  payload: TEvents[K]
+) => void;
 
 /**
- * Re-export from @oxog/emitter for convenience
+ * Typed event emitter interface.
  */
+export interface TypedEventEmitter<TEvents extends EventMap> {
+  on<K extends keyof TEvents>(event: K, handler: EventHandler<TEvents, K>): Unsubscribe;
+  off<K extends keyof TEvents>(event: K, handler: EventHandler<TEvents, K>): void;
+  emit<K extends keyof TEvents>(event: K, payload: TEvents[K]): void;
+  once<K extends keyof TEvents>(event: K, handler: EventHandler<TEvents, K>): Unsubscribe;
+}
+
+// ============================================================================
+// Plugin / Kernel compatibility types (from @oxog/types shapes)
+// ============================================================================
+
+/**
+ * Standard plugin interface.
+ * Compatibility alias for the former `Plugin` type from @oxog/types.
+ */
+export interface OxogPlugin<TContext = unknown> {
+  /** Unique plugin identifier (kebab-case) */
+  readonly name: string;
+  /** Semantic version */
+  readonly version: string;
+  /** Plugin dependencies by name */
+  readonly dependencies?: readonly string[];
+  /** Called when plugin is registered with the kernel */
+  install: (kernel: OxogKernel<TContext>) => void;
+  /** Called after ALL plugins are installed */
+  onInit?: (context: TContext) => MaybePromise<void>;
+  /** Called when plugin is unregistered */
+  onDestroy?: () => MaybePromise<void>;
+  /** Called when an error occurs in this plugin */
+  onError?: (error: Error) => void;
+}
+
+/**
+ * Micro-kernel interface.
+ * Compatibility alias for the former `Kernel` type from @oxog/types.
+ */
+export interface OxogKernel<TContext = unknown> {
+  /** Register a plugin */
+  use(plugin: OxogPlugin<TContext>): this;
+  /** Unregister a plugin by name */
+  unregister(name: string): boolean;
+  /** Get registered plugin by name */
+  getPlugin<T extends OxogPlugin<TContext> = OxogPlugin<TContext>>(name: string): T | undefined;
+  /** List all registered plugins */
+  listPlugins(): ReadonlyArray<OxogPlugin<TContext>>;
+  /** Check if plugin is registered */
+  hasPlugin(name: string): boolean;
+  /** Emit event to all plugins */
+  emit<K extends string>(event: K, payload?: unknown): void;
+  /** Subscribe to kernel events */
+  on<K extends string>(event: K, handler: (payload: unknown) => void): Unsubscribe;
+  /** Get shared context */
+  getContext(): TContext;
+}
+
+// ============================================================================
+// Emitter type re-exports (from local zero-dependency emitter)
+// ============================================================================
+
 export type {
   EmitterOptions,
   EmitterInstance,
   Handler as EmitterHandler,
   WildcardHandler,
   PatternHandler,
-} from '@oxog/emitter';
+} from './events/emitter.js';
+
+// ============================================================================
+// Color types (formerly re-exported from @oxog/pigment)
+// ============================================================================
 
 /**
- * Re-export from @oxog/pigment for convenience
+ * Terminal color support level.
  */
-export type {
-  Pigment,
-  PigmentOptions,
-  Styler,
-  ColorSupport,
-} from '@oxog/pigment';
+export interface ColorSupport {
+  /** Color depth level (0 = none, 1 = basic, 2 = 256, 3 = 16m) */
+  level: 0 | 1 | 2 | 3;
+  /** Basic 16 colors supported */
+  hasBasic: boolean;
+  /** 256 colors supported */
+  has256: boolean;
+  /** 16 million colors supported */
+  has16m: boolean;
+}
 
-// Import types we need internally
-import type { MaybePromise, Unsubscribe, EventMap } from '@oxog/types';
-import type { Pigment } from '@oxog/pigment';
+/**
+ * Styler function type.
+ */
+export type Styler = (text: string) => string;
+
+/**
+ * Color options for the built-in chainable color API.
+ */
+export interface PigmentOptions {
+  /** Force a color level (0-3) */
+  level?: 0 | 1 | 2 | 3;
+  /** Force colors on even when not a TTY */
+  forceColor?: boolean;
+  /** Disable colors entirely */
+  noColor?: boolean;
+}
+
+/**
+ * Chainable terminal styling API.
+ * Property access returns a new chainable styler; calling the result
+ * applies all accumulated styles to the text.
+ *
+ * @example
+ * ```typescript
+ * const pigment = createPigment();
+ * pigment.red.bold('Error!');   // red + bold
+ * pigment.hex('#ff6600')('Hi'); // 256-color from hex
+ * ```
+ */
+export interface Pigment {
+  readonly bold: Pigment;
+  readonly dim: Pigment;
+  readonly italic: Pigment;
+  readonly underline: Pigment;
+  readonly strikethrough: Pigment;
+  readonly inverse: Pigment;
+  readonly hidden: Pigment;
+  readonly reset: Pigment;
+  readonly black: Pigment;
+  readonly red: Pigment;
+  readonly green: Pigment;
+  readonly yellow: Pigment;
+  readonly blue: Pigment;
+  readonly magenta: Pigment;
+  readonly cyan: Pigment;
+  readonly white: Pigment;
+  readonly blackBright: Pigment;
+  readonly redBright: Pigment;
+  readonly greenBright: Pigment;
+  readonly yellowBright: Pigment;
+  readonly blueBright: Pigment;
+  readonly magentaBright: Pigment;
+  readonly cyanBright: Pigment;
+  readonly whiteBright: Pigment;
+  readonly gray: Pigment;
+  readonly grey: Pigment;
+  readonly bgBlack: Pigment;
+  readonly bgRed: Pigment;
+  readonly bgGreen: Pigment;
+  readonly bgYellow: Pigment;
+  readonly bgBlue: Pigment;
+  readonly bgMagenta: Pigment;
+  readonly bgCyan: Pigment;
+  readonly bgWhite: Pigment;
+  readonly bgBlackBright: Pigment;
+  readonly bgRedBright: Pigment;
+  readonly bgGreenBright: Pigment;
+  readonly bgYellowBright: Pigment;
+  readonly bgBlueBright: Pigment;
+  readonly bgMagentaBright: Pigment;
+  readonly bgCyanBright: Pigment;
+  readonly bgWhiteBright: Pigment;
+  readonly bgGray: Pigment;
+  readonly bgGrey: Pigment;
+  ansi256(code: number): Pigment;
+  bgAnsi256(code: number): Pigment;
+  rgb(r: number, g: number, b: number): Pigment;
+  bgRgb(r: number, g: number, b: number): Pigment;
+  hex(color: string): Pigment;
+  bgHex(color: string): Pigment;
+  (text: string): string;
+}
 
 // ============================================================================
 // CLI-Specific Types
@@ -101,15 +297,27 @@ export interface CLIOptions {
 
   /** Initial plugins to load */
   plugins?: CLIPlugin[];
+
+  /**
+   * Declarative command definitions (Object Config API).
+   * Keyed by command name; alternative to `.command()` chaining.
+   */
+  commands?: Record<string, CommandDef>;
+
+  /**
+   * Declarative global option definitions (Object Config API).
+   * Keyed by option name; alternative to `.option()` chaining.
+   */
+  options?: Record<string, Omit<OptionDef, 'name'>>;
 }
 
 /**
- * Command definition for object config API
+ * Command definition for object config API.
+ * The record key under `commands` is the authoritative name.
  *
  * @example
  * ```typescript
  * const command: CommandDef = {
- *   name: 'build',
  *   description: 'Build the project',
  *   arguments: {
  *     input: { type: 'string', required: true, description: 'Input file' }
@@ -125,8 +333,8 @@ export interface CLIOptions {
  * ```
  */
 export interface CommandDef {
-  /** Command name (kebab-case recommended) */
-  name: string;
+  /** Command name (kebab-case recommended). Optional: the record key wins. */
+  name?: string;
 
   /** Command description for help output */
   description?: string;
@@ -134,11 +342,11 @@ export interface CommandDef {
   /** Alternative names for this command */
   aliases?: string[];
 
-  /** Command arguments definition */
-  arguments?: Record<string, ArgumentDef>;
+  /** Command arguments definition (key wins over any inner name) */
+  arguments?: Record<string, Omit<ArgumentDef, 'name'>>;
 
-  /** Command options definition */
-  options?: Record<string, OptionDef>;
+  /** Command options definition (key wins over any inner name) */
+  options?: Record<string, Omit<OptionDef, 'name'>>;
 
   /** Nested subcommands */
   commands?: Record<string, CommandDef>;
@@ -523,6 +731,12 @@ export interface CLI {
    * @param argv - Arguments array (defaults to process.argv.slice(2))
    */
   run(argv?: string[]): void | Promise<void>;
+
+  /**
+   * Run the CLI and await completion
+   * @param argv - Arguments array (defaults to process.argv.slice(2))
+   */
+  runAsync(argv?: string[]): Promise<void>;
 }
 
 /**

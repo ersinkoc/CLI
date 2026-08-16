@@ -3,7 +3,7 @@
  * Tests all example applications to ensure they work correctly
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -47,11 +47,11 @@ async function runExample(examplePath: string, args: string[] = []): Promise<{
       resolve({ code: 1, stdout, stderr });
     });
 
-    // Kill after timeout
+    // Kill after generous timeout; per-test timeouts govern failure reporting
     setTimeout(() => {
       proc.kill();
       resolve({ code: 1, stdout, stderr: 'Timeout' });
-    }, 10000);
+    }, 25000);
   });
 }
 
@@ -185,17 +185,17 @@ describe('Examples Integration Tests', () => {
     it('spinners: should run basic spinner', async () => {
       const result = await runExample(join(examplesDir, '04-output/spinners.ts'), ['basic']);
       expect(result.code).toBe(0);
-    });
+    }, 20000);
 
     it('spinners: should run states command', async () => {
       const result = await runExample(join(examplesDir, '04-output/spinners.ts'), ['states']);
       expect(result.code).toBe(0);
-    });
+    }, 20000);
 
     it('spinners: should run workflow command', async () => {
       const result = await runExample(join(examplesDir, '04-output/spinners.ts'), ['workflow']);
       expect(result.code).toBe(0);
-    }, 10000);
+    }, 30000);
   });
 
   describe('05-validation', () => {

@@ -1,33 +1,11 @@
 import type { CLIPlugin, CLIKernel, Pigment } from '../../../types.js';
 import { colors as colorFn } from '../../../utils/ansi.js';
-
-// Lazy-loaded @oxog/pigment instance (optional)
-let pigmentInstance: Pigment | null | undefined = undefined;
-let pigmentModule: typeof import('@oxog/pigment') | null = null;
-
-/**
- * Lazily load and create pigment instance
- * Returns null if @oxog/pigment is not available
- */
-async function getPigment(): Promise<Pigment | null> {
-  if (pigmentInstance !== undefined) {
-    return pigmentInstance;
-  }
-
-  try {
-    pigmentModule = await import('@oxog/pigment');
-    pigmentInstance = pigmentModule.createPigment();
-    return pigmentInstance;
-  } catch {
-    // @oxog/pigment not available
-    pigmentInstance = null;
-    return null;
-  }
-}
+import { createPigment } from '../../../utils/pigment.js';
 
 /**
  * Color plugin
- * Provides colored output utilities powered by @oxog/pigment (if available)
+ * Provides colored output utilities via the built-in zero-dependency
+ * chainable color API (pigment-compatible).
  *
  * @example
  * ```typescript
@@ -37,17 +15,18 @@ async function getPigment(): Promise<Pigment | null> {
  * const app = cli('myapp')
  *   .use(colorPlugin());
  *
- * app.command('test').action(({ color, pigment }) => {
- *   // Legacy API (always available)
+ * app.command('test').action(({ color, pigment, chalk }) => {
+ *   // Legacy flat API (always available)
  *   console.log(color.red('Error!'));
  *   console.log(color.green('Success!'));
  *
- *   // @oxog/pigment chainable API (if available)
- *   if (pigment) {
- *     console.log(pigment.red.bold('Error!'));
- *     console.log(pigment.green.italic('Success!'));
- *     console.log(pigment.hex('#ff6600').bold('Custom color!'));
- *   }
+ *   // Chainable pigment API (always available, zero-dependency)
+ *   console.log(pigment.red.bold('Error!'));
+ *   console.log(pigment.green.italic('Success!'));
+ *   console.log(pigment.hex('#ff6600').bold('Custom color!'));
+ *
+ *   // chalk is an alias of pigment
+ *   console.log(chalk.blue('Info'));
  * });
  * ```
  */
@@ -58,45 +37,36 @@ export function colorPlugin(): CLIPlugin {
 
     install(kernel: CLIKernel) {
       // Add color utilities to action context
-      kernel.on('command:before', async (data: any) => {
+      kernel.on('command:before', async (data: unknown) => {
+        const ctx = data as { context: Record<string, unknown> };
         // Legacy API for backward compatibility (always available)
-        data.context.color = colorFn;
+        ctx.context.color = colorFn;
 
-        // New @oxog/pigment API (if available)
-        const pigment = await getPigment();
-        if (pigment) {
-          data.context.pigment = pigment;
-          data.context.chalk = pigment;
-        }
+        // Chainable pigment-compatible API (always available, zero-dependency)
+        const pigment = createPigment();
+        ctx.context.pigment = pigment;
+        ctx.context.chalk = pigment;
       });
     },
   };
 }
 
 /**
- * Get the Pigment instance (lazy-loaded)
- * Returns null if @oxog/pigment is not installed
+ * Get a Pigment instance.
+ * Preserves the historical async contract (`await getPigment()`).
+ * The built-in implementation is always available, so this never
+ * resolves to null.
  */
-export { getPigment };
+export async function getPigment(options?: import('../../../types.js').PigmentOptions): Promise<Pigment> {
+  return createPigment(options);
+}
 
 /**
- * Create a new Pigment instance
- * Returns null if @oxog/pigment is not installed
+ * Create a new Pigment instance (built-in, zero-dependency)
  */
-export async function createPigment(
-  options?: import('@oxog/pigment').PigmentOptions
-): Promise<Pigment | null> {
-  try {
-    const mod = pigmentModule || (await import('@oxog/pigment'));
-    return mod.createPigment(options);
-  } catch {
-    return null;
-  }
-}
+export { createPigment };
+export type { Pigment, PigmentOptions, Styler, ColorSupport } from '../../../types.js';
 
 // Re-export color utilities (legacy)
 export { colors } from '../../../utils/ansi.js';
 export type { ColorUtils } from '../../../types.js';
-
-// Re-export types from @oxog/pigment (these are always available as type-only)
-export type { Pigment, PigmentOptions, Styler, ColorSupport } from '../../../types.js';

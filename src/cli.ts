@@ -14,13 +14,9 @@ import { CLIKernelImpl } from './kernel.js';
 import { tokenize, TokenType } from './parser/tokenizer.js';
 import { parseArguments } from './parser/arguments.js';
 import { parseOptions } from './parser/options.js';
-import {
-  CLIError,
-  UnknownCommandError,
-  ValidationError,
-  ExitRequest,
-} from './errors/cli-error.js';
+import { CLIError, UnknownCommandError, ValidationError, ExitRequest } from './errors/cli-error.js';
 import { findBestMatch } from './utils/levenshtein.js';
+import { buildCommandInto } from './api/build.js';
 
 /**
  * CLI application class
@@ -71,6 +67,22 @@ export class CLIImplementation implements CLI {
     if (options.plugins) {
       for (const plugin of options.plugins) {
         this.use(plugin);
+      }
+    }
+
+    // Declarative global options (Object Config API)
+    if (options.options) {
+      for (const [name, def] of Object.entries(options.options)) {
+        this.options.push({ ...def, name });
+      }
+    }
+
+    // Declarative commands (Object Config API)
+    if (options.commands) {
+      for (const [name, def] of Object.entries(options.commands)) {
+        const cmd = this.root.addCommand(name);
+        buildCommandInto(cmd, def);
+        this.commands.set(name, cmd);
       }
     }
   }
@@ -230,7 +242,9 @@ export class CLIImplementation implements CLI {
     command: Command,
     tokens: Token[]
   ): { args: Record<string, unknown>; options: Record<string, unknown>; errors: string[] } {
-    const optResult = parseOptions(tokens, command.options, this._strict);
+    // Global (app-level) options apply everywhere; command options take precedence on conflict
+    const effectiveOptions = command === this.root ? this.options : [...this.options, ...command.options];
+    const optResult = parseOptions(tokens, effectiveOptions, this._strict);
     const argResult = parseArguments(optResult.remaining, command.arguments);
 
     return {

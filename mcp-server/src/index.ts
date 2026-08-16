@@ -94,11 +94,31 @@ const tools: Tool[] = [
 function handleCliGenerate(params: { description: string; style?: string }): string {
   const { description, style = 'fluent' } = params;
 
+  if (style === 'decorator') {
+    return `// @oxog/cli - decorator API
+// Generated from: ${description}
+
+import { CLI, Command, Argument, Option, CLIApplication } from '@oxog/cli/decorator';
+
+@CLI({ name: 'myapp', version: '1.0.0', description: 'My CLI application' })
+class MyApp extends CLIApplication {
+  @Command('example', { description: 'Example command' })
+  async example(
+    @Argument('name') name: string,
+    @Option('verbose', { alias: 'v', type: 'boolean' }) verbose: boolean
+  ) {
+    console.log(\`Hello \${name}!\`);
+  }
+}
+
+new MyApp().run();
+`;
+  }
+
   return `// @oxog/cli - ${style} API
 // Generated from: ${description}
 
 import { cli } from '@oxog/cli';
-${style !== 'fluent' ? style === 'config' ? "import { cli } from '@oxog/cli/config';" : "import { CLI, Command, Argument, Option } from '@oxog/cli/decorator';" : ''}
 import { colorPlugin, spinnerPlugin, loggerPlugin } from '@oxog/cli/plugins';
 
 const app = cli('myapp')
