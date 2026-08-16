@@ -1,6 +1,6 @@
 {
   "name": "@oxog/cli",
-  "version": "2.0.2",
+  "version": "3.0.0",
   "description": "Zero-dependency, type-safe CLI framework with plugin architecture, interactive prompts, and beautiful output",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -107,6 +107,5 @@
     "typescript": "^5.0.0",
     "typescript-eslint": "^8.67.0",
     "vitest": "^2.0.0"
-  },
-  "peerDependenciesMeta": {}
+  }
 }

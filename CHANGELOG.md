@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-08-16
+
+### Removed
+- **Zero runtime dependencies**: Removed the `@oxog/emitter`, `@oxog/pigment`,
+  `@oxog/plugin`, and `@oxog/types` peer dependencies
+  - `dependencies` is now empty and `peerDependencies` no longer exist
+  - Consumers no longer need to install ecosystem packages
+  - **BREAKING**: Code importing directly from `@oxog/emitter`, `@oxog/pigment`,
+    `@oxog/plugin`, or `@oxog/types` must migrate to the built-in equivalents
+    (see Changed below)
+
+### Added
+- **Object Config API**: Define CLIs declaratively with `cli({ commands: {...} })`
+  - Available from the root entry and the new `@oxog/cli/config` subpath
+  - Nested commands, aliases, argument/option records, defaults, middleware
+- **Decorator API**: `@CLI`, `@Command`, `@Argument`, `@Option` decorators plus
+  the `CLIApplication` base class, via the new `@oxog/cli/decorator` subpath
+  - Uses legacy (experimental) TypeScript decorators; no `reflect-metadata` needed
+- Vendored typed event `Emitter` (wildcard/pattern subscriptions, `emitAsync`,
+  configurable error strategies, max-listener warnings) exported from the root
+- Vendored chainable color API (`createPigment()`, modifiers, 256-color,
+  truecolor hex/rgb) exported from `@oxog/cli/plugins`
+- 31 tests for the config/decorator APIs; 86 emitter and 77 pigment tests
+
+### Changed
+- The color plugin now uses the built-in pigment — always available, no dynamic
+  import, identical Chalk-compatible surface
+- README and docs repositioned around zero-dependency; ecosystem packages are
+  no longer referenced
+- Test count grew to 839 passing tests across 25 files; coverage 98.95% lines /
+  96.52% branches against the >=95% thresholds
+
+### Fixed
+- Global (app-level) options now parse into command action contexts
+- `hexToAnsi` handles `#abc` shorthand and invalid input without emitting NaN
+- MCP server no longer generates duplicate `cli` imports; its decorator template
+  matches the real package exports
+- `tsup` declaration build: aliased the `CLI` type import in `src/api/decorator.ts`
+  to avoid a value/type name collision with the exported `CLI` decorator function
+- Repaired the ESLint config (registered `typescript-eslint` plugin and parser)
+- Raised flaky spinner example test timeouts
+
 ## [2.0.1] - 2026-01-25
 
 ### Fixed
