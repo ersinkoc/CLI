@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Hardened the release gate used after 3.0.0:
+  - Plugin `command:before` handlers now use the shared event and action-context types instead of `any`.
+  - Example integration tests tolerate cold `npx tsx` startup on Windows and CI while clearing their process watchdogs after completion.
+  - Production bundles no longer emit source maps that would reference source files excluded from the npm tarball.
+- Restored repository-wide Prettier conformance for source, tests, documentation, examples, and website assets.
+
 ## [3.0.0] - 2026-08-16
 
 ### Removed
