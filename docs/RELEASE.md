@@ -15,6 +15,7 @@ This checklist applies to every release of `@oxog/cli`. It keeps the published t
 
 - [ ] Review `CHANGELOG.md` and move the relevant **Unreleased** entries to the target version with its release date.
 - [ ] Confirm `package.json` has the intended version and that `dependencies` remains empty with no `peerDependencies`.
+- [ ] Confirm the `NPM_TOKEN` GitHub Actions secret is a valid npm automation token for the `@oxog` scope and has publish access to `@oxog/cli`.
 - [ ] Confirm `README.md`, package exports, and changelog notes describe the same public API.
 
 ## Verify

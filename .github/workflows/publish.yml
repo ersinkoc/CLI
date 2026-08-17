@@ -25,10 +25,18 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Fail before packaging if the release token is missing, revoked, or lacks package access.
+      - name: Verify npm publishing access
+        run: |
+          npm whoami
+          npm access list collaborators @oxog/cli --json > /dev/null
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Run tests
         run: npm test
 
       - name: Publish to npm
-        run: npm publish
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
