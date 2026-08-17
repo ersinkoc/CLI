@@ -1,6 +1,6 @@
 {
   "name": "@oxog/cli-mcp-server",
-  "version": "1.0.0",
+  "version": "3.1.0",
   "description": "MCP server for @oxog/cli - enables AI assistants to generate CLI code",
   "type": "module",
   "main": "dist/index.js",

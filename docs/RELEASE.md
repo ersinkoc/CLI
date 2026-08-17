@@ -2,6 +2,15 @@
 
 This checklist applies to every release of `@oxog/cli`. It keeps the published tarball, public exports, and consumer type experience aligned.
 
+## Release record
+
+### 3.1.0 — 2026-08-17
+
+- [x] Root package, website, and MCP server manifests are versioned `3.1.0`; root and website lockfile roots match.
+- [x] `CHANGELOG.md` moves the quality-gate and dependency-security changes into the 3.1.0 release entry.
+- [x] Root and website dependency audits are clean after the supported security updates.
+- [x] The root `prepublishOnly` gate, website production build, tarball dry-run, and isolated consumer smoke test have passed for the release preparation changes.
+
 ## Prepare
 
 - [ ] Review `CHANGELOG.md` and move the relevant **Unreleased** entries to the target version with its release date.
