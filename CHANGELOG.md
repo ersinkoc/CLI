@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- Updated the release test and coverage toolchain to Vitest 3.2.6 and refreshed its transitive lockfile dependencies, clearing npm audit findings while preserving Node 18 support and legacy decorator test compatibility.
+- Updated website build and routing dependencies (Vite, PostCSS, and React Router) and refreshed their lockfile dependencies to clear npm audit findings for the deployed documentation site.
+
 ### Fixed
 
 - Hardened the release gate used after 3.0.0:
