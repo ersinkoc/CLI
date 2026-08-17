@@ -22,7 +22,13 @@ class Logger {
     this.prefix = prefix;
   }
 
-  private log(level: LogLevel, color: string, label: string, message: string, meta?: Record<string, unknown>) {
+  private log(
+    level: LogLevel,
+    color: string,
+    label: string,
+    message: string,
+    meta?: Record<string, unknown>
+  ) {
     if (level < this.level) return;
 
     const timestamp = new Date().toISOString();
@@ -55,7 +61,8 @@ const app = cli('myapp')
   .option('-v, --verbose', 'Enable verbose (debug) logging')
   .option('-q, --quiet', 'Suppress info logs');
 
-app.command('start')
+app
+  .command('start')
   .description('Start the application')
   .action(async ({ options }) => {
     if (options.verbose) {
@@ -69,7 +76,7 @@ app.command('start')
     logger.info('Application starting', { port: 3000 });
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       logger.info('Application started successfully');
     } catch (error) {
       logger.error('Failed to start', { error: error instanceof Error ? error.message : error });
@@ -77,17 +84,18 @@ app.command('start')
     }
   });
 
-app.command('process')
+app
+  .command('process')
   .description('Process some data')
   .argument('input', 'Input file')
   .action(async ({ args }) => {
     logger.info('Processing file', { file: args.input });
 
     logger.debug('Reading file...');
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     logger.debug('Parsing data...');
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     logger.warn('Found some potential issues', { warnings: 3 });
 

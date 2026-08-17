@@ -9,17 +9,20 @@ export function Home() {
     {
       icon: Zap,
       title: '@oxog Ecosystem',
-      description: 'Built on the @oxog ecosystem with optional peer dependencies. Use @oxog/emitter, @oxog/pigment, @oxog/plugin for enhanced functionality.',
+      description:
+        'Built on the @oxog ecosystem with optional peer dependencies. Use @oxog/emitter, @oxog/pigment, @oxog/plugin for enhanced functionality.',
     },
     {
       icon: Shield,
       title: 'Type-Safe',
-      description: 'Full TypeScript support with end-to-end type inference. Catch errors at compile time, not runtime.',
+      description:
+        'Full TypeScript support with end-to-end type inference. Catch errors at compile time, not runtime.',
     },
     {
       icon: Puzzle,
       title: 'Plugin System',
-      description: 'Micro-kernel architecture with a powerful plugin system. Extend functionality with ease.',
+      description:
+        'Micro-kernel architecture with a powerful plugin system. Extend functionality with ease.',
     },
   ];
 
@@ -44,8 +47,8 @@ export function Home() {
             </h1>
 
             <p className="mt-6 text-lg leading-8 text-muted-foreground sm:text-xl">
-              Type-safe commands, beautiful output, and plugin architecture.
-              The only CLI library you'll ever need for building professional command-line tools.
+              Type-safe commands, beautiful output, and plugin architecture. The only CLI library
+              you'll ever need for building professional command-line tools.
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -56,11 +59,7 @@ export function Home() {
                 </Button>
               </Link>
               <Button size="lg" variant="outline" asChild>
-                <a
-                  href="https://github.com/ersinkoc/cli"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href="https://github.com/ersinkoc/cli" target="_blank" rel="noopener noreferrer">
                   <Github className="mr-2 h-4 w-4" />
                   GitHub
                 </a>
@@ -68,9 +67,7 @@ export function Home() {
             </div>
 
             <div className="mt-8">
-              <code className="text-sm text-muted-foreground">
-                npm install @oxog/cli
-              </code>
+              <code className="text-sm text-muted-foreground">npm install @oxog/cli</code>
             </div>
           </div>
         </div>
@@ -101,9 +98,7 @@ export function Home() {
       <section className="border-b">
         <div className="container px-4 py-24 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl">
-            <h2 className="text-3xl font-bold tracking-tight text-center">
-              Why @oxog/cli?
-            </h2>
+            <h2 className="text-3xl font-bold tracking-tight text-center">Why @oxog/cli?</h2>
             <p className="mt-4 text-center text-lg text-muted-foreground">
               Built for developers who value simplicity, type safety, and performance.
             </p>
@@ -122,9 +117,7 @@ export function Home() {
                       </div>
                       <h3 className="font-semibold">{feature.title}</h3>
                     </div>
-                    <p className="mt-3 text-sm text-muted-foreground">
-                      {feature.description}
-                    </p>
+                    <p className="mt-3 text-sm text-muted-foreground">{feature.description}</p>
                   </div>
                 );
               })}
@@ -137,9 +130,7 @@ export function Home() {
       <section className="border-b bg-muted/30">
         <div className="container px-4 py-24 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl">
-            <h2 className="text-3xl font-bold tracking-tight text-center">
-              Three API Styles
-            </h2>
+            <h2 className="text-3xl font-bold tracking-tight text-center">Three API Styles</h2>
             <p className="mt-4 text-center text-lg text-muted-foreground">
               Choose the style that fits your coding preference.
             </p>
@@ -192,9 +183,7 @@ export function Home() {
       <section>
         <div className="container px-4 py-24 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight">
-              Ready to build your CLI?
-            </h2>
+            <h2 className="text-3xl font-bold tracking-tight">Ready to build your CLI?</h2>
             <p className="mt-4 text-lg text-muted-foreground">
               Get started with our comprehensive documentation and examples.
             </p>

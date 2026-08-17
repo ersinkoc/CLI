@@ -1,4 +1,4 @@
-import type { CLIPlugin, CLIKernel } from '../../../types.js';
+import type { CLIPlugin, CLIKernel, CommandBeforeEvent } from '../../../types.js';
 import { colors } from '../../../utils/ansi.js';
 import { getTerminalWidth } from '../../../utils/terminal.js';
 
@@ -305,13 +305,14 @@ export function progressPlugin(): CLIPlugin {
     version: '1.0.0',
 
     install(kernel: CLIKernel) {
-      kernel.on('command:before', async (data: any) => {
+      kernel.on('command:before', async (data: unknown) => {
+        const { context } = data as CommandBeforeEvent;
         const progressUtils: ProgressUtils = {
           create: (options: ProgressBarOptions) => new ProgressBarImpl(options),
           multi: () => new MultiProgressImpl(),
         };
 
-        data.context.progress = progressUtils;
+        context.progress = progressUtils;
       });
     },
   };

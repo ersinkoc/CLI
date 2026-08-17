@@ -9,6 +9,7 @@ Mevcut `@oxog/cli` paketi standalone, zero-dependency olarak tasarlandı. Artık
 3. **@oxog/emitter** - Event sistemi bu paketten alınacak
 
 Bu sayede:
+
 - Kod tekrarı ortadan kalkacak
 - Ekosistem tutarlılığı sağlanacak
 - Diğer @oxog paketleriyle interoperability artacak
@@ -19,6 +20,7 @@ Bu sayede:
 ## Bağımlılık Yapısı
 
 ### Önceki (Standalone)
+
 ```
 @oxog/cli
 ├── (zero dependencies)
@@ -26,6 +28,7 @@ Bu sayede:
 ```
 
 ### Sonraki (Ecosystem Integrated)
+
 ```
 @oxog/cli
 ├── @oxog/types (peer dependency)
@@ -38,13 +41,13 @@ Bu sayede:
 
 ## Package Identity
 
-| Field | Value |
-|-------|-------|
-| **NPM Package** | `@oxog/cli` |
-| **GitHub Repository** | `https://github.com/ersinkoc/cli` |
-| **Documentation Site** | `https://cli.oxog.dev` |
-| **License** | MIT |
-| **Author** | Ersin Koç (ersinkoc) |
+| Field                  | Value                             |
+| ---------------------- | --------------------------------- |
+| **NPM Package**        | `@oxog/cli`                       |
+| **GitHub Repository**  | `https://github.com/ersinkoc/cli` |
+| **Documentation Site** | `https://cli.oxog.dev`            |
+| **License**            | MIT                               |
+| **Author**             | Ersin Koç (ersinkoc)              |
 
 ---
 
@@ -94,22 +97,22 @@ import type {
   Prettify,
   DeepPartial,
   DeepRequired,
-  
+
   // Function types
   AnyFunction,
   AsyncFunction,
   Callback,
-  
+
   // Object types
   Dictionary,
   StringKeyOf,
   ValueOf,
-  
+
   // Utility types
   Brand,
   Opaque,
   NonEmptyArray,
-  Nullish
+  Nullish,
 } from '@oxog/types';
 ```
 
@@ -169,7 +172,7 @@ import {
   type Plugin,
   type PluginSystem,
   type PluginContext,
-  type PluginLifecycle
+  type PluginLifecycle,
 } from '@oxog/plugin';
 ```
 
@@ -186,10 +189,10 @@ import type { CLIContext } from '../types';
 export interface CLIPlugin extends Plugin<CLIContext> {
   /** CLI-specific: commands to register */
   commands?: CommandDef[];
-  
+
   /** CLI-specific: global options to add */
   globalOptions?: OptionDef[];
-  
+
   /** CLI-specific: middleware to apply */
   middleware?: Middleware[];
 }
@@ -200,15 +203,15 @@ export interface CLIPlugin extends Plugin<CLIContext> {
 export function createCLIPluginSystem() {
   return createPluginSystem<CLIContext>({
     namespace: 'cli',
-    
+
     // CLI-specific lifecycle hooks
     hooks: {
       'command:before': true,
       'command:after': true,
       'parse:before': true,
       'parse:after': true,
-      'error': true
-    }
+      error: true,
+    },
   });
 }
 
@@ -223,21 +226,23 @@ export function defineCLIPlugin(plugin: CLIPlugin): CLIPlugin {
 ### Plugin Migration Örneği
 
 **Önce (Standalone implementasyon):**
+
 ```typescript
 // Eski: src/kernel.ts içinde custom plugin sistemi
 class CLIKernel {
   private plugins: Map<string, CLIPlugin> = new Map();
-  
+
   use(plugin: CLIPlugin) {
     this.plugins.set(plugin.name, plugin);
     plugin.install(this);
   }
-  
+
   // ... custom implementation
 }
 ```
 
 **Sonra (@oxog/plugin kullanarak):**
+
 ```typescript
 // Yeni: src/kernel.ts @oxog/plugin kullanıyor
 import { createPluginSystem } from '@oxog/plugin';
@@ -245,21 +250,21 @@ import type { CLIContext, CLIPlugin } from './types';
 
 class CLIKernel {
   private pluginSystem = createPluginSystem<CLIContext>({
-    namespace: 'cli'
+    namespace: 'cli',
   });
-  
+
   use(plugin: CLIPlugin) {
     return this.pluginSystem.register(plugin);
   }
-  
+
   unuse(name: string) {
     return this.pluginSystem.unregister(name);
   }
-  
+
   getPlugin(name: string) {
     return this.pluginSystem.get(name);
   }
-  
+
   listPlugins() {
     return this.pluginSystem.list();
   }
@@ -279,7 +284,7 @@ import {
   type Emitter,
   type EventMap,
   type EventHandler,
-  type EmitterOptions
+  type EmitterOptions,
 } from '@oxog/emitter';
 ```
 
@@ -297,28 +302,28 @@ export interface CLIEventMap extends EventMap {
   // Lifecycle events
   'cli:start': { args: string[] };
   'cli:end': { exitCode: number };
-  
+
   // Command events
   'command:before': { command: string; context: ActionContext };
   'command:after': { command: string; context: ActionContext; result: unknown };
   'command:error': { command: string; error: CLIError };
-  
+
   // Parse events
   'parse:before': { argv: string[] };
   'parse:after': { argv: string[]; parsed: ParsedArgs };
-  
+
   // Plugin events
   'plugin:registered': { name: string };
   'plugin:unregistered': { name: string };
-  
+
   // Prompt events (if prompt plugin enabled)
   'prompt:before': { type: string; options: unknown };
   'prompt:after': { type: string; value: unknown };
   'prompt:cancel': { type: string };
-  
+
   // General
-  'error': CLIError;
-  'warn': { message: string; context?: unknown };
+  error: CLIError;
+  warn: { message: string; context?: unknown };
 }
 
 /**
@@ -326,9 +331,9 @@ export interface CLIEventMap extends EventMap {
  */
 export function createCLIEmitter() {
   return createEmitter<CLIEventMap>({
-    wildcard: true,     // Support 'command:*' patterns
-    async: true,        // Async event handlers
-    maxListeners: 100   // Reasonable limit
+    wildcard: true, // Support 'command:*' patterns
+    async: true, // Async event handlers
+    maxListeners: 100, // Reasonable limit
   });
 }
 
@@ -338,30 +343,32 @@ export type CLIEmitter = ReturnType<typeof createCLIEmitter>;
 ### Emitter Migration Örneği
 
 **Önce (Standalone implementasyon):**
+
 ```typescript
 // Eski: src/kernel.ts içinde custom event sistemi
 class CLIKernel {
   private listeners: Map<string, Set<Function>> = new Map();
-  
+
   on(event: string, handler: Function) {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set());
     }
     this.listeners.get(event)!.add(handler);
   }
-  
+
   emit(event: string, data: unknown) {
     const handlers = this.listeners.get(event);
     if (handlers) {
-      handlers.forEach(h => h(data));
+      handlers.forEach((h) => h(data));
     }
   }
-  
+
   // ... custom implementation
 }
 ```
 
 **Sonra (@oxog/emitter kullanarak):**
+
 ```typescript
 // Yeni: src/kernel.ts @oxog/emitter kullanıyor
 import { createEmitter } from '@oxog/emitter';
@@ -369,23 +376,23 @@ import { createCLIEmitter, type CLIEventMap } from './events';
 
 class CLIKernel {
   private emitter = createCLIEmitter();
-  
+
   on<K extends keyof CLIEventMap>(event: K, handler: (data: CLIEventMap[K]) => void) {
     return this.emitter.on(event, handler);
   }
-  
+
   once<K extends keyof CLIEventMap>(event: K, handler: (data: CLIEventMap[K]) => void) {
     return this.emitter.once(event, handler);
   }
-  
+
   off<K extends keyof CLIEventMap>(event: K, handler: (data: CLIEventMap[K]) => void) {
     return this.emitter.off(event, handler);
   }
-  
+
   emit<K extends keyof CLIEventMap>(event: K, data: CLIEventMap[K]) {
     return this.emitter.emit(event, data);
   }
-  
+
   // Wildcard support
   onAny(handler: (event: string, data: unknown) => void) {
     return this.emitter.on('*', handler);
@@ -478,7 +485,7 @@ cli/
 ```typescript
 /**
  * CLI Micro Kernel
- * 
+ *
  * Uses:
  * - @oxog/plugin for plugin management
  * - @oxog/emitter for event system
@@ -489,12 +496,7 @@ import { createPluginSystem, type PluginSystem } from '@oxog/plugin';
 import { createEmitter, type Emitter } from '@oxog/emitter';
 import type { MaybePromise, Dictionary } from '@oxog/types';
 
-import type { 
-  CLIOptions, 
-  CLIContext, 
-  CLIPlugin,
-  CLIEventMap 
-} from './types';
+import type { CLIOptions, CLIContext, CLIPlugin, CLIEventMap } from './types';
 import { CommandRegistry } from './command/registry';
 import { CommandRouter } from './command/router';
 import { Parser } from './parser';
@@ -505,143 +507,139 @@ import { Parser } from './parser';
 export class CLIKernel {
   readonly name: string;
   readonly version: string;
-  
+
   // From @oxog/plugin
   private pluginSystem: PluginSystem<CLIContext>;
-  
+
   // From @oxog/emitter
   private emitter: Emitter<CLIEventMap>;
-  
+
   // CLI-specific
   private commandRegistry: CommandRegistry;
   private router: CommandRouter;
   private parser: Parser;
-  
+
   constructor(options: CLIOptions) {
     this.name = options.name;
     this.version = options.version ?? '0.0.0';
-    
+
     // Initialize @oxog/plugin system
     this.pluginSystem = createPluginSystem<CLIContext>({
       namespace: 'cli',
-      strict: options.strict
+      strict: options.strict,
     });
-    
+
     // Initialize @oxog/emitter
     this.emitter = createEmitter<CLIEventMap>({
       wildcard: true,
-      async: true
+      async: true,
     });
-    
+
     // Initialize CLI-specific components
     this.commandRegistry = new CommandRegistry();
     this.router = new CommandRouter(this.commandRegistry);
     this.parser = new Parser(options);
-    
+
     // Load core plugins
     this.loadCorePlugins();
   }
-  
+
   // ─────────────────────────────────────────────────────────────
   // Plugin System (delegated to @oxog/plugin)
   // ─────────────────────────────────────────────────────────────
-  
+
   use(plugin: CLIPlugin): this {
     this.pluginSystem.register(plugin);
-    
+
     // CLI-specific: register plugin's commands
     if (plugin.commands) {
-      plugin.commands.forEach(cmd => this.commandRegistry.register(cmd));
+      plugin.commands.forEach((cmd) => this.commandRegistry.register(cmd));
     }
-    
+
     // CLI-specific: register plugin's global options
     if (plugin.globalOptions) {
-      plugin.globalOptions.forEach(opt => this.parser.addGlobalOption(opt));
+      plugin.globalOptions.forEach((opt) => this.parser.addGlobalOption(opt));
     }
-    
+
     this.emitter.emit('plugin:registered', { name: plugin.name });
     return this;
   }
-  
+
   unuse(name: string): this {
     this.pluginSystem.unregister(name);
     this.emitter.emit('plugin:unregistered', { name });
     return this;
   }
-  
+
   getPlugin(name: string): CLIPlugin | undefined {
     return this.pluginSystem.get(name) as CLIPlugin | undefined;
   }
-  
+
   listPlugins(): string[] {
     return this.pluginSystem.list();
   }
-  
+
   // ─────────────────────────────────────────────────────────────
   // Event System (delegated to @oxog/emitter)
   // ─────────────────────────────────────────────────────────────
-  
+
   on<K extends keyof CLIEventMap>(
-    event: K, 
+    event: K,
     handler: (data: CLIEventMap[K]) => MaybePromise<void>
   ): () => void {
     return this.emitter.on(event, handler);
   }
-  
+
   once<K extends keyof CLIEventMap>(
-    event: K, 
+    event: K,
     handler: (data: CLIEventMap[K]) => MaybePromise<void>
   ): () => void {
     return this.emitter.once(event, handler);
   }
-  
+
   off<K extends keyof CLIEventMap>(
-    event: K, 
+    event: K,
     handler: (data: CLIEventMap[K]) => MaybePromise<void>
   ): void {
     this.emitter.off(event, handler);
   }
-  
-  protected emit<K extends keyof CLIEventMap>(
-    event: K, 
-    data: CLIEventMap[K]
-  ): MaybePromise<void> {
+
+  protected emit<K extends keyof CLIEventMap>(event: K, data: CLIEventMap[K]): MaybePromise<void> {
     return this.emitter.emit(event, data);
   }
-  
+
   // ─────────────────────────────────────────────────────────────
   // CLI-Specific Methods
   // ─────────────────────────────────────────────────────────────
-  
+
   async run(argv: string[] = process.argv.slice(2)): Promise<void> {
     try {
       await this.emit('cli:start', { args: argv });
       await this.emit('parse:before', { argv });
-      
+
       const parsed = this.parser.parse(argv);
       await this.emit('parse:after', { argv, parsed });
-      
+
       const { command, context } = this.router.resolve(parsed);
-      
+
       await this.emit('command:before', { command: command.name, context });
-      
+
       const result = await command.action(context);
-      
+
       await this.emit('command:after', { command: command.name, context, result });
       await this.emit('cli:end', { exitCode: 0 });
-      
     } catch (error) {
       await this.emit('error', this.normalizeError(error));
       await this.emit('cli:end', { exitCode: 1 });
       process.exit(1);
     }
   }
-  
+
   private loadCorePlugins(): void {
     // Core plugins are always loaded
     // They use defineCLIPlugin from our adapted plugin system
   }
-  
+
   private normalizeError(error: unknown): CLIError {
     // Convert unknown errors to CLIError
   }
@@ -653,17 +651,11 @@ export class CLIKernel {
 ```typescript
 /**
  * CLI Type Definitions
- * 
+ *
  * Extends @oxog/types with CLI-specific types
  */
 
-import type { 
-  MaybePromise, 
-  MaybeArray, 
-  Dictionary, 
-  Prettify,
-  AnyFunction 
-} from '@oxog/types';
+import type { MaybePromise, MaybeArray, Dictionary, Prettify, AnyFunction } from '@oxog/types';
 
 import type { Plugin, PluginContext } from '@oxog/plugin';
 import type { EventMap } from '@oxog/emitter';
@@ -758,10 +750,7 @@ export interface ActionContext extends CLIContext {}
 
 export type ActionHandler = (ctx: ActionContext) => MaybePromise<void>;
 
-export type Middleware = (
-  ctx: ActionContext, 
-  next: () => MaybePromise<void>
-) => MaybePromise<void>;
+export type Middleware = (ctx: ActionContext, next: () => MaybePromise<void>) => MaybePromise<void>;
 
 export type Validator = (value: unknown) => boolean | string;
 
@@ -798,7 +787,7 @@ export interface CLIEventMap extends EventMap {
   'parse:after': { argv: string[]; parsed: ParsedArgs };
   'plugin:registered': { name: string };
   'plugin:unregistered': { name: string };
-  'error': CLIError;
+  error: CLIError;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -839,7 +828,7 @@ export interface ParseResult {
 ```typescript
 /**
  * Help Plugin
- * 
+ *
  * Uses defineCLIPlugin from adapted @oxog/plugin
  */
 
@@ -849,25 +838,23 @@ import type { CLIContext, Command } from '../../types';
 export const helpPlugin = defineCLIPlugin({
   name: 'help',
   version: '1.0.0',
-  
+
   // Adds --help, -h global option
   globalOptions: [
     {
       name: 'help',
       alias: 'h',
       type: 'boolean',
-      description: 'Show help'
-    }
+      description: 'Show help',
+    },
   ],
-  
+
   // Adds help command
   commands: [
     {
       name: 'help',
       description: 'Show help for a command',
-      arguments: [
-        { name: 'command', description: 'Command to show help for', required: false }
-      ],
+      arguments: [{ name: 'command', description: 'Command to show help for', required: false }],
       action: ({ args, app }) => {
         const commandName = args.command as string | undefined;
         if (commandName) {
@@ -875,10 +862,10 @@ export const helpPlugin = defineCLIPlugin({
         } else {
           showGeneralHelp(app);
         }
-      }
-    }
+      },
+    },
   ],
-  
+
   install(kernel) {
     // Listen for --help flag on any command
     kernel.on('command:before', ({ context }) => {
@@ -887,7 +874,7 @@ export const helpPlugin = defineCLIPlugin({
         process.exit(0);
       }
     });
-  }
+  },
 });
 
 function showGeneralHelp(app: CLI): void {
@@ -1003,7 +990,7 @@ function showCommandHelp(app: CLI, commandName: string): void {
 - [ ] Add @oxog/plugin as peer dependency
 - [ ] Add @oxog/emitter as peer dependency
 - [ ] Update tsconfig.json paths if needed
-- [ ] Verify all @oxog/* packages are compatible
+- [ ] Verify all @oxog/\* packages are compatible
 
 ### Phase 2: Type Migration
 
@@ -1072,8 +1059,9 @@ function showCommandHelp(app: CLI, commandName: string): void {
 6. Create PR for review
 
 **Remember:**
-- All @oxog/* packages are zero-dependency themselves
+
+- All @oxog/\* packages are zero-dependency themselves
 - CLI-specific logic stays in @oxog/cli
-- Only common, reusable code comes from @oxog/* packages
+- Only common, reusable code comes from @oxog/\* packages
 - 100% test coverage must be maintained
 - All existing features must continue to work

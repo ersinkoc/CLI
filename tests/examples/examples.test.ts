@@ -13,7 +13,10 @@ const __dirname = dirname(__filename);
 const examplesDir = join(__dirname, '../../examples');
 
 // Helper function to run an example file
-async function runExample(examplePath: string, args: string[] = []): Promise<{
+async function runExample(
+  examplePath: string,
+  args: string[] = []
+): Promise<{
   code: number | null;
   stdout: string;
   stderr: string;
@@ -29,6 +32,20 @@ async function runExample(examplePath: string, args: string[] = []): Promise<{
 
     let stdout = '';
     let stderr = '';
+    let settled = false;
+    let timeout: ReturnType<typeof setTimeout>;
+    const finish = (code: number | null, errorOutput = stderr) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      resolve({ code, stdout, stderr: errorOutput });
+    };
+
+    // Keep a hard process-level limit independent from Vitest's per-test timeout.
+    timeout = setTimeout(() => {
+      proc.kill();
+      finish(1, 'Timeout');
+    }, 25000);
 
     proc.stdout?.on('data', (data) => {
       stdout += data.toString();
@@ -39,23 +56,17 @@ async function runExample(examplePath: string, args: string[] = []): Promise<{
     });
 
     proc.on('close', (code) => {
-      resolve({ code, stdout, stderr });
+      finish(code);
     });
 
     proc.on('error', (error) => {
-      stderr += error.message;
-      resolve({ code: 1, stdout, stderr });
+      finish(1, `${stderr}${error.message}`);
     });
-
-    // Kill after generous timeout; per-test timeouts govern failure reporting
-    setTimeout(() => {
-      proc.kill();
-      resolve({ code: 1, stdout, stderr: 'Timeout' });
-    }, 25000);
   });
 }
 
-describe('Examples Integration Tests', () => {
+// 10 seconds accommodates cold `npx tsx` starts on slower Windows/CI hosts.
+describe('Examples Integration Tests', { timeout: 10000 }, () => {
   describe('01-basic', () => {
     it('hello-world: should run without errors', async () => {
       const result = await runExample(join(examplesDir, '01-basic/hello-world.ts'), []);
@@ -100,7 +111,10 @@ describe('Examples Integration Tests', () => {
     });
 
     it('with-options: should run build command', async () => {
-      const result = await runExample(join(examplesDir, '01-basic/with-options.ts'), ['build', '--watch']);
+      const result = await runExample(join(examplesDir, '01-basic/with-options.ts'), [
+        'build',
+        '--watch',
+      ]);
       expect(result.stdout).toContain('Watch mode');
     });
 
@@ -246,7 +260,9 @@ describe('Examples Integration Tests', () => {
 
   describe('11-completions', () => {
     it('completions: should run without errors', async () => {
-      const result = await runExample(join(examplesDir, '11-completions/completions.ts'), ['--help']);
+      const result = await runExample(join(examplesDir, '11-completions/completions.ts'), [
+        '--help',
+      ]);
       expect(result.code).toBe(0);
     });
   });
@@ -283,9 +299,10 @@ describe('Examples Integration Tests', () => {
 
   describe('16-advanced-options', () => {
     it('advanced-options: should run without errors', async () => {
-      const result = await runExample(join(examplesDir, '16-advanced-options/advanced-options.ts'), [
-        '--help',
-      ]);
+      const result = await runExample(
+        join(examplesDir, '16-advanced-options/advanced-options.ts'),
+        ['--help']
+      );
       expect(result.code).toBe(0);
     });
   });

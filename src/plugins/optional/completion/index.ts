@@ -1,4 +1,10 @@
-import type { CLIPlugin, CLIKernel, CLI } from '../../../types.js';
+import type {
+  ActionContext,
+  CLIPlugin,
+  CLIKernel,
+  CLI,
+  CommandBeforeEvent,
+} from '../../../types.js';
 import { ValidationError } from '../../../errors/cli-error.js';
 
 /**
@@ -22,13 +28,17 @@ function generateBashCompletion(app: CLI): string {
   const commands = Array.from(app.commands.values());
 
   const commandNames = commands.map((c) => c.name).join(' ');
-  const commandCompletions = commands.map((cmd) => {
-    const options = cmd.options.map((o) => `--${o.name}${o.alias ? ` -${o.alias}` : ''}`).join(' ');
-    return `      ${cmd.name})
+  const commandCompletions = commands
+    .map((cmd) => {
+      const options = cmd.options
+        .map((o) => `--${o.name}${o.alias ? ` -${o.alias}` : ''}`)
+        .join(' ');
+      return `      ${cmd.name})
         COMPREPLY=($(compgen -W "${options}" -- "\${cur}"))
         return 0
         ;;`;
-  }).join('\n');
+    })
+    .join('\n');
 
   return `# Bash completion for ${name}
 # Add to ~/.bashrc or ~/.bash_completion
@@ -63,23 +73,29 @@ function generateZshCompletion(app: CLI): string {
   const name = app.name;
   const commands = Array.from(app.commands.values());
 
-  const commandList = commands.map((cmd) => {
-    const desc = cmd.description?.replace(/'/g, "\\'") || cmd.name;
-    return `    '${cmd.name}:${desc}'`;
-  }).join(' \\\n');
+  const commandList = commands
+    .map((cmd) => {
+      const desc = cmd.description?.replace(/'/g, "\\'") || cmd.name;
+      return `    '${cmd.name}:${desc}'`;
+    })
+    .join(' \\\n');
 
-  const commandCases = commands.map((cmd) => {
-    const options = cmd.options.map((o) => {
-      const desc = o.description?.replace(/'/g, "\\'") || o.name;
-      const alias = o.alias ? `{-${o.alias},--${o.name}}` : `--${o.name}`;
-      return `        '${alias}[${desc}]'`;
-    }).join(' \\\n');
+  const commandCases = commands
+    .map((cmd) => {
+      const options = cmd.options
+        .map((o) => {
+          const desc = o.description?.replace(/'/g, "\\'") || o.name;
+          const alias = o.alias ? `{-${o.alias},--${o.name}}` : `--${o.name}`;
+          return `        '${alias}[${desc}]'`;
+        })
+        .join(' \\\n');
 
-    return `      ${cmd.name})
+      return `      ${cmd.name})
         _arguments -s \\
 ${options || "          '*:file:_files'"}
         ;;`;
-  }).join('\n');
+    })
+    .join('\n');
 
   return `#compdef ${name}
 # Zsh completion for ${name}
@@ -118,18 +134,22 @@ function generateFishCompletion(app: CLI): string {
   const name = app.name;
   const commands = Array.from(app.commands.values());
 
-  const commandCompletions = commands.map((cmd) => {
-    const desc = cmd.description?.replace(/'/g, "\\'") || cmd.name;
-    return `complete -c ${name} -n __fish_use_subcommand -a ${cmd.name} -d '${desc}'`;
-  }).join('\n');
+  const commandCompletions = commands
+    .map((cmd) => {
+      const desc = cmd.description?.replace(/'/g, "\\'") || cmd.name;
+      return `complete -c ${name} -n __fish_use_subcommand -a ${cmd.name} -d '${desc}'`;
+    })
+    .join('\n');
 
-  const optionCompletions = commands.flatMap((cmd) => {
-    return cmd.options.map((o) => {
-      const desc = o.description?.replace(/'/g, "\\'") || o.name;
-      const short = o.alias ? `-s ${o.alias} ` : '';
-      return `complete -c ${name} -n "__fish_seen_subcommand_from ${cmd.name}" ${short}-l ${o.name} -d '${desc}'`;
-    });
-  }).join('\n');
+  const optionCompletions = commands
+    .flatMap((cmd) => {
+      return cmd.options.map((o) => {
+        const desc = o.description?.replace(/'/g, "\\'") || o.name;
+        const short = o.alias ? `-s ${o.alias} ` : '';
+        return `complete -c ${name} -n "__fish_seen_subcommand_from ${cmd.name}" ${short}-l ${o.name} -d '${desc}'`;
+      });
+    })
+    .join('\n');
 
   return `# Fish completion for ${name}
 # Add to ~/.config/fish/completions/${name}.fish
@@ -219,8 +239,9 @@ export function completionPlugin(options: CompletionPluginOptions = {}): CLIPlug
 
     install(kernel: CLIKernel) {
       // Add completion utilities to context
-      kernel.on('command:before', async (data: any) => {
-        const app = data.context.app as CLI;
+      kernel.on('command:before', async (data: unknown) => {
+        const { context } = data as CommandBeforeEvent;
+        const app = context.app;
 
         const completionUtils: CompletionUtils = {
           generate: (shell?: ShellType) => {
@@ -240,20 +261,21 @@ export function completionPlugin(options: CompletionPluginOptions = {}): CLIPlug
           detectShell,
         };
 
-        data.context.completion = completionUtils;
+        context.completion = completionUtils;
       });
     },
 
-    onInit(context: any) {
-      const app = context.app as CLI;
+    onInit(context: unknown) {
+      const app = (context as { app?: CLI }).app;
 
       // Add completion command
       if (app && typeof app.command === 'function') {
-        app.command(commandName)
+        app
+          .command(commandName)
           .describe('Generate shell completion script')
           .argument('[shell]', 'Shell type (bash, zsh, fish)')
           .option('--install', 'Show installation instructions')
-          .action(({ args, options }: any) => {
+          .action(({ args, options }: ActionContext) => {
             const shell = (args.shell as ShellType) || detectShell();
 
             if (!['bash', 'zsh', 'fish'].includes(shell)) {

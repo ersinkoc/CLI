@@ -13,7 +13,9 @@ import { Emitter } from './events/emitter.js';
  * kernel.emit('init', { app: cli });
  * ```
  */
-export class CLIKernelImpl<TContext extends CLIContext = CLIContext> implements CLIKernel<TContext> {
+export class CLIKernelImpl<
+  TContext extends CLIContext = CLIContext,
+> implements CLIKernel<TContext> {
   private plugins = new Map<string, CLIPlugin<TContext>>();
   /**
    * @oxog/emitter instance for typed event handling
@@ -257,9 +259,7 @@ export class CLIKernelImpl<TContext extends CLIContext = CLIContext> implements 
       }
 
       if (visiting.has(name)) {
-        throw new Error(
-          `Circular dependency detected: ${[...path, name].join(' -> ')}`
-        );
+        throw new Error(`Circular dependency detected: ${[...path, name].join(' -> ')}`);
       }
 
       const plugin = this.plugins.get(name);

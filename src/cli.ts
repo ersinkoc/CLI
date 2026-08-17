@@ -243,7 +243,8 @@ export class CLIImplementation implements CLI {
     tokens: Token[]
   ): { args: Record<string, unknown>; options: Record<string, unknown>; errors: string[] } {
     // Global (app-level) options apply everywhere; command options take precedence on conflict
-    const effectiveOptions = command === this.root ? this.options : [...this.options, ...command.options];
+    const effectiveOptions =
+      command === this.root ? this.options : [...this.options, ...command.options];
     const optResult = parseOptions(tokens, effectiveOptions, this._strict);
     const argResult = parseArguments(optResult.remaining, command.arguments);
 

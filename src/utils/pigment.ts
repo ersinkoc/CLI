@@ -163,16 +163,14 @@ function buildChain(openCodes: string[], enabled: boolean): Pigment {
   }
 
   // Parameterized styles
-  const param = (fn: (code: number) => string) => (code: number) =>
-    addStyle(fn(code));
+  const param = (fn: (code: number) => string) => (code: number) => addStyle(fn(code));
   chain.ansi256 = param((c) => `\x1b[38;5;${c}m`);
   chain.bgAnsi256 = param((c) => `\x1b[48;5;${c}m`);
   chain.rgb = (r: number, g: number, b: number) => addStyle(rgbToAnsi(r, g, b));
   chain.bgRgb = (r: number, g: number, b: number) =>
     addStyle(rgbToAnsi(r, g, b).replace('38;5', '48;5'));
   chain.hex = (color: string) => addStyle(hexToAnsi(color));
-  chain.bgHex = (color: string) =>
-    addStyle(hexToAnsi(color).replace('38;5', '48;5'));
+  chain.bgHex = (color: string) => addStyle(hexToAnsi(color).replace('38;5', '48;5'));
 
   return chain;
 }

@@ -1,6 +1,6 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
@@ -57,13 +57,20 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   /* Better typography */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-semibold tracking-tight;
   }
 
@@ -88,7 +95,20 @@
   }
 
   /* All text uses JetBrains Mono */
-  code, pre, .font-mono, h1, h2, h3, h4, h5, h6, p, span, div, a, button {
+  code,
+  pre,
+  .font-mono,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  span,
+  div,
+  a,
+  button {
     font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
   }
 

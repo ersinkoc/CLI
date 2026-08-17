@@ -1,4 +1,10 @@
-import type { CLIPlugin, CLIKernel, Spinner, SpinnerUtils } from '../../../types.js';
+import type {
+  CLIPlugin,
+  CLIKernel,
+  CommandBeforeEvent,
+  Spinner,
+  SpinnerUtils,
+} from '../../../types.js';
 import { colors } from '../../../utils/ansi.js';
 
 /**
@@ -128,11 +134,12 @@ export function spinnerPlugin(): CLIPlugin {
 
     install(kernel: CLIKernel) {
       // Add spinner utilities to action context
-      kernel.on('command:before', async (data: any) => {
+      kernel.on('command:before', async (data: unknown) => {
+        const { context } = data as CommandBeforeEvent;
         const spinnerUtils: SpinnerUtils = {
           start: (text: string) => new SpinnerImpl(kernel).start(text),
         };
-        data.context.spinner = spinnerUtils;
+        context.spinner = spinnerUtils;
       });
     },
   };

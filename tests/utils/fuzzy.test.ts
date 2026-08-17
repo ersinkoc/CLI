@@ -3,7 +3,14 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { fuzzyMatch, fuzzyFilter, fuzzyFindBest, fuzzySimilarity, fuzzySubset, fuzzyHighlight } from '../../src/utils/fuzzy.js';
+import {
+  fuzzyMatch,
+  fuzzyFilter,
+  fuzzyFindBest,
+  fuzzySimilarity,
+  fuzzySubset,
+  fuzzyHighlight,
+} from '../../src/utils/fuzzy.js';
 
 describe('Fuzzy Search', () => {
   describe('fuzzyMatch', () => {
@@ -96,7 +103,7 @@ describe('Fuzzy Search', () => {
 
     it('should return contains matches', () => {
       const results = fuzzyFilter('st', candidates);
-      const values = results.map(r => r.value);
+      const values = results.map((r) => r.value);
       expect(values).toContain('start');
       expect(values).toContain('test');
     });
@@ -114,7 +121,7 @@ describe('Fuzzy Search', () => {
     it('should be case insensitive', () => {
       const results1 = fuzzyFilter('BUILD', candidates);
       const results2 = fuzzyFilter('build', candidates);
-      expect(results1.map(r => r.value)).toEqual(results2.map(r => r.value));
+      expect(results1.map((r) => r.value)).toEqual(results2.map((r) => r.value));
     });
 
     it('should include scores', () => {

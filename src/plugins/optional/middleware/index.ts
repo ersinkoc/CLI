@@ -1,4 +1,4 @@
-import type { CLIPlugin, CLIKernel, Middleware } from '../../../types.js';
+import type { ActionContext, CLIPlugin, CLIKernel, Middleware } from '../../../types.js';
 
 /**
  * Interface for CLI apps that support middleware plugin integration.
@@ -46,7 +46,10 @@ export function middlewarePlugin(): CLIPlugin {
     install(kernel: CLIKernel) {
       // Listen for command:before to execute global and command-specific middleware
       kernel.on('command:before', async (data: unknown) => {
-        const { command, context } = data as { command: { middleware?: Middleware[] }; context: unknown };
+        const { command, context } = data as {
+          command: { middleware?: Middleware[] };
+          context: unknown;
+        };
 
         // Combine global and command-specific middleware
         const allMiddleware = [...globalMiddleware, ...(command.middleware || [])];
@@ -103,9 +106,7 @@ export function middlewarePlugin(): CLIPlugin {
  * app.command('deploy').use(auth);
  * ```
  */
-export function requireAuth(
-  getToken: (ctx: any) => string | undefined
-): Middleware {
+export function requireAuth(getToken: (ctx: ActionContext) => string | undefined): Middleware {
   return async (ctx, next) => {
     const token = getToken(ctx);
     if (!token) {

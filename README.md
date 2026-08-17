@@ -36,11 +36,10 @@ npm install @oxog/cli
 ```typescript
 import { cli } from '@oxog/cli';
 
-const app = cli('myapp')
-  .version('1.0.0')
-  .describe('My awesome CLI application');
+const app = cli('myapp').version('1.0.0').describe('My awesome CLI application');
 
-app.command('greet')
+app
+  .command('greet')
   .describe('Greet someone')
   .argument('<name>', 'Name of the person to greet')
   .option('--loud', 'Shout the greeting')
@@ -61,11 +60,12 @@ import { cli } from '@oxog/cli';
 import { colorPlugin, spinnerPlugin, loggerPlugin } from '@oxog/cli/plugins';
 
 const app = cli('myapp')
-  .use(colorPlugin())    // Beautiful colored output
-  .use(spinnerPlugin())  // Loading spinners
-  .use(loggerPlugin());  // Structured logging
+  .use(colorPlugin()) // Beautiful colored output
+  .use(spinnerPlugin()) // Loading spinners
+  .use(loggerPlugin()); // Structured logging
 
-app.command('deploy')
+app
+  .command('deploy')
   .describe('Deploy to production')
   .action(async ({ spinner, logger }) => {
     const spin = spinner.start('Deploying...');
@@ -88,11 +88,13 @@ app.command('deploy')
 ### Available Plugins
 
 **Core Plugins:**
+
 - **helpPlugin** - Automatic help text generation
 - **versionPlugin** - Version display support
 - **validationPlugin** - Argument and option validation
 
 **Optional Plugins:**
+
 - **colorPlugin** - Terminal styling with the built-in chainable pigment API (Chalk-compatible)
 - **spinnerPlugin** - Elegant loading indicators
 - **loggerPlugin** - Structured logging with levels

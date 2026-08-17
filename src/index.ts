@@ -33,14 +33,7 @@ export type { EventMap as EmitterEventMap, Handler as EmitterHandler } from './e
 // Types are re-exported from types.js (already exported via export * from './types.js')
 
 // Utilities - pick specific exports to avoid conflicts
-export {
-  isSupported,
-  colorize,
-  hexToAnsi,
-  rgbToAnsi,
-  color,
-  colors,
-} from './utils/ansi.js';
+export { isSupported, colorize, hexToAnsi, rgbToAnsi, color, colors } from './utils/ansi.js';
 export {
   getTerminalWidth,
   getTerminalHeight,

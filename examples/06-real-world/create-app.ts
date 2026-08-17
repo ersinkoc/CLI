@@ -17,10 +17,10 @@ const app = cli('create-app')
 // Template definitions
 const templates = {
   'vanilla-ts': 'Vanilla TypeScript',
-  'react': 'React + TypeScript',
-  'vue': 'Vue 3 + TypeScript',
-  'svelte': 'Svelte + TypeScript',
-  'solid': 'Solid + TypeScript',
+  react: 'React + TypeScript',
+  vue: 'Vue 3 + TypeScript',
+  svelte: 'Svelte + TypeScript',
+  solid: 'Solid + TypeScript',
 };
 
 app

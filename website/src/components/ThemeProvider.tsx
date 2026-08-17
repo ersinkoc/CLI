@@ -37,11 +37,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Always provide the context, but only apply classes after mount
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {

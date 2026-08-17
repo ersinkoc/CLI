@@ -16,13 +16,7 @@ const themes = {
     'catppuccin',
     'ayu-dark',
   ],
-  light: [
-    'github-light',
-    'vscode-light',
-    'one-light',
-    'solarized-light',
-    'ayu-light',
-  ],
+  light: ['github-light', 'vscode-light', 'one-light', 'solarized-light', 'ayu-light'],
 };
 
 interface CodeBlockProps {
@@ -45,7 +39,9 @@ export function CodeBlock({
   const { theme: siteTheme } = useTheme();
   const [copied, setCopied] = useState(false);
   const [html, setHtml] = useState<string>('');
-  const [currentTheme, setCurrentTheme] = useState(siteTheme === 'light' ? 'github-light' : 'github-dark');
+  const [currentTheme, setCurrentTheme] = useState(
+    siteTheme === 'light' ? 'github-light' : 'github-dark'
+  );
   const [showThemeDropdown, setShowThemeDropdown] = useState(false);
 
   // Check if current theme is light or dark
@@ -87,57 +83,60 @@ export function CodeBlock({
   }, [decodedCode, language, currentTheme, showLineNumbers, highlightLines]);
 
   return (
-    <div className={cn(
-      'group relative my-6 overflow-hidden rounded-lg border',
-      isLightTheme
-        ? 'border-gray-300 bg-white'
-        : 'border-gray-700/50 bg-[#1e1e1e]',
-      className
-    )}>
+    <div
+      className={cn(
+        'group relative my-6 overflow-hidden rounded-lg border',
+        isLightTheme ? 'border-gray-300 bg-white' : 'border-gray-700/50 bg-[#1e1e1e]',
+        className
+      )}
+    >
       {/* Header */}
       {title && (
-        <div className={cn(
-          'flex items-center justify-between border-b px-4 py-2',
-          isLightTheme
-            ? 'border-gray-200 bg-gray-50'
-            : 'border-gray-700/50 bg-[#252526]'
-        )}>
+        <div
+          className={cn(
+            'flex items-center justify-between border-b px-4 py-2',
+            isLightTheme ? 'border-gray-200 bg-gray-50' : 'border-gray-700/50 bg-[#252526]'
+          )}
+        >
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5">
               <div className="h-2.5 w-2.5 rounded-full bg-[#ff5f56]" />
               <div className="h-2.5 w-2.5 rounded-full bg-[#ffbd2e]" />
               <div className="h-2.5 w-2.5 rounded-full bg-[#27c93f]" />
             </div>
-            <span className={cn(
-              'ml-2 text-xs font-mono',
-              isLightTheme ? 'text-gray-600' : 'text-gray-400'
-            )}>{title}</span>
+            <span
+              className={cn(
+                'ml-2 text-xs font-mono',
+                isLightTheme ? 'text-gray-600' : 'text-gray-400'
+              )}
+            >
+              {title}
+            </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className={cn(
-              'text-xs uppercase',
-              isLightTheme ? 'text-gray-500' : 'text-gray-500'
-            )}>{language}</span>
+            <span
+              className={cn('text-xs uppercase', isLightTheme ? 'text-gray-500' : 'text-gray-500')}
+            >
+              {language}
+            </span>
           </div>
         </div>
       )}
 
-      <div className={cn(
-        'relative',
-        isLightTheme ? 'bg-gray-50' : 'bg-[#1e1e1e]'
-      )}>
+      <div className={cn('relative', isLightTheme ? 'bg-gray-50' : 'bg-[#1e1e1e]')}>
         {/* Top action bar - only show when no title or in code area */}
-        <div className={cn(
-          'flex items-center justify-between px-3 py-2 border-b',
-          isLightTheme
-            ? 'border-gray-200'
-            : 'border-gray-700/30'
-        )}>
+        <div
+          className={cn(
+            'flex items-center justify-between px-3 py-2 border-b',
+            isLightTheme ? 'border-gray-200' : 'border-gray-700/30'
+          )}
+        >
           {/* Language indicator */}
-          <span className={cn(
-            'text-xs uppercase',
-            isLightTheme ? 'text-gray-500' : 'text-gray-500'
-          )}>{language}</span>
+          <span
+            className={cn('text-xs uppercase', isLightTheme ? 'text-gray-500' : 'text-gray-500')}
+          >
+            {language}
+          </span>
 
           {/* Theme selector & Copy */}
           <div className="flex items-center gap-2">
@@ -158,18 +157,22 @@ export function CodeBlock({
               </button>
 
               {showThemeDropdown && (
-                <div className={cn(
-                  'absolute right-0 top-full mt-1 z-20 w-48 rounded-md border shadow-xl',
-                  isLightTheme
-                    ? 'border-gray-200 bg-white'
-                    : 'border-gray-700/50 bg-[#252526]'
-                )}>
+                <div
+                  className={cn(
+                    'absolute right-0 top-full mt-1 z-20 w-48 rounded-md border shadow-xl',
+                    isLightTheme ? 'border-gray-200 bg-white' : 'border-gray-700/50 bg-[#252526]'
+                  )}
+                >
                   {/* Dark themes */}
                   <div className="p-1">
-                    <div className={cn(
-                      'px-2 py-1 text-xs font-semibold uppercase tracking-wide',
-                      isLightTheme ? 'text-gray-500' : 'text-gray-500'
-                    )}>Dark</div>
+                    <div
+                      className={cn(
+                        'px-2 py-1 text-xs font-semibold uppercase tracking-wide',
+                        isLightTheme ? 'text-gray-500' : 'text-gray-500'
+                      )}
+                    >
+                      Dark
+                    </div>
                     {themes.dark.map((t) => (
                       <button
                         key={t}
@@ -192,14 +195,20 @@ export function CodeBlock({
                   </div>
 
                   {/* Light themes */}
-                  <div className={cn(
-                    'border-t p-1',
-                    isLightTheme ? 'border-gray-200' : 'border-gray-700/50'
-                  )}>
-                    <div className={cn(
-                      'px-2 py-1 text-xs font-semibold uppercase tracking-wide',
-                      isLightTheme ? 'text-gray-500' : 'text-gray-500'
-                    )}>Light</div>
+                  <div
+                    className={cn(
+                      'border-t p-1',
+                      isLightTheme ? 'border-gray-200' : 'border-gray-700/50'
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'px-2 py-1 text-xs font-semibold uppercase tracking-wide',
+                        isLightTheme ? 'text-gray-500' : 'text-gray-500'
+                      )}
+                    >
+                      Light
+                    </div>
                     {themes.light.map((t) => (
                       <button
                         key={t}
@@ -235,11 +244,7 @@ export function CodeBlock({
               )}
               aria-label="Copy code"
             >
-              {copied ? (
-                <Check className="h-4 w-4 text-green-400" />
-              ) : (
-                <Copy className="h-4 w-4" />
-              )}
+              {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
             </button>
           </div>
         </div>

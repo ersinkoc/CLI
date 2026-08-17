@@ -186,7 +186,7 @@ export class EventBus {
    * @returns Array of event names
    *
    * @example
- * ```typescript
+   * ```typescript
    * bus.eventNames(); // ['log', 'command:start', 'command:end']
    * ```
    */

@@ -46,14 +46,16 @@ const app = cli('myapp')
   .description('Custom plugin example')
   .use(loggerPlugin({ prefix: '[MYAPP]', timestamp: true }));
 
-app.command('start')
+app
+  .command('start')
   .description('Start the application')
   .action(async () => {
     console.log('Application started!');
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
   });
 
-app.command('fail')
+app
+  .command('fail')
   .description('Demonstrate error handling')
   .action(async () => {
     throw new Error('Something went wrong!');

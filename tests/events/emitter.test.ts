@@ -336,16 +336,16 @@ describe('Emitter', () => {
 
     it('should throw on invalid handler in prependListener()', () => {
       const emitter = new Emitter<TestEvents>();
-      expect(() =>
-        emitter.prependListener('message', null as unknown as () => void)
-      ).toThrow('Invalid handler');
+      expect(() => emitter.prependListener('message', null as unknown as () => void)).toThrow(
+        'Invalid handler'
+      );
     });
 
     it('should throw on invalid event in prependOnceListener()', () => {
       const emitter = new Emitter<TestEvents>();
-      expect(() =>
-        emitter.prependOnceListener('' as keyof TestEvents, () => {})
-      ).toThrow('Invalid event name');
+      expect(() => emitter.prependOnceListener('' as keyof TestEvents, () => {})).toThrow(
+        'Invalid event name'
+      );
     });
   });
 

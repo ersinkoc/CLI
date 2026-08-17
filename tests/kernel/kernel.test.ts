@@ -210,7 +210,7 @@ describe('CLIKernel', () => {
   it('should handle async event handlers', async () => {
     let result = '';
     kernel.on('test', async (...args: unknown[]) => {
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       result = 'done';
     });
 

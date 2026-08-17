@@ -208,7 +208,9 @@ export function hexToAnsi(hex: string): string {
  * ```
  */
 export function rgbToAnsi(r: number, g: number, b: number): string {
-  return hexToAnsi(`#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`);
+  return hexToAnsi(
+    `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+  );
 }
 
 /**
@@ -245,7 +247,11 @@ export class ColorUtils {
 
   // Foreground colors
   black(): string {
-    return this.end().replace(/^/, reset).replace(`${reset}${reset}`, reset).replace(`${reset}`, `${black}`).replace(`${reset}${reset}`, reset);
+    return this.end()
+      .replace(/^/, reset)
+      .replace(`${reset}${reset}`, reset)
+      .replace(`${reset}`, `${black}`)
+      .replace(`${reset}${reset}`, reset);
   }
   red(): string {
     return colorize(this.text, red);

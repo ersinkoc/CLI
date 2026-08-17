@@ -6,12 +6,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  createPigment,
-  detectColorSupport,
-  styles,
-  compose,
-} from '../../src/utils/pigment.js';
+import { createPigment, detectColorSupport, styles, compose } from '../../src/utils/pigment.js';
 import type { ColorSupport } from '../../src/types.js';
 
 describe('pigment', () => {

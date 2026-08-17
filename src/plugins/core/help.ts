@@ -1,5 +1,4 @@
-import type { CLIPlugin, CLIKernel } from '../../types.js';
-import type { CLI } from '../../types.js';
+import type { CLIPlugin, CLIKernel, CLI, CommandBeforeEvent, OptionDef } from '../../types.js';
 import { colors } from '../../utils/ansi.js';
 import { HelpRequestedExit } from '../../errors/cli-error.js';
 
@@ -45,16 +44,13 @@ export function helpPlugin(options: HelpPluginOptions = {}): CLIPlugin {
       // Listen for help event
       kernel.on('help', async (...args: unknown[]) => {
         const context = args[0] as HelpContext;
-        const helpText = options.format
-          ? options.format(context)
-          : formatHelp(context);
+        const helpText = options.format ? options.format(context) : formatHelp(context);
         console.log(helpText);
       });
 
       // Listen for command:before to check for --help
       kernel.on('command:before', async (...args: unknown[]) => {
-        const data = args[0] as any;
-        const { context } = data;
+        const { context } = args[0] as CommandBeforeEvent;
         if (context.options?.help === true) {
           await kernel.emit('help', { app: context.app });
           // Throw instead of process.exit to allow library users to handle gracefully
@@ -119,7 +115,7 @@ function formatHelp(context: HelpContext): string {
 /**
  * Format option flags for display
  */
-function formatOptionFlags(opt: any): string {
+function formatOptionFlags(opt: OptionDef): string {
   let flags = '';
   if (opt.alias) {
     flags += `-${opt.alias}, `;

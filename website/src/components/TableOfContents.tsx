@@ -64,18 +64,13 @@ export function TableOfContents({ content }: TableOfContentsProps) {
             {headings.map((heading) => (
               <li
                 key={heading.id}
-                className={cn(
-                  'line-clamp-2',
-                  heading.level === 3 ? 'pl-4' : ''
-                )}
+                className={cn('line-clamp-2', heading.level === 3 ? 'pl-4' : '')}
               >
                 <a
                   href={`#${heading.id}`}
                   className={cn(
                     'inline-block transition-colors hover:text-primary',
-                    activeId === heading.id
-                      ? 'text-primary font-medium'
-                      : 'text-muted-foreground'
+                    activeId === heading.id ? 'text-primary font-medium' : 'text-muted-foreground'
                   )}
                 >
                   {heading.text}

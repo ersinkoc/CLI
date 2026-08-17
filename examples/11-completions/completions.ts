@@ -6,9 +6,7 @@
 
 import { cli } from '../../src/index.js';
 
-const app = cli('myapp')
-  .version('1.0.0')
-  .description('Shell completions example');
+const app = cli('myapp').version('1.0.0').description('Shell completions example');
 
 // Available commands
 const commands = ['build', 'test', 'deploy', 'lint', 'format'];
@@ -16,7 +14,8 @@ const commands = ['build', 'test', 'deploy', 'lint', 'format'];
 // Available options
 const options = ['--help', '--version', '--verbose', '--watch', '--output'];
 
-app.command('completion')
+app
+  .command('completion')
   .description('Generate shell completion script')
   .argument('shell', 'Shell type (bash, zsh, fish)')
   .action(async ({ args }) => {
@@ -46,7 +45,7 @@ complete -F _myapp_completion myapp
 _myapp() {
   local -a commands
   commands=(
-${commands.map(c => `    '${c}:${c}'`).join('\n')}
+${commands.map((c) => `    '${c}:${c}'`).join('\n')}
   )
 
   if (( CURRENT == 2 )); then
@@ -71,7 +70,8 @@ complete -c myapp -l verbose -d 'Verbose output'
     }
   });
 
-app.command('build')
+app
+  .command('build')
   .description('Build the project')
   .option('-o, --output <dir>', 'Output directory')
   .option('-w, --watch', 'Watch mode')
@@ -79,7 +79,8 @@ app.command('build')
     console.log('Building...');
   });
 
-app.command('deploy')
+app
+  .command('deploy')
   .description('Deploy the project')
   .action(async () => {
     console.log('Deploying...');

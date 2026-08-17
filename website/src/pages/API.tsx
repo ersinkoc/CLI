@@ -30,7 +30,10 @@ function parseMarkdown(content: string): React.ReactNode {
   const flushList = () => {
     if (inList && listItems.length > 0) {
       elements.push(
-        <ul key={`list-${listKey++}`} className="list-disc list-inside my-4 space-y-2 text-muted-foreground">
+        <ul
+          key={`list-${listKey++}`}
+          className="list-disc list-inside my-4 space-y-2 text-muted-foreground"
+        >
           {listItems.map((item, i) => (
             <li key={i}>{parseInline(item)}</li>
           ))}
@@ -54,7 +57,10 @@ function parseMarkdown(content: string): React.ReactNode {
           parts.push(remaining.slice(0, codeMatch.index));
         }
         parts.push(
-          <code className="bg-muted/50 hover:bg-muted px-1.5 py-0.5 rounded text-sm font-mono text-foreground transition-colors" key={parts.length}>
+          <code
+            className="bg-muted/50 hover:bg-muted px-1.5 py-0.5 rounded text-sm font-mono text-foreground transition-colors"
+            key={parts.length}
+          >
             {codeMatch[1]}
           </code>
         );
@@ -116,12 +122,16 @@ function parseMarkdown(content: string): React.ReactNode {
         const id = text.toLowerCase().replace(/\s+/g, '-');
         const Tag = `h${level}` as keyof JSX.IntrinsicElements;
         elements.push(
-          <Tag key={idx} id={id} className={cn(
-            'font-semibold tracking-tight scroll-mt-20',
-            level === 1 ? 'text-2xl sm:text-3xl mt-8 mb-4' : '',
-            level === 2 ? 'text-xl sm:text-2xl mt-6 mb-3' : '',
-            level === 3 ? 'text-lg sm:text-xl mt-4 mb-2' : ''
-          )}>
+          <Tag
+            key={idx}
+            id={id}
+            className={cn(
+              'font-semibold tracking-tight scroll-mt-20',
+              level === 1 ? 'text-2xl sm:text-3xl mt-8 mb-4' : '',
+              level === 2 ? 'text-xl sm:text-2xl mt-6 mb-3' : '',
+              level === 3 ? 'text-lg sm:text-xl mt-4 mb-2' : ''
+            )}
+          >
             {parseInline(text)}
           </Tag>
         );
@@ -445,7 +455,9 @@ export function APIPage() {
       <div className="mx-auto max-w-4xl">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
-          <a href="/api" className="hover:text-foreground">API</a>
+          <a href="/api" className="hover:text-foreground">
+            API
+          </a>
           <span>/</span>
           <span className="text-foreground">{data.title}</span>
         </nav>
@@ -458,11 +470,7 @@ export function APIPage() {
 
         {data.code && (
           <div className="mt-8">
-            <CodeBlock
-              code={data.code}
-              language="typescript"
-              showLineNumbers={true}
-            />
+            <CodeBlock code={data.code} language="typescript" showLineNumbers={true} />
           </div>
         )}
 
@@ -492,10 +500,18 @@ function MainAPIPage() {
             {[
               { id: 'cli', name: 'CLI', desc: 'The main CLI class with fluent builder API' },
               { id: 'command', name: 'Command', desc: 'Represents a command with configuration' },
-              { id: 'command-builder', name: 'CommandBuilder', desc: 'Builder for configuring commands' },
+              {
+                id: 'command-builder',
+                name: 'CommandBuilder',
+                desc: 'Builder for configuring commands',
+              },
               { id: 'kernel', name: 'CLIKernel', desc: 'Micro-kernel for plugins and events' },
             ].map((cls) => (
-              <a key={cls.id} href={`/api/${cls.id}`} className="block p-4 rounded-lg border bg-background hover:bg-muted/50 transition-colors">
+              <a
+                key={cls.id}
+                href={`/api/${cls.id}`}
+                className="block p-4 rounded-lg border bg-background hover:bg-muted/50 transition-colors"
+              >
                 <h3 className="font-semibold text-primary">{cls.name}</h3>
                 <p className="text-sm text-muted-foreground mt-1">{cls.desc}</p>
               </a>
@@ -515,7 +531,11 @@ function MainAPIPage() {
               { id: 'plugin', name: 'CLIPlugin', desc: 'Plugin function type' },
               { id: 'action-context', name: 'ActionContext', desc: 'Context passed to handlers' },
             ].map((iface) => (
-              <a key={iface.id} href={`/api/${iface.id}`} className="block p-4 rounded-lg border bg-background hover:bg-muted/50 transition-colors">
+              <a
+                key={iface.id}
+                href={`/api/${iface.id}`}
+                className="block p-4 rounded-lg border bg-background hover:bg-muted/50 transition-colors"
+              >
                 <h3 className="font-semibold text-primary">{iface.name}</h3>
                 <p className="text-sm text-muted-foreground mt-1">{iface.desc}</p>
               </a>
@@ -529,11 +549,23 @@ function MainAPIPage() {
           <div className="space-y-3">
             {[
               { id: 'cli-function', name: 'cli()', desc: 'Creates a new CLI instance' },
-              { id: 'command-decorator', name: '@Command', desc: 'Decorator for defining commands' },
+              {
+                id: 'command-decorator',
+                name: '@Command',
+                desc: 'Decorator for defining commands',
+              },
               { id: 'option-decorator', name: '@Option', desc: 'Decorator for injecting options' },
-              { id: 'argument-decorator', name: '@Argument', desc: 'Decorator for injecting arguments' },
+              {
+                id: 'argument-decorator',
+                name: '@Argument',
+                desc: 'Decorator for injecting arguments',
+              },
             ].map((item) => (
-              <a key={item.id} href={`/api/${item.id}`} className="block p-4 rounded-lg border bg-background hover:bg-muted/50 transition-colors">
+              <a
+                key={item.id}
+                href={`/api/${item.id}`}
+                className="block p-4 rounded-lg border bg-background hover:bg-muted/50 transition-colors"
+              >
                 <h3 className="font-semibold text-primary">{item.name}</h3>
                 <p className="text-sm text-muted-foreground mt-1">{item.desc}</p>
               </a>
@@ -551,7 +583,11 @@ function MainAPIPage() {
               { id: 'coercer', name: 'Coercer', desc: 'Type coercion function' },
               { id: 'validator', name: 'Validator', desc: 'Validation function' },
             ].map((type) => (
-              <a key={type.id} href={`/api/${type.id}`} className="block p-4 rounded-lg border bg-background hover:bg-muted/50 transition-colors">
+              <a
+                key={type.id}
+                href={`/api/${type.id}`}
+                className="block p-4 rounded-lg border bg-background hover:bg-muted/50 transition-colors"
+              >
                 <h3 className="font-semibold text-primary">{type.name}</h3>
                 <p className="text-sm text-muted-foreground mt-1">{type.desc}</p>
               </a>

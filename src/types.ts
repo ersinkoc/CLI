@@ -19,7 +19,9 @@ export type DeepPartial<T> = T extends object ? { [P in keyof T]?: DeepPartial<T
 /**
  * Deep readonly - all nested properties readonly.
  */
-export type DeepReadonly<T> = T extends object ? { readonly [P in keyof T]: DeepReadonly<T[P]> } : T;
+export type DeepReadonly<T> = T extends object
+  ? { readonly [P in keyof T]: DeepReadonly<T[P]> }
+  : T;
 
 /**
  * Deep required - all nested properties required.
@@ -533,10 +535,7 @@ export type ActionHandler = (ctx: ActionContext) => MaybePromise<void>;
  * };
  * ```
  */
-export type Middleware = (
-  ctx: ActionContext,
-  next: () => MaybePromise<void>
-) => MaybePromise<void>;
+export type Middleware = (ctx: ActionContext, next: () => MaybePromise<void>) => MaybePromise<void>;
 
 /**
  * Plugin interface for extending CLI kernel functionality
@@ -1050,9 +1049,9 @@ export interface ErrorEvent {
 export interface CLIEvents extends EventMap {
   'command:before': CommandBeforeEvent;
   'command:after': CommandAfterEvent;
-  'help': HelpEvent;
-  'version': VersionEvent;
-  'error': ErrorEvent;
+  help: HelpEvent;
+  version: VersionEvent;
+  error: ErrorEvent;
 }
 
 /**

@@ -36,10 +36,7 @@ export interface ParsedArguments {
  * // { values: { input: 'myfile.txt', output: 'output.txt' }, remaining: [], errors: [] }
  * ```
  */
-export function parseArguments(
-  tokens: Token[],
-  definitions: ArgumentDef[]
-): ParsedArguments {
+export function parseArguments(tokens: Token[], definitions: ArgumentDef[]): ParsedArguments {
   const values: Record<string, unknown> = {};
   const errors: string[] = [];
   const remaining: Token[] = [];

@@ -110,10 +110,9 @@ describe('CLI', () => {
 
   it('should run without error', async () => {
     const app = cli({ name: 'myapp' });
-    app.command('test')
-      .action(async () => {
-        // Test successful execution
-      });
+    app.command('test').action(async () => {
+      // Test successful execution
+    });
 
     await app.runAsync(['test']);
     expect(exitCode).toBeNull();
@@ -195,7 +194,8 @@ describe('CLI', () => {
     const app = cli({ name: 'myapp' });
     let receivedOptions: any = null;
 
-    app.command('test')
+    app
+      .command('test')
       .option('--verbose', 'Verbose')
       .action(async ({ options }) => {
         receivedOptions = options;
@@ -210,7 +210,8 @@ describe('CLI', () => {
     const app = cli({ name: 'myapp' });
     let receivedArgs: any = null;
 
-    app.command('test')
+    app
+      .command('test')
       .argument('<input>')
       .action(async ({ args }) => {
         receivedArgs = args;
@@ -298,8 +299,7 @@ describe('CLI', () => {
   it('should register multiple options on command', () => {
     const app = cli({ name: 'myapp' });
     const builder = app.command('test');
-    builder.option('--verbose', 'Verbose')
-            .option('--output <path>', 'Output path');
+    builder.option('--verbose', 'Verbose').option('--output <path>', 'Output path');
 
     const testCmd = app.commands.get('test');
     expect(testCmd?.options).toHaveLength(2);
@@ -402,7 +402,8 @@ describe('CLI', () => {
     const app = cli({ name: 'myapp' });
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    app.command('test')
+    app
+      .command('test')
       .argument('<port>')
       .action(async ({ args }) => {
         // This should fail type validation if port is not a number
@@ -423,7 +424,8 @@ describe('CLI', () => {
     const app = cli({ name: 'myapp' });
     const order: string[] = [];
 
-    app.command('test')
+    app
+      .command('test')
       .use(async (ctx, next) => {
         order.push('middleware1');
         await next();
@@ -635,7 +637,8 @@ describe('CLI', () => {
     const app = cli({ name: 'myapp' });
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    app.command('test')
+    app
+      .command('test')
       .argument('<required>', 'Required argument')
       .action(async () => {});
 

@@ -57,7 +57,9 @@ export function colorPlugin(): CLIPlugin {
  * The built-in implementation is always available, so this never
  * resolves to null.
  */
-export async function getPigment(options?: import('../../../types.js').PigmentOptions): Promise<Pigment> {
+export async function getPigment(
+  options?: import('../../../types.js').PigmentOptions
+): Promise<Pigment> {
   return createPigment(options);
 }
 

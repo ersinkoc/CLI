@@ -15,9 +15,7 @@ const app = cli('config-cli')
   .use(spinnerPlugin());
 
 // Main config command with subcommands
-const configCmd = app
-  .command('config')
-  .describe('Manage configuration');
+const configCmd = app.command('config').describe('Manage configuration');
 
 configCmd
   .command('get')
@@ -62,9 +60,7 @@ configCmd
   });
 
 // Another command group - create user command and add subcommands
-const userCmd = app
-  .command('user')
-  .describe('Manage users');
+const userCmd = app.command('user').describe('Manage users');
 
 userCmd
   .command('add')

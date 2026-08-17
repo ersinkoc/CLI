@@ -85,11 +85,7 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
             className="p-2 rounded-md hover:bg-accent transition-colors"
             aria-label="Toggle theme"
           >
-            {theme === 'dark' ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
+            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </button>
         </div>
       </div>

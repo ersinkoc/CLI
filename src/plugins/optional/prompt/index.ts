@@ -12,6 +12,15 @@ import type {
   PromptEditorOptions,
   PromptWizardOptions,
   PromptSelectOption,
+  CommandBeforeEvent,
+  PromptInputOptions as WizardInputOptions,
+  PromptConfirmOptions as WizardConfirmOptions,
+  PromptSelectOptions as WizardSelectOptions,
+  PromptMultiSelectOptions as WizardMultiSelectOptions,
+  PromptAutocompleteOptions as WizardAutocompleteOptions,
+  PromptNumberOptions as WizardNumberOptions,
+  PromptDateOptions as WizardDateOptions,
+  PromptEditorOptions as WizardEditorOptions,
 } from '../../../types.js';
 import { colors } from '../../../utils/ansi.js';
 import { fuzzyFilter } from '../../../utils/fuzzy.js';
@@ -30,6 +39,16 @@ export interface PromptPluginOptions {
     muted?: string;
   };
 }
+
+type WizardPrompt =
+  | ({ type: 'input' | 'password' } & WizardInputOptions)
+  | ({ type: 'confirm' } & WizardConfirmOptions)
+  | ({ type: 'select' } & WizardSelectOptions<unknown>)
+  | ({ type: 'multiselect' } & WizardMultiSelectOptions<unknown>)
+  | ({ type: 'autocomplete' } & WizardAutocompleteOptions<unknown>)
+  | ({ type: 'number' } & WizardNumberOptions)
+  | ({ type: 'date' } & WizardDateOptions)
+  | ({ type: 'editor' } & WizardEditorOptions);
 
 /**
  * Read a line of input
@@ -197,9 +216,10 @@ class PromptImpl implements PromptUtils {
    * Yes/No confirmation prompt
    */
   async confirm(options: PromptConfirmOptions): Promise<boolean> {
-    const defaultHint = options.default !== undefined
-      ? colors.gray(` (${options.default ? 'Y/n' : 'y/N'})`)
-      : colors.gray(' (y/n)');
+    const defaultHint =
+      options.default !== undefined
+        ? colors.gray(` (${options.default ? 'Y/n' : 'y/N'})`)
+        : colors.gray(' (y/n)');
 
     process.stdout.write(`${this.prefix} ${options.message}${defaultHint} `);
 
@@ -377,9 +397,12 @@ class PromptImpl implements PromptUtils {
     // Initial render
     const minHint = options.min ? `min: ${options.min}` : '';
     const maxHint = options.max ? `max: ${options.max}` : '';
-    const rangeHint = minHint || maxHint ? colors.gray(` (${[minHint, maxHint].filter(Boolean).join(', ')})`) : '';
+    const rangeHint =
+      minHint || maxHint ? colors.gray(` (${[minHint, maxHint].filter(Boolean).join(', ')})`) : '';
 
-    stdout.write(`${this.prefix} ${options.message}${rangeHint} ${colors.gray('(space to select, enter to confirm)')}\n`);
+    stdout.write(
+      `${this.prefix} ${options.message}${rangeHint} ${colors.gray('(space to select, enter to confirm)')}\n`
+    );
     for (let i = 0; i < choices.length; i++) {
       const choice = choices[i];
       const cursor = i === cursorIndex ? colors.cyan('>') : ' ';
@@ -586,7 +609,9 @@ class PromptImpl implements PromptUtils {
     const defaultHint = options.default !== undefined ? ` (${options.default})` : '';
     const rangeHint = hints.length > 0 ? colors.gray(` [${hints.join(', ')}]`) : '';
 
-    process.stdout.write(`${this.prefix} ${options.message}${rangeHint}${colors.gray(defaultHint)} `);
+    process.stdout.write(
+      `${this.prefix} ${options.message}${rangeHint}${colors.gray(defaultHint)} `
+    );
 
     const value = await readLine({
       default: options.default?.toString(),
@@ -651,7 +676,9 @@ class PromptImpl implements PromptUtils {
     // Write default content
     writeFileSync(tmpFile, options.default || '');
 
-    process.stdout.write(`${this.prefix} ${options.message} ${colors.gray(`(opening ${editor}...)`)}\n`);
+    process.stdout.write(
+      `${this.prefix} ${options.message} ${colors.gray(`(opening ${editor}...)`)}\n`
+    );
 
     return new Promise((resolve, reject) => {
       const child = spawn(editor, [tmpFile], {
@@ -690,33 +717,42 @@ class PromptImpl implements PromptUtils {
       }
 
       // Execute prompt
-      const promptOptions = step.prompt as any;
+      const promptOptions = step.prompt as WizardPrompt;
       let result: unknown;
 
-      if (promptOptions.type === 'input') {
-        result = await this.input(promptOptions);
-      } else if (promptOptions.type === 'password') {
-        result = await this.password(promptOptions);
-      } else if (promptOptions.type === 'confirm') {
-        result = await this.confirm(promptOptions);
-      } else if (promptOptions.type === 'select') {
-        result = await this.select(promptOptions);
-      } else if (promptOptions.type === 'multiselect') {
-        result = await this.multiselect(promptOptions);
-      } else if (promptOptions.type === 'number') {
-        result = await this.number(promptOptions);
-      } else if (promptOptions.type === 'date') {
-        result = await this.date(promptOptions);
-      } else if (promptOptions.type === 'editor') {
-        result = await this.editor(promptOptions);
-      } else if (promptOptions.type === 'autocomplete') {
-        result = await this.autocomplete(promptOptions);
-      } else {
-        // Default to input
-        result = await this.input(promptOptions);
+      switch (promptOptions.type) {
+        case 'input':
+          result = await this.input(promptOptions);
+          break;
+        case 'password':
+          result = await this.password(promptOptions);
+          break;
+        case 'confirm':
+          result = await this.confirm(promptOptions);
+          break;
+        case 'select':
+          result = await this.select(promptOptions);
+          break;
+        case 'multiselect':
+          result = await this.multiselect(promptOptions);
+          break;
+        case 'number':
+          result = await this.number(promptOptions);
+          break;
+        case 'date':
+          result = await this.date(promptOptions);
+          break;
+        case 'editor':
+          result = await this.editor(promptOptions);
+          break;
+        case 'autocomplete':
+          result = await this.autocomplete(promptOptions);
+          break;
+        default:
+          result = await this.input(promptOptions as WizardInputOptions);
       }
 
-      (answers as any)[step.name] = result;
+      (answers as Record<string, unknown>)[step.name] = result;
     }
 
     return answers as T;
@@ -751,9 +787,10 @@ export function promptPlugin(options: PromptPluginOptions = {}): CLIPlugin {
     version: '1.0.0',
 
     install(kernel: CLIKernel) {
-      kernel.on('command:before', async (data: any) => {
+      kernel.on('command:before', async (data: unknown) => {
+        const { context } = data as CommandBeforeEvent;
         const promptUtils = new PromptImpl(options);
-        data.context.prompt = promptUtils;
+        context.prompt = promptUtils;
       });
     },
   };

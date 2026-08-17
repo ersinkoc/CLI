@@ -7,11 +7,10 @@
 import { cli } from '../../src/index.js';
 import { colors, color, rgbToAnsi } from '../../src/utils/index.js';
 
-const app = cli('myapp')
-  .version('1.0.0')
-  .description('Color output example');
+const app = cli('myapp').version('1.0.0').description('Color output example');
 
-app.command('colors')
+app
+  .command('colors')
   .description('Show all available colors')
   .action(async () => {
     console.log('\n=== Foreground Colors ===\n');
@@ -45,7 +44,8 @@ app.command('colors')
     console.log(colors.bgGreen.black('Black on green'));
   });
 
-app.command('rainbow')
+app
+  .command('rainbow')
   .description('Display rainbow text')
   .action(async () => {
     const text = 'Rainbow Text!';
@@ -58,12 +58,20 @@ app.command('rainbow')
       colors.magenta,
     ];
 
-    console.log('\n' + text.split('').map((char, i) => {
-      return rainbowColors[i % rainbowColors.length](char);
-    }).join('') + '\n');
+    console.log(
+      '\n' +
+        text
+          .split('')
+          .map((char, i) => {
+            return rainbowColors[i % rainbowColors.length](char);
+          })
+          .join('') +
+        '\n'
+    );
   });
 
-app.command('gradient')
+app
+  .command('gradient')
   .description('Display gradient text')
   .argument('text', 'Text to display')
   .action(async ({ args }) => {
@@ -71,19 +79,23 @@ app.command('gradient')
     const length = text.length;
 
     // Generate gradient from blue to cyan
-    const gradient = text.split('').map((char, i) => {
-      const ratio = i / length;
-      const r = 59;
-      const g = Math.floor(130 + ratio * 125);
-      const b = 246;
-      const ansiCode = rgbToAnsi(r, g, b);
-      return `\x1b[${ansiCode}m${char}\x1b[0m`;
-    }).join('');
+    const gradient = text
+      .split('')
+      .map((char, i) => {
+        const ratio = i / length;
+        const r = 59;
+        const g = Math.floor(130 + ratio * 125);
+        const b = 246;
+        const ansiCode = rgbToAnsi(r, g, b);
+        return `\x1b[${ansiCode}m${char}\x1b[0m`;
+      })
+      .join('');
 
     console.log('\n' + gradient + '\n');
   });
 
-app.command('levels')
+app
+  .command('levels')
   .description('Show log levels with colors')
   .action(async () => {
     console.log('\n' + colors.dim('Timestamp') + ' ' + colors.gray('DEBUG') + ' Debug message');
@@ -93,7 +105,8 @@ app.command('levels')
     console.log('');
   });
 
-app.command('box')
+app
+  .command('box')
   .description('Draw a colored box')
   .action(async () => {
     const border = colors.bgCyan.black('  ');

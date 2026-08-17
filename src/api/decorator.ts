@@ -194,10 +194,7 @@ export function Command(
  * greet(@Argument('name') name: string) { ... }
  * ```
  */
-export function Argument(
-  name?: string,
-  def: Omit<ArgumentDef, 'name'> = {}
-): ParameterDecoratorFn {
+export function Argument(name?: string, def: Omit<ArgumentDef, 'name'> = {}): ParameterDecoratorFn {
   return (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) => {
     const key = propertyKey ?? '';
     const fullDef: Omit<ArgumentDef, 'name'> = { required: true, ...def };
@@ -223,10 +220,7 @@ export function Argument(
  * serve(@Option('port', { alias: 'p', type: 'number', default: 3000 }) port: number) { ... }
  * ```
  */
-export function Option(
-  name?: string,
-  def: Omit<OptionDef, 'name'> = {}
-): ParameterDecoratorFn {
+export function Option(name?: string, def: Omit<OptionDef, 'name'> = {}): ParameterDecoratorFn {
   return (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) => {
     const key = propertyKey ?? '';
     // Parameter decorators run before @Command; record for later merge.

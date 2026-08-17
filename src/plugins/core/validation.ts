@@ -1,4 +1,4 @@
-import type { CLIPlugin, CLIKernel } from '../../types.js';
+import type { CLIPlugin, CLIKernel, CommandBeforeEvent } from '../../types.js';
 import { ValidationError } from '../../errors/cli-error.js';
 import { colors } from '../../utils/ansi.js';
 
@@ -22,8 +22,8 @@ export function validationPlugin(): CLIPlugin {
 
     install(kernel: CLIKernel) {
       // Listen for command:before to validate
-      kernel.on('command:before', async (data: any) => {
-        const { command, context } = data;
+      kernel.on('command:before', async (data: unknown) => {
+        const { command, context } = data as CommandBeforeEvent;
         const errors: string[] = [];
 
         // Validate arguments

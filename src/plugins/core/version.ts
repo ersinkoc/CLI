@@ -1,4 +1,4 @@
-import type { CLIPlugin, CLIKernel } from '../../types.js';
+import type { CLIPlugin, CLIKernel, CommandBeforeEvent } from '../../types.js';
 import { colors } from '../../utils/ansi.js';
 import { VersionRequestedExit } from '../../errors/cli-error.js';
 
@@ -37,16 +37,13 @@ export function versionPlugin(options: VersionPluginOptions = {}): CLIPlugin {
       kernel.on('version', async (...args: unknown[]) => {
         const data = args[0] as { version: string };
         const version = options.version ?? data.version;
-        const text = options.format
-          ? options.format(version)
-          : formatVersion(version);
+        const text = options.format ? options.format(version) : formatVersion(version);
         console.log(text);
       });
 
       // Listen for command:before to check for --version
       kernel.on('command:before', async (...args: unknown[]) => {
-        const data = args[0] as any;
-        const { context } = data;
+        const { context } = args[0] as CommandBeforeEvent;
         if (context.options?.version === true || context.options?.V === true) {
           await kernel.emit('version', { version: context.app.version });
           // Throw instead of process.exit to allow library users to handle gracefully

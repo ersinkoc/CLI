@@ -3,7 +3,8 @@ import { TableOfContents } from '@/components/TableOfContents';
 import { cn } from '@/lib/utils';
 import { codeExamples } from '@/lib/constants';
 
-const docsContent = String.raw`# Introduction
+const docsContent =
+  String.raw`# Introduction
 
 @oxog/cli is a type-safe CLI framework for TypeScript that provides type-safe commands, beautiful output formatting, and a powerful plugin architecture. Built on the @oxog ecosystem for enhanced functionality.
 
@@ -41,7 +42,9 @@ yarn add @oxog/types @oxog/emitter @oxog/plugin @oxog/pigment
 Here's the simplest CLI you can create:
 
 \`\`\`typescript
-` + codeExamples.quickStart.trim() + `
+` +
+  codeExamples.quickStart.trim() +
+  `
 \`\`\`
 
 ## Architecture Overview
@@ -129,7 +132,8 @@ Make sure your \`tsconfig.json\` has the following settings:
 - TypeScript 5.0 or higher (for type safety)
 `;
 
-const quickStartContent = String.raw`# Quick Start
+const quickStartContent =
+  String.raw`# Quick Start
 
 Let's create your first CLI with @oxog/cli.
 
@@ -149,7 +153,9 @@ npm install @oxog/cli
 Create a file named \`cli.ts\`:
 
 \`\`\`typescript
-` + codeExamples.quickStart.trim() + `
+` +
+  codeExamples.quickStart.trim() +
+  `
 \`\`\`
 
 ## Step 3: Run It
@@ -274,7 +280,8 @@ User Input → Parser → Router → Command → Action Handler
 - Understand [Options](/docs/options)
 `;
 
-const commandsContent = String.raw`# Commands
+const commandsContent =
+  String.raw`# Commands
 
 Commands are the core building blocks of your CLI. Each command represents a specific action users can perform.
 
@@ -283,7 +290,9 @@ Commands are the core building blocks of your CLI. Each command represents a spe
 Use the \`.command()\` method to add commands:
 
 \`\`\`typescript
-` + codeExamples.quickStart.trim() + `
+` +
+  codeExamples.quickStart.trim() +
+  `
 \`\`\`
 
 ## Command Properties
@@ -468,7 +477,8 @@ app.option('--color', 'Enable colors', { default: true });
 - Add [Middleware](/docs/middleware)
 `;
 
-const subcommandsContent = String.raw`# Subcommands
+const subcommandsContent =
+  String.raw`# Subcommands
 
 Subcommands allow you to organize related commands hierarchically, like Git or Docker.
 
@@ -477,7 +487,9 @@ Subcommands allow you to organize related commands hierarchically, like Git or D
 Chain \`.command()\` calls to create nested commands:
 
 \`\`\`typescript
-` + codeExamples.subcommands.trim() + `
+` +
+  codeExamples.subcommands.trim() +
+  `
 \`\`\`
 
 ## Subcommand Benefits
@@ -534,7 +546,8 @@ app
 - Explore [Plugins](/docs/plugins)
 `;
 
-const middlewareContent = String.raw`# Middleware
+const middlewareContent =
+  String.raw`# Middleware
 
 Middleware functions run before and after command execution, enabling cross-cutting concerns like logging, authentication, and timing.
 
@@ -543,7 +556,9 @@ Middleware functions run before and after command execution, enabling cross-cutt
 Apply middleware to all commands:
 
 \`\`\`typescript
-` + codeExamples.middleware.trim() + `
+` +
+  codeExamples.middleware.trim() +
+  `
 \`\`\`
 
 ## Command-Specific Middleware
@@ -617,14 +632,17 @@ app.use((context) => {
 - Learn about [Error Handling](/docs/error-handling)
 `;
 
-const fluentAPIContent = String.raw`# Fluent Builder API
+const fluentAPIContent =
+  String.raw`# Fluent Builder API
 
 The fluent builder API provides a clean, chainable syntax for building CLIs.
 
 ## Basic Usage
 
 \`\`\`typescript
-` + codeExamples.fluentApi.trim() + `
+` +
+  codeExamples.fluentApi.trim() +
+  `
 \`\`\`
 
 ## Method Chaining
@@ -662,14 +680,17 @@ const app = cli('myapp')
 - Explore [Decorator API](/docs/decorator-api)
 `;
 
-const configAPIContent = String.raw`# Object Config API
+const configAPIContent =
+  String.raw`# Object Config API
 
 The object config API lets you define your CLI declaratively using configuration objects.
 
 ## Basic Usage
 
 \`\`\`typescript
-` + codeExamples.configApi.trim() + `
+` +
+  codeExamples.configApi.trim() +
+  `
 \`\`\`
 
 ## Configuration Structure
@@ -737,14 +758,17 @@ const app = cli({ name: 'myapp', commands });
 - Explore [Decorator API](/docs/decorator-api)
 `;
 
-const decoratorAPIContent = String.raw`# Decorator API
+const decoratorAPIContent =
+  String.raw`# Decorator API
 
 The decorator API uses TypeScript decorators for class-based CLI definition.
 
 ## Basic Usage
 
 \`\`\`typescript
-` + codeExamples.decoratorApi.trim() + `
+` +
+  codeExamples.decoratorApi.trim() +
+  `
 \`\`\`
 
 ## Available Decorators
@@ -1177,7 +1201,8 @@ export default myPlugin;
 - Learn about [Error Handling](/docs/error-handling)
 `;
 
-const errorHandlingContent = String.raw`# Error Handling
+const errorHandlingContent =
+  String.raw`# Error Handling
 
 @oxog/cli provides comprehensive error handling capabilities.
 
@@ -1186,7 +1211,9 @@ const errorHandlingContent = String.raw`# Error Handling
 Set a global error handler for the entire CLI:
 
 \`\`\`typescript
-` + codeExamples.errorHandling.trim() + `
+` +
+  codeExamples.errorHandling.trim() +
+  `
 \`\`\`
 
 ## CLIError
@@ -2191,7 +2218,10 @@ function DocsLayout({ content, title }: DocsLayoutProps) {
     const flushList = () => {
       if (inList && listItems.length > 0) {
         elements.push(
-          <ul key={`list-${listKey++}`} className="list-disc list-inside my-4 space-y-2 text-muted-foreground">
+          <ul
+            key={`list-${listKey++}`}
+            className="list-disc list-inside my-4 space-y-2 text-muted-foreground"
+          >
             {listItems.map((item, i) => (
               <li key={i}>{parseInline(item)}</li>
             ))}
@@ -2215,7 +2245,10 @@ function DocsLayout({ content, title }: DocsLayoutProps) {
             parts.push(remaining.slice(0, codeMatch.index));
           }
           parts.push(
-            <code className="bg-muted/50 hover:bg-muted px-1.5 py-0.5 rounded text-sm font-mono text-foreground transition-colors" key={parts.length}>
+            <code
+              className="bg-muted/50 hover:bg-muted px-1.5 py-0.5 rounded text-sm font-mono text-foreground transition-colors"
+              key={parts.length}
+            >
               {codeMatch[1]}
             </code>
           );
@@ -2277,12 +2310,16 @@ function DocsLayout({ content, title }: DocsLayoutProps) {
           const id = text.toLowerCase().replace(/\s+/g, '-');
           const Tag = `h${level}` as keyof JSX.IntrinsicElements;
           elements.push(
-            <Tag key={idx} id={id} className={cn(
-              'font-semibold tracking-tight scroll-mt-20',
-              level === 1 ? 'text-3xl sm:text-4xl mt-12 mb-4' : '',
-              level === 2 ? 'text-2xl sm:text-3xl mt-10 mb-4' : '',
-              level === 3 ? 'text-xl sm:text-2xl mt-8 mb-3' : ''
-            )}>
+            <Tag
+              key={idx}
+              id={id}
+              className={cn(
+                'font-semibold tracking-tight scroll-mt-20',
+                level === 1 ? 'text-3xl sm:text-4xl mt-12 mb-4' : '',
+                level === 2 ? 'text-2xl sm:text-3xl mt-10 mb-4' : '',
+                level === 3 ? 'text-xl sm:text-2xl mt-8 mb-3' : ''
+              )}
+            >
               {text}
             </Tag>
           );
@@ -2320,7 +2357,9 @@ function DocsLayout({ content, title }: DocsLayoutProps) {
       <div className="mx-auto max-w-4xl">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
-          <a href="/docs" className="hover:text-foreground">Docs</a>
+          <a href="/docs" className="hover:text-foreground">
+            Docs
+          </a>
           <span>/</span>
           <span className="text-foreground">{title}</span>
         </nav>

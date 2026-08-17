@@ -24,19 +24,10 @@ export function Layout() {
       <Header onMobileMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
 
       <div className="flex">
-        {showSidebar && (
-          <Sidebar
-            currentSection={currentSection}
-          />
-        )}
+        {showSidebar && <Sidebar currentSection={currentSection} />}
 
         {/* Main content */}
-        <main
-          className={cn(
-            'flex-1 min-h-[calc(100vh-4rem)]',
-            showSidebar ? 'lg:ml-72' : ''
-          )}
-        >
+        <main className={cn('flex-1 min-h-[calc(100vh-4rem)]', showSidebar ? 'lg:ml-72' : '')}>
           <Outlet />
         </main>
       </div>

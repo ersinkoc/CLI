@@ -1,4 +1,4 @@
-import type { CLIPlugin, CLIKernel } from '../../../types.js';
+import type { CLIPlugin, CLIKernel, CommandBeforeEvent } from '../../../types.js';
 import { colors } from '../../../utils/ansi.js';
 import { getTerminalWidth } from '../../../utils/terminal.js';
 
@@ -63,48 +63,99 @@ export interface TableOptions {
 /**
  * Border character sets
  */
-const BORDERS: Record<BorderStyle, {
-  topLeft: string;
-  topRight: string;
-  bottomLeft: string;
-  bottomRight: string;
-  horizontal: string;
-  vertical: string;
-  cross: string;
-  topT: string;
-  bottomT: string;
-  leftT: string;
-  rightT: string;
-}> = {
+const BORDERS: Record<
+  BorderStyle,
+  {
+    topLeft: string;
+    topRight: string;
+    bottomLeft: string;
+    bottomRight: string;
+    horizontal: string;
+    vertical: string;
+    cross: string;
+    topT: string;
+    bottomT: string;
+    leftT: string;
+    rightT: string;
+  }
+> = {
   none: {
-    topLeft: '', topRight: '', bottomLeft: '', bottomRight: '',
-    horizontal: '', vertical: '', cross: '',
-    topT: '', bottomT: '', leftT: '', rightT: '',
+    topLeft: '',
+    topRight: '',
+    bottomLeft: '',
+    bottomRight: '',
+    horizontal: '',
+    vertical: '',
+    cross: '',
+    topT: '',
+    bottomT: '',
+    leftT: '',
+    rightT: '',
   },
   single: {
-    topLeft: '┌', topRight: '┐', bottomLeft: '└', bottomRight: '┘',
-    horizontal: '─', vertical: '│', cross: '┼',
-    topT: '┬', bottomT: '┴', leftT: '├', rightT: '┤',
+    topLeft: '┌',
+    topRight: '┐',
+    bottomLeft: '└',
+    bottomRight: '┘',
+    horizontal: '─',
+    vertical: '│',
+    cross: '┼',
+    topT: '┬',
+    bottomT: '┴',
+    leftT: '├',
+    rightT: '┤',
   },
   double: {
-    topLeft: '╔', topRight: '╗', bottomLeft: '╚', bottomRight: '╝',
-    horizontal: '═', vertical: '║', cross: '╬',
-    topT: '╦', bottomT: '╩', leftT: '╠', rightT: '╣',
+    topLeft: '╔',
+    topRight: '╗',
+    bottomLeft: '╚',
+    bottomRight: '╝',
+    horizontal: '═',
+    vertical: '║',
+    cross: '╬',
+    topT: '╦',
+    bottomT: '╩',
+    leftT: '╠',
+    rightT: '╣',
   },
   rounded: {
-    topLeft: '╭', topRight: '╮', bottomLeft: '╰', bottomRight: '╯',
-    horizontal: '─', vertical: '│', cross: '┼',
-    topT: '┬', bottomT: '┴', leftT: '├', rightT: '┤',
+    topLeft: '╭',
+    topRight: '╮',
+    bottomLeft: '╰',
+    bottomRight: '╯',
+    horizontal: '─',
+    vertical: '│',
+    cross: '┼',
+    topT: '┬',
+    bottomT: '┴',
+    leftT: '├',
+    rightT: '┤',
   },
   heavy: {
-    topLeft: '┏', topRight: '┓', bottomLeft: '┗', bottomRight: '┛',
-    horizontal: '━', vertical: '┃', cross: '╋',
-    topT: '┳', bottomT: '┻', leftT: '┣', rightT: '┫',
+    topLeft: '┏',
+    topRight: '┓',
+    bottomLeft: '┗',
+    bottomRight: '┛',
+    horizontal: '━',
+    vertical: '┃',
+    cross: '╋',
+    topT: '┳',
+    bottomT: '┻',
+    leftT: '┣',
+    rightT: '┫',
   },
   ascii: {
-    topLeft: '+', topRight: '+', bottomLeft: '+', bottomRight: '+',
-    horizontal: '-', vertical: '|', cross: '+',
-    topT: '+', bottomT: '+', leftT: '+', rightT: '+',
+    topLeft: '+',
+    topRight: '+',
+    bottomLeft: '+',
+    bottomRight: '+',
+    horizontal: '-',
+    vertical: '|',
+    cross: '+',
+    topT: '+',
+    bottomT: '+',
+    leftT: '+',
+    rightT: '+',
   },
 };
 
@@ -215,7 +266,9 @@ export class Table {
 
     // Top border
     if (hasBorder) {
-      lines.push(this.buildBorderLine(border.topLeft, border.horizontal, border.topT, border.topRight));
+      lines.push(
+        this.buildBorderLine(border.topLeft, border.horizontal, border.topT, border.topRight)
+      );
     }
 
     // Header
@@ -229,7 +282,9 @@ export class Table {
 
       if (hasBorder) {
         lines.push(border.vertical + headerCells.join(border.vertical) + border.vertical);
-        lines.push(this.buildBorderLine(border.leftT, border.horizontal, border.cross, border.rightT));
+        lines.push(
+          this.buildBorderLine(border.leftT, border.horizontal, border.cross, border.rightT)
+        );
       } else {
         lines.push(headerCells.join(' '));
       }
@@ -268,13 +323,22 @@ export class Table {
 
       // Row separator
       if (this.options.rowSeparator && i < this.data.length - 1 && hasBorder) {
-        lines.push(this.buildBorderLine(border.leftT, border.horizontal, border.cross, border.rightT));
+        lines.push(
+          this.buildBorderLine(border.leftT, border.horizontal, border.cross, border.rightT)
+        );
       }
     }
 
     // Bottom border
     if (hasBorder) {
-      lines.push(this.buildBorderLine(border.bottomLeft, border.horizontal, border.bottomT, border.bottomRight));
+      lines.push(
+        this.buildBorderLine(
+          border.bottomLeft,
+          border.horizontal,
+          border.bottomT,
+          border.bottomRight
+        )
+      );
     }
 
     return lines.join('\n');
@@ -395,7 +459,8 @@ export function tablePlugin(): CLIPlugin {
     version: '1.0.0',
 
     install(kernel: CLIKernel) {
-      kernel.on('command:before', async (data: any) => {
+      kernel.on('command:before', async (data: unknown) => {
+        const { context } = data as CommandBeforeEvent;
         const tableUtils: TableUtils = {
           create: (options?: TableOptions) => new Table(options),
           render: (data, options) => {
@@ -410,7 +475,7 @@ export function tablePlugin(): CLIPlugin {
           },
         };
 
-        data.context.table = tableUtils;
+        context.table = tableUtils;
       });
     },
   };

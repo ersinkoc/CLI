@@ -7,9 +7,7 @@
 
 import { cli } from '@oxog/cli';
 
-const app = cli('hello')
-  .version('1.0.0')
-  .describe('A simple hello world CLI');
+const app = cli('hello').version('1.0.0').describe('A simple hello world CLI');
 
 // Add a simple command
 app

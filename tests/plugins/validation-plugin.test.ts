@@ -37,12 +37,8 @@ describe('Validation Plugin', () => {
     validationPlugin().install(kernel);
 
     const command = {
-      arguments: [
-        { name: 'input', required: true },
-      ],
-      options: [
-        { name: 'output', required: true },
-      ],
+      arguments: [{ name: 'input', required: true }],
+      options: [{ name: 'output', required: true }],
     };
 
     const context = {
@@ -58,9 +54,7 @@ describe('Validation Plugin', () => {
     validationPlugin().install(kernel);
 
     const command = {
-      arguments: [
-        { name: 'input', required: true },
-      ],
+      arguments: [{ name: 'input', required: true }],
       options: [],
     };
 
@@ -69,7 +63,9 @@ describe('Validation Plugin', () => {
       options: {},
     };
 
-    await expect(kernel.emit('command:before', { command, context })).rejects.toThrow(ValidationError);
+    await expect(kernel.emit('command:before', { command, context })).rejects.toThrow(
+      ValidationError
+    );
   });
 
   it('should throw ValidationError for missing required option', async () => {
@@ -77,9 +73,7 @@ describe('Validation Plugin', () => {
 
     const command = {
       arguments: [],
-      options: [
-        { name: 'output', required: true },
-      ],
+      options: [{ name: 'output', required: true }],
     };
 
     const context = {
@@ -87,16 +81,16 @@ describe('Validation Plugin', () => {
       options: {},
     };
 
-    await expect(kernel.emit('command:before', { command, context })).rejects.toThrow(ValidationError);
+    await expect(kernel.emit('command:before', { command, context })).rejects.toThrow(
+      ValidationError
+    );
   });
 
   it('should throw ValidationError for failed custom argument validation', async () => {
     validationPlugin().install(kernel);
 
     const command = {
-      arguments: [
-        { name: 'age', validate: (v: number) => v >= 18 || 'Must be 18 or older' },
-      ],
+      arguments: [{ name: 'age', validate: (v: number) => v >= 18 || 'Must be 18 or older' }],
       options: [],
     };
 
@@ -105,16 +99,16 @@ describe('Validation Plugin', () => {
       options: {},
     };
 
-    await expect(kernel.emit('command:before', { command, context })).rejects.toThrow(ValidationError);
+    await expect(kernel.emit('command:before', { command, context })).rejects.toThrow(
+      ValidationError
+    );
   });
 
   it('should pass custom argument validation when valid', async () => {
     validationPlugin().install(kernel);
 
     const command = {
-      arguments: [
-        { name: 'age', validate: (v: number) => v >= 18 || 'Must be 18 or older' },
-      ],
+      arguments: [{ name: 'age', validate: (v: number) => v >= 18 || 'Must be 18 or older' }],
       options: [],
     };
 
@@ -132,9 +126,7 @@ describe('Validation Plugin', () => {
 
     const command = {
       arguments: [],
-      options: [
-        { name: 'port', validate: (v: number) => v > 0 || 'Must be positive' },
-      ],
+      options: [{ name: 'port', validate: (v: number) => v > 0 || 'Must be positive' }],
     };
 
     const context = {
@@ -142,7 +134,9 @@ describe('Validation Plugin', () => {
       options: { port: -1 },
     };
 
-    await expect(kernel.emit('command:before', { command, context })).rejects.toThrow(ValidationError);
+    await expect(kernel.emit('command:before', { command, context })).rejects.toThrow(
+      ValidationError
+    );
   });
 
   it('should throw ValidationError for invalid choice', async () => {
@@ -150,9 +144,7 @@ describe('Validation Plugin', () => {
 
     const command = {
       arguments: [],
-      options: [
-        { name: 'format', choices: ['json', 'yaml'] },
-      ],
+      options: [{ name: 'format', choices: ['json', 'yaml'] }],
     };
 
     const context = {
@@ -160,7 +152,9 @@ describe('Validation Plugin', () => {
       options: { format: 'xml' },
     };
 
-    await expect(kernel.emit('command:before', { command, context })).rejects.toThrow(ValidationError);
+    await expect(kernel.emit('command:before', { command, context })).rejects.toThrow(
+      ValidationError
+    );
   });
 
   it('should pass validation for valid choice', async () => {
@@ -168,9 +162,7 @@ describe('Validation Plugin', () => {
 
     const command = {
       arguments: [],
-      options: [
-        { name: 'format', choices: ['json', 'yaml'] },
-      ],
+      options: [{ name: 'format', choices: ['json', 'yaml'] }],
     };
 
     const context = {
@@ -187,9 +179,7 @@ describe('Validation Plugin', () => {
 
     const command = {
       arguments: [],
-      options: [
-        { name: 'formats', choices: ['json', 'yaml', 'xml'] },
-      ],
+      options: [{ name: 'formats', choices: ['json', 'yaml', 'xml'] }],
     };
 
     const context = {
@@ -206,9 +196,7 @@ describe('Validation Plugin', () => {
 
     const command = {
       arguments: [],
-      options: [
-        { name: 'formats', choices: ['json', 'yaml'] },
-      ],
+      options: [{ name: 'formats', choices: ['json', 'yaml'] }],
     };
 
     const context = {
@@ -216,7 +204,9 @@ describe('Validation Plugin', () => {
       options: { formats: ['json', 'xml'] },
     };
 
-    await expect(kernel.emit('command:before', { command, context })).rejects.toThrow(ValidationError);
+    await expect(kernel.emit('command:before', { command, context })).rejects.toThrow(
+      ValidationError
+    );
   });
 
   it('should skip validation when value is undefined and not required', async () => {

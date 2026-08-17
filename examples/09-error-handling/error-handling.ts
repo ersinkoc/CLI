@@ -6,12 +6,11 @@
 
 import { cli } from '../../src/index.js';
 
-const app = cli('myapp')
-  .version('1.0.0')
-  .description('Error handling example');
+const app = cli('myapp').version('1.0.0').description('Error handling example');
 
 // Command with try-catch
-app.command('safe')
+app
+  .command('safe')
   .description('Safe command with manual error handling')
   .action(async () => {
     try {
@@ -27,14 +26,16 @@ app.command('safe')
   });
 
 // Command that throws
-app.command('unsafe')
+app
+  .command('unsafe')
   .description('Command that throws (will be caught by framework)')
   .action(async () => {
     throw new Error('This command always fails!');
   });
 
 // Command with validation
-app.command('validate')
+app
+  .command('validate')
   .description('Command with input validation')
   .argument('name', 'Name to validate')
   .action(async ({ args }) => {
@@ -47,13 +48,17 @@ app.command('validate')
 
 // Command with custom error class
 class ValidationError extends Error {
-  constructor(message: string, public field: string) {
+  constructor(
+    message: string,
+    public field: string
+  ) {
     super(message);
     this.name = 'ValidationError';
   }
 }
 
-app.command('custom-error')
+app
+  .command('custom-error')
   .description('Command with custom error class')
   .argument('email', 'Email address')
   .action(async ({ args }) => {

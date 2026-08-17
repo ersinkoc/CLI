@@ -4,13 +4,16 @@ import { Copy, Check, ArrowLeft } from 'lucide-react';
 import { CodeBlock } from '@/components/CodeBlock';
 import { codeExamples } from '@/lib/constants';
 
-const examplesData: Record<string, {
-  title: string;
-  description: string;
-  category: string;
-  code: string;
-  explanation?: string;
-}> = {
+const examplesData: Record<
+  string,
+  {
+    title: string;
+    description: string;
+    category: string;
+    code: string;
+    explanation?: string;
+  }
+> = {
   'hello-world': {
     title: 'Hello World',
     description: 'The simplest CLI application - greet the world!',
@@ -26,14 +29,16 @@ const app = cli('hello')
     });
 
 app.run();`,
-    explanation: 'This is the most basic CLI you can create. It defines a single command `world` that prints "Hello, World!" when executed.',
+    explanation:
+      'This is the most basic CLI you can create. It defines a single command `world` that prints "Hello, World!" when executed.',
   },
   greeting: {
     title: 'Greeting Command',
     description: 'A personalized greeting with name and loud options.',
     category: 'Basic',
     code: codeExamples.quickStart,
-    explanation: 'This example shows how to add arguments and options to your commands. The `<name>` argument is required, while `--loud` is an optional flag.',
+    explanation:
+      'This example shows how to add arguments and options to your commands. The `<name>` argument is required, while `--loud` is an optional flag.',
   },
   'file-ops': {
     title: 'File Operations',
@@ -67,7 +72,8 @@ const app = cli('fileops')
     });
 
 app.run();`,
-    explanation: 'A practical example showing file reading and writing operations with command-line options.',
+    explanation:
+      'A practical example showing file reading and writing operations with command-line options.',
   },
   'data-processing': {
     title: 'Data Processing',
@@ -113,7 +119,8 @@ app.run();`,
     description: 'Organize commands with nested subcommands.',
     category: 'Intermediate',
     code: codeExamples.subcommands,
-    explanation: 'Subcommands allow you to organize related commands hierarchically, similar to git or docker.',
+    explanation:
+      'Subcommands allow you to organize related commands hierarchically, similar to git or docker.',
   },
   interactive: {
     title: 'Interactive CLI',
@@ -165,7 +172,8 @@ const app = cli('init')
     });
 
 app.run();`,
-    explanation: 'Uses the prompt plugin to create an interactive project initialization experience.',
+    explanation:
+      'Uses the prompt plugin to create an interactive project initialization experience.',
   },
   progress: {
     title: 'Progress Bars',
@@ -559,9 +567,10 @@ function MainExamplesPage() {
 
   const examplesList = Object.entries(examplesData).map(([id, ex]) => ({ id, ...ex }));
 
-  const filteredExamples = selectedCategory === 'All'
-    ? examplesList
-    : examplesList.filter(ex => ex.category === selectedCategory);
+  const filteredExamples =
+    selectedCategory === 'All'
+      ? examplesList
+      : examplesList.filter((ex) => ex.category === selectedCategory);
 
   return (
     <div className="container px-4 py-8 sm:px-6 lg:px-8">
@@ -609,7 +618,17 @@ function MainExamplesPage() {
   );
 }
 
-function ExampleDetail({ example }: { example: { title: string; description: string; category: string; code: string; explanation?: string } }) {
+function ExampleDetail({
+  example,
+}: {
+  example: {
+    title: string;
+    description: string;
+    category: string;
+    code: string;
+    explanation?: string;
+  };
+}) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -623,7 +642,9 @@ function ExampleDetail({ example }: { example: { title: string; description: str
       <div className="mx-auto max-w-4xl">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
-          <Link to="/examples" className="hover:text-foreground">Examples</Link>
+          <Link to="/examples" className="hover:text-foreground">
+            Examples
+          </Link>
           <span>/</span>
           <span className="text-foreground">{example.title}</span>
         </nav>
@@ -665,11 +686,7 @@ function ExampleDetail({ example }: { example: { title: string; description: str
           </div>
         </div>
 
-        <CodeBlock
-          code={example.code}
-          language="typescript"
-          showLineNumbers={true}
-        />
+        <CodeBlock code={example.code} language="typescript" showLineNumbers={true} />
 
         {/* Related Links */}
         <div className="mt-8 p-4 rounded-lg bg-muted/50">
@@ -691,7 +708,10 @@ function ExampleDetail({ example }: { example: { title: string; description: str
         </div>
 
         <div className="mt-8">
-          <Link to="/examples" className="text-primary hover:underline inline-flex items-center gap-2">
+          <Link
+            to="/examples"
+            className="text-primary hover:underline inline-flex items-center gap-2"
+          >
             <ArrowLeft className="h-4 w-4" />
             Back to Examples
           </Link>

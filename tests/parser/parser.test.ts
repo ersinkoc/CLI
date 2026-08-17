@@ -3,7 +3,14 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { parse, parseArguments, parseOptions, parseArgumentDef, parseOptionFlags, coerceOptionValue } from '../../src/parser/index.js';
+import {
+  parse,
+  parseArguments,
+  parseOptions,
+  parseArgumentDef,
+  parseOptionFlags,
+  coerceOptionValue,
+} from '../../src/parser/index.js';
 import { tokenize, isNegativeNumber } from '../../src/parser/tokenizer.js';
 import type { ArgumentDef, OptionDef } from '../../src/types.js';
 
@@ -38,18 +45,14 @@ describe('Argument Parser', () => {
     });
 
     it('should parse variadic arguments', () => {
-      const defs: ArgumentDef[] = [
-        { name: 'files', required: true, variadic: true },
-      ];
+      const defs: ArgumentDef[] = [{ name: 'files', required: true, variadic: true }];
       const tokens = tokenize(['file1.txt', 'file2.txt', 'file3.txt']);
       const result = parseArguments(tokens, defs);
       expect(result.values).toEqual({ files: ['file1.txt', 'file2.txt', 'file3.txt'] });
     });
 
     it('should return remaining tokens', () => {
-      const defs: ArgumentDef[] = [
-        { name: 'input', required: true },
-      ];
+      const defs: ArgumentDef[] = [{ name: 'input', required: true }];
       const tokens = tokenize(['file1.txt', '--verbose']);
       const result = parseArguments(tokens, defs);
       expect(result.values).toEqual({ input: 'file1.txt' });
@@ -68,9 +71,7 @@ describe('Argument Parser', () => {
     });
 
     it('should validate required arguments', () => {
-      const defs: ArgumentDef[] = [
-        { name: 'input', required: true },
-      ];
+      const defs: ArgumentDef[] = [{ name: 'input', required: true }];
       const tokens = tokenize([]);
       const result = parseArguments(tokens, defs);
       expect(result.errors).toHaveLength(1);
@@ -88,9 +89,7 @@ describe('Argument Parser', () => {
     });
 
     it('should use default values for missing required arguments', () => {
-      const defs: ArgumentDef[] = [
-        { name: 'input', required: true, default: 'default.txt' },
-      ];
+      const defs: ArgumentDef[] = [{ name: 'input', required: true, default: 'default.txt' }];
       const tokens = tokenize([]);
       const result = parseArguments(tokens, defs);
       expect(result.values.input).toBe('default.txt');
@@ -116,9 +115,7 @@ describe('Argument Parser', () => {
     });
 
     it('should handle number coercion error', () => {
-      const defs: ArgumentDef[] = [
-        { name: 'count', required: true, type: 'number' },
-      ];
+      const defs: ArgumentDef[] = [{ name: 'count', required: true, type: 'number' }];
       const tokens = tokenize(['not-a-number']);
       const result = parseArguments(tokens, defs);
       expect(result.errors).toHaveLength(1);
@@ -127,9 +124,13 @@ describe('Argument Parser', () => {
 
     it('should handle custom coercion error', () => {
       const defs: ArgumentDef[] = [
-        { name: 'value', required: true, coerce: () => {
-          throw new Error('Invalid');
-        }},
+        {
+          name: 'value',
+          required: true,
+          coerce: () => {
+            throw new Error('Invalid');
+          },
+        },
       ];
       const tokens = tokenize(['test']);
       const result = parseArguments(tokens, defs);
@@ -139,7 +140,11 @@ describe('Argument Parser', () => {
 
     it('should validate arguments', () => {
       const defs: ArgumentDef[] = [
-        { name: 'port', required: true, validate: (v) => (typeof v === 'number' && v > 0 ? true : 'Port must be positive') },
+        {
+          name: 'port',
+          required: true,
+          validate: (v) => (typeof v === 'number' && v > 0 ? true : 'Port must be positive'),
+        },
       ];
       const tokens = tokenize(['-1']);
       const result = parseArguments(tokens, defs);
@@ -148,37 +153,29 @@ describe('Argument Parser', () => {
     });
 
     it('should keep non-argument tokens in remaining', () => {
-      const defs: ArgumentDef[] = [
-        { name: 'input', required: true },
-      ];
+      const defs: ArgumentDef[] = [{ name: 'input', required: true }];
       const tokens = tokenize(['file.txt', '--option', 'value']);
       const result = parseArguments(tokens, defs);
       expect(result.values.input).toBe('file.txt');
-      expect(result.remaining.some(t => t.type === 'option')).toBe(true);
+      expect(result.remaining.some((t) => t.type === 'option')).toBe(true);
     });
 
     it('should handle boolean "false" as false', () => {
-      const defs: ArgumentDef[] = [
-        { name: 'flag', required: true, type: 'boolean' },
-      ];
+      const defs: ArgumentDef[] = [{ name: 'flag', required: true, type: 'boolean' }];
       const tokens = tokenize(['false']);
       const result = parseArguments(tokens, defs);
       expect(result.values.flag).toBe(false);
     });
 
     it('should handle boolean "1" as true', () => {
-      const defs: ArgumentDef[] = [
-        { name: 'flag', required: true, type: 'boolean' },
-      ];
+      const defs: ArgumentDef[] = [{ name: 'flag', required: true, type: 'boolean' }];
       const tokens = tokenize(['1']);
       const result = parseArguments(tokens, defs);
       expect(result.values.flag).toBe(true);
     });
 
     it('should handle boolean other values as false', () => {
-      const defs: ArgumentDef[] = [
-        { name: 'flag', required: true, type: 'boolean' },
-      ];
+      const defs: ArgumentDef[] = [{ name: 'flag', required: true, type: 'boolean' }];
       const tokens = tokenize(['yes']);
       const result = parseArguments(tokens, defs);
       expect(result.values.flag).toBe(false);
@@ -230,72 +227,56 @@ describe('Option Parser', () => {
   });
 
   it('should parse boolean flags', () => {
-    const defs: OptionDef[] = [
-      { name: 'verbose', alias: 'v', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'verbose', alias: 'v', type: 'boolean' }];
     const tokens = tokenize(['--verbose']);
     const result = parseOptions(tokens, defs);
     expect(result.values.verbose).toBe(true);
   });
 
   it('should parse short boolean flags', () => {
-    const defs: OptionDef[] = [
-      { name: 'verbose', alias: 'v', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'verbose', alias: 'v', type: 'boolean' }];
     const tokens = tokenize(['-v']);
     const result = parseOptions(tokens, defs);
     expect(result.values.verbose).toBe(true);
   });
 
   it('should parse string options', () => {
-    const defs: OptionDef[] = [
-      { name: 'output', alias: 'o', type: 'string' },
-    ];
+    const defs: OptionDef[] = [{ name: 'output', alias: 'o', type: 'string' }];
     const tokens = tokenize(['--output', 'dist']);
     const result = parseOptions(tokens, defs);
     expect(result.values.output).toBe('dist');
   });
 
   it('should parse number options', () => {
-    const defs: OptionDef[] = [
-      { name: 'port', alias: 'p', type: 'number' },
-    ];
+    const defs: OptionDef[] = [{ name: 'port', alias: 'p', type: 'number' }];
     const tokens = tokenize(['--port', '3000']);
     const result = parseOptions(tokens, defs);
     expect(result.values.port).toBe(3000);
   });
 
   it('should use default values', () => {
-    const defs: OptionDef[] = [
-      { name: 'port', type: 'number', default: 3000 },
-    ];
+    const defs: OptionDef[] = [{ name: 'port', type: 'number', default: 3000 }];
     const tokens = tokenize([]);
     const result = parseOptions(tokens, defs);
     expect(result.values.port).toBe(3000);
   });
 
   it('should override defaults with provided values', () => {
-    const defs: OptionDef[] = [
-      { name: 'port', type: 'number', default: 3000 },
-    ];
+    const defs: OptionDef[] = [{ name: 'port', type: 'number', default: 3000 }];
     const tokens = tokenize(['--port', '8080']);
     const result = parseOptions(tokens, defs);
     expect(result.values.port).toBe(8080);
   });
 
   it('should parse options with equals', () => {
-    const defs: OptionDef[] = [
-      { name: 'output', type: 'string' },
-    ];
+    const defs: OptionDef[] = [{ name: 'output', type: 'string' }];
     const tokens = tokenize(['--output=dist']);
     const result = parseOptions(tokens, defs);
     expect(result.values.output).toBe('dist');
   });
 
   it('should return remaining non-option tokens', () => {
-    const defs: OptionDef[] = [
-      { name: 'verbose', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'verbose', type: 'boolean' }];
     const tokens = tokenize(['--verbose', 'file.txt']);
     const result = parseOptions(tokens, defs);
     expect(result.values.verbose).toBe(true);
@@ -321,18 +302,14 @@ describe('Option Parser', () => {
   });
 
   it('should parse array options via multiple flags', () => {
-    const defs: OptionDef[] = [
-      { name: 'items', type: 'array' },
-    ];
+    const defs: OptionDef[] = [{ name: 'items', type: 'array' }];
     const tokens = tokenize(['--items', 'a', '--items', 'b', '--items', 'c']);
     const result = parseOptions(tokens, defs);
     expect(result.values.items).toEqual(['a', 'b', 'c']);
   });
 
   it('should not split array values by comma (preserves "San Francisco, CA")', () => {
-    const defs: OptionDef[] = [
-      { name: 'items', type: 'array' },
-    ];
+    const defs: OptionDef[] = [{ name: 'items', type: 'array' }];
     const tokens = tokenize(['--items', 'San Francisco, CA']);
     const result = parseOptions(tokens, defs);
     // Should be single element, not split by comma
@@ -340,18 +317,14 @@ describe('Option Parser', () => {
   });
 
   it('should parse object options (key=value)', () => {
-    const defs: OptionDef[] = [
-      { name: 'config', type: 'object' },
-    ];
+    const defs: OptionDef[] = [{ name: 'config', type: 'object' }];
     const tokens = tokenize(['--config', 'key=value']);
     const result = parseOptions(tokens, defs);
     expect(result.values.config).toEqual({ key: 'value' });
   });
 
   it('should parse object options (key only)', () => {
-    const defs: OptionDef[] = [
-      { name: 'feature', type: 'object' },
-    ];
+    const defs: OptionDef[] = [{ name: 'feature', type: 'object' }];
     const tokens = tokenize(['--feature', 'myFeature']);
     const result = parseOptions(tokens, defs);
     expect(result.values.feature).toEqual({ myFeature: true });
@@ -368,9 +341,7 @@ describe('Option Parser', () => {
   });
 
   it('should error for invalid choice', () => {
-    const defs: OptionDef[] = [
-      { name: 'format', type: 'string', choices: ['json', 'yaml'] },
-    ];
+    const defs: OptionDef[] = [{ name: 'format', type: 'string', choices: ['json', 'yaml'] }];
     const tokens = tokenize(['--format', 'xml']);
     const result = parseOptions(tokens, defs);
     expect(result.errors).toHaveLength(1);
@@ -387,18 +358,14 @@ describe('Option Parser', () => {
   });
 
   it('should error for invalid array choice', () => {
-    const defs: OptionDef[] = [
-      { name: 'formats', type: 'array', choices: ['json', 'yaml'] },
-    ];
+    const defs: OptionDef[] = [{ name: 'formats', type: 'array', choices: ['json', 'yaml'] }];
     const tokens = tokenize(['--formats', 'json', '--formats', 'xml']);
     const result = parseOptions(tokens, defs);
     expect(result.errors.length).toBeGreaterThan(0);
   });
 
   it('should report unknown options in strict mode', () => {
-    const defs: OptionDef[] = [
-      { name: 'verbose', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'verbose', type: 'boolean' }];
     const tokens = tokenize(['--unknown', '--verbose']);
     const result = parseOptions(tokens, defs, true);
     expect(result.errors).toHaveLength(1);
@@ -406,63 +373,49 @@ describe('Option Parser', () => {
   });
 
   it('should track unknown options', () => {
-    const defs: OptionDef[] = [
-      { name: 'verbose', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'verbose', type: 'boolean' }];
     const tokens = tokenize(['--unknown1', '--unknown2']);
     const result = parseOptions(tokens, defs);
     expect(result.unknown).toEqual(['unknown1', 'unknown2']);
   });
 
   it('should not error for unknown options in non-strict mode', () => {
-    const defs: OptionDef[] = [
-      { name: 'verbose', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'verbose', type: 'boolean' }];
     const tokens = tokenize(['--unknown']);
     const result = parseOptions(tokens, defs, false);
     expect(result.errors).toHaveLength(0);
   });
 
   it('should handle explicit boolean values', () => {
-    const defs: OptionDef[] = [
-      { name: 'enabled', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'enabled', type: 'boolean' }];
     const tokens = tokenize(['--enabled', 'true']);
     const result = parseOptions(tokens, defs);
     expect(result.values.enabled).toBe(true);
   });
 
   it('should parse boolean with explicit values', () => {
-    const defs: OptionDef[] = [
-      { name: 'enabled', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'enabled', type: 'boolean' }];
     const tokens = tokenize(['--enabled', 'true']);
     const result = parseOptions(tokens, defs);
     expect(result.values.enabled).toBe(true);
   });
 
   it('should parse boolean "yes" as true', () => {
-    const defs: OptionDef[] = [
-      { name: 'enabled', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'enabled', type: 'boolean' }];
     const tokens = tokenize(['--enabled', 'yes']);
     const result = parseOptions(tokens, defs);
     expect(result.values.enabled).toBe(true);
   });
 
   it('should parse boolean 1 as true', () => {
-    const defs: OptionDef[] = [
-      { name: 'enabled', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'enabled', type: 'boolean' }];
     const tokens = tokenize(['--enabled', '1']);
     const result = parseOptions(tokens, defs);
     expect(result.values.enabled).toBe(true);
   });
 
   it('should handle missing required value', () => {
-    const defs: OptionDef[] = [
-      { name: 'output', type: 'string' },
-    ];
+    const defs: OptionDef[] = [{ name: 'output', type: 'string' }];
     const tokens = tokenize(['--output']);
     const result = parseOptions(tokens, defs);
     expect(result.errors).toHaveLength(1);
@@ -470,9 +423,7 @@ describe('Option Parser', () => {
   });
 
   it('should handle number coercion error', () => {
-    const defs: OptionDef[] = [
-      { name: 'port', type: 'number' },
-    ];
+    const defs: OptionDef[] = [{ name: 'port', type: 'number' }];
     const tokens = tokenize(['--port', 'not-a-number']);
     const result = parseOptions(tokens, defs);
     expect(result.errors).toHaveLength(1);
@@ -481,10 +432,14 @@ describe('Option Parser', () => {
 
   it('should handle custom coerce error', () => {
     const defs: OptionDef[] = [
-      { name: 'value', type: 'string', coerce: (v) => {
-        if (v === 'invalid') throw new Error('Invalid value');
-        return v;
-      }},
+      {
+        name: 'value',
+        type: 'string',
+        coerce: (v) => {
+          if (v === 'invalid') throw new Error('Invalid value');
+          return v;
+        },
+      },
     ];
     const tokens = tokenize(['--value', 'invalid']);
     const result = parseOptions(tokens, defs);
@@ -493,9 +448,7 @@ describe('Option Parser', () => {
   });
 
   it('should use default when no value provided and default exists', () => {
-    const defs: OptionDef[] = [
-      { name: 'output', type: 'string', default: 'dist' },
-    ];
+    const defs: OptionDef[] = [{ name: 'output', type: 'string', default: 'dist' }];
     const tokens = tokenize(['--output']);
     const result = parseOptions(tokens, defs);
     expect(result.values.output).toBe('dist');
@@ -514,9 +467,7 @@ describe('Option Parser', () => {
   });
 
   it('should handle alias options', () => {
-    const defs: OptionDef[] = [
-      { name: 'verbose', alias: 'v', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'verbose', alias: 'v', type: 'boolean' }];
     const tokens = tokenize(['-v']);
     const result = parseOptions(tokens, defs);
     expect(result.values.verbose).toBe(true);
@@ -537,7 +488,7 @@ describe('Option Parser', () => {
 
   it('should handle custom validation failure', () => {
     const defs: OptionDef[] = [
-      { name: 'port', type: 'number', validate: (v) => v > 0 ? true : 'Port must be positive' },
+      { name: 'port', type: 'number', validate: (v) => (v > 0 ? true : 'Port must be positive') },
     ];
     const tokens = tokenize(['--port', '-1']);
     const result = parseOptions(tokens, defs);
@@ -549,9 +500,7 @@ describe('Option Parser', () => {
     // When negatable option is registered, byName has both 'color' and 'no-color'
     // But we look up by token value 'no-color', which won't match 'color' directly
     // The implementation handles this through the negatable check at lines 92-102
-    const defs: OptionDef[] = [
-      { name: 'color', type: 'boolean', negatable: true },
-    ];
+    const defs: OptionDef[] = [{ name: 'color', type: 'boolean', negatable: true }];
     // Need to manually register the no- form for this to work in current impl
     const extendedDefs = [...defs, { name: 'no-color', type: 'boolean' }];
     const tokens = tokenize(['--no-color']);
@@ -561,18 +510,14 @@ describe('Option Parser', () => {
   });
 
   it('should handle regular negatable option set to true', () => {
-    const defs: OptionDef[] = [
-      { name: 'color', type: 'boolean', negatable: true },
-    ];
+    const defs: OptionDef[] = [{ name: 'color', type: 'boolean', negatable: true }];
     const tokens = tokenize(['--color']);
     const result = parseOptions(tokens, defs);
     expect(result.values.color).toBe(true);
   });
 
   it('should handle negatable option with explicit false value', () => {
-    const defs: OptionDef[] = [
-      { name: 'color', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'color', type: 'boolean' }];
     // 'false' is tokenized as an argument, not a value, so it won't be consumed
     // The boolean option --color without a value token defaults to true
     const tokens = tokenize(['--color', 'false']);
@@ -584,54 +529,42 @@ describe('Option Parser', () => {
   });
 
   it('should handle negatable option with default value', () => {
-    const defs: OptionDef[] = [
-      { name: 'color', type: 'boolean', default: true },
-    ];
+    const defs: OptionDef[] = [{ name: 'color', type: 'boolean', default: true }];
     const tokens = tokenize([]);
     const result = parseOptions(tokens, defs);
     expect(result.values.color).toBe(true);
   });
 
   it('should handle option with equals separator', () => {
-    const defs: OptionDef[] = [
-      { name: 'port', type: 'number' },
-    ];
+    const defs: OptionDef[] = [{ name: 'port', type: 'number' }];
     const tokens = tokenize(['--port=3000']);
     const result = parseOptions(tokens, defs);
     expect(result.values.port).toBe(3000);
   });
 
   it('should handle option with equals separator and string value', () => {
-    const defs: OptionDef[] = [
-      { name: 'output', type: 'string' },
-    ];
+    const defs: OptionDef[] = [{ name: 'output', type: 'string' }];
     const tokens = tokenize(['--output=dist']);
     const result = parseOptions(tokens, defs);
     expect(result.values.output).toBe('dist');
   });
 
   it('should handle object option without = separator', () => {
-    const defs: OptionDef[] = [
-      { name: 'feature', type: 'object' },
-    ];
+    const defs: OptionDef[] = [{ name: 'feature', type: 'object' }];
     const tokens = tokenize(['--feature', 'myFeature']);
     const result = parseOptions(tokens, defs);
     expect(result.values.feature).toEqual({ myFeature: true });
   });
 
   it('should handle object option with = separator', () => {
-    const defs: OptionDef[] = [
-      { name: 'config', type: 'object' },
-    ];
+    const defs: OptionDef[] = [{ name: 'config', type: 'object' }];
     const tokens = tokenize(['--config', 'key=value']);
     const result = parseOptions(tokens, defs);
     expect(result.values.config).toEqual({ key: 'value' });
   });
 
   it('should preserve whitespace in array values (no trimming)', () => {
-    const defs: OptionDef[] = [
-      { name: 'items', type: 'array' },
-    ];
+    const defs: OptionDef[] = [{ name: 'items', type: 'array' }];
     const tokens = tokenize(['--items', 'a, b , c']);
     const result = parseOptions(tokens, defs);
     // Values are not split or trimmed - entire string is one array element
@@ -648,9 +581,7 @@ describe('Option Parser', () => {
   });
 
   it('should error for invalid choice in array options', () => {
-    const defs: OptionDef[] = [
-      { name: 'formats', type: 'array', choices: ['json', 'yaml'] },
-    ];
+    const defs: OptionDef[] = [{ name: 'formats', type: 'array', choices: ['json', 'yaml'] }];
     const tokens = tokenize(['--formats', 'json', '--formats', 'xml']);
     const result = parseOptions(tokens, defs);
     expect(result.errors.length).toBeGreaterThan(0);
@@ -658,45 +589,35 @@ describe('Option Parser', () => {
   });
 
   it('should handle boolean option with explicit value "true"', () => {
-    const defs: OptionDef[] = [
-      { name: 'verbose', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'verbose', type: 'boolean' }];
     const tokens = tokenize(['--verbose', 'true']);
     const result = parseOptions(tokens, defs);
     expect(result.values.verbose).toBe(true);
   });
 
   it('should handle boolean option with explicit value "yes"', () => {
-    const defs: OptionDef[] = [
-      { name: 'verbose', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'verbose', type: 'boolean' }];
     const tokens = tokenize(['--verbose', 'yes']);
     const result = parseOptions(tokens, defs);
     expect(result.values.verbose).toBe(true);
   });
 
   it('should handle boolean option with explicit value "1"', () => {
-    const defs: OptionDef[] = [
-      { name: 'verbose', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'verbose', type: 'boolean' }];
     const tokens = tokenize(['--verbose', '1']);
     const result = parseOptions(tokens, defs);
     expect(result.values.verbose).toBe(true);
   });
 
   it('should coerce boolean string values', () => {
-    const defs: OptionDef[] = [
-      { name: 'enabled', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'enabled', type: 'boolean' }];
     const tokens = tokenize(['--enabled', 'yes']);
     const result = parseOptions(tokens, defs);
     expect(result.values.enabled).toBe(true);
   });
 
   it('should handle boolean option with explicit value using = syntax', () => {
-    const defs: OptionDef[] = [
-      { name: 'verbose', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'verbose', type: 'boolean' }];
     // Using --option=value syntax produces a 'value' type token
     const tokens = tokenize(['--verbose=true']);
     const result = parseOptions(tokens, defs);
@@ -704,9 +625,7 @@ describe('Option Parser', () => {
   });
 
   it('should handle boolean option with "yes" using = syntax', () => {
-    const defs: OptionDef[] = [
-      { name: 'enabled', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'enabled', type: 'boolean' }];
     const tokens = tokenize(['--enabled=yes']);
     const result = parseOptions(tokens, defs);
     expect(result.values.enabled).toBe(true);
@@ -852,9 +771,7 @@ describe('parse', () => {
       { name: 'input', required: true },
       { name: 'output', required: true },
     ];
-    const optDefs: OptionDef[] = [
-      { name: 'verbose', alias: 'v', type: 'boolean' },
-    ];
+    const optDefs: OptionDef[] = [{ name: 'verbose', alias: 'v', type: 'boolean' }];
     const result = parse(['input.txt', 'output.txt', '--verbose'], argDefs, optDefs);
 
     expect(result.args.input).toBe('input.txt');
@@ -864,12 +781,8 @@ describe('parse', () => {
   });
 
   it('should parse options before arguments', () => {
-    const argDefs: ArgumentDef[] = [
-      { name: 'input', required: true },
-    ];
-    const optDefs: OptionDef[] = [
-      { name: 'port', alias: 'p', type: 'number' },
-    ];
+    const argDefs: ArgumentDef[] = [{ name: 'input', required: true }];
+    const optDefs: OptionDef[] = [{ name: 'port', alias: 'p', type: 'number' }];
     // Note: standalone '3000' is tokenized as an 'argument', not a 'value'
     // The options parser expects value tokens, so '3000' won't be consumed
     const result = parse(['--port', '3000', 'file.txt'], argDefs, optDefs);
@@ -902,18 +815,14 @@ describe('parse', () => {
       { name: 'input', required: true },
       { name: 'output', required: true },
     ];
-    const optDefs: OptionDef[] = [
-      { name: 'port', type: 'number' },
-    ];
+    const optDefs: OptionDef[] = [{ name: 'port', type: 'number' }];
     const result = parse(['--port', 'not-a-number'], argDefs, optDefs);
 
     expect(result.errors.length).toBeGreaterThan(0);
   });
 
   it('should return remaining unparsed tokens', () => {
-    const argDefs: ArgumentDef[] = [
-      { name: 'input', required: true },
-    ];
+    const argDefs: ArgumentDef[] = [{ name: 'input', required: true }];
     const optDefs: OptionDef[] = [];
     const result = parse(['file.txt', 'extra1', 'extra2'], argDefs, optDefs);
 
@@ -923,9 +832,7 @@ describe('parse', () => {
 
   it('should track unknown options', () => {
     const argDefs: ArgumentDef[] = [];
-    const optDefs: OptionDef[] = [
-      { name: 'verbose', type: 'boolean' },
-    ];
+    const optDefs: OptionDef[] = [{ name: 'verbose', type: 'boolean' }];
     const result = parse(['--verbose', '--unknown'], argDefs, optDefs);
 
     expect(result.unknown).toEqual(['unknown']);
@@ -933,9 +840,7 @@ describe('parse', () => {
 
   it('should error on unknown options in strict mode', () => {
     const argDefs: ArgumentDef[] = [];
-    const optDefs: OptionDef[] = [
-      { name: 'verbose', type: 'boolean' },
-    ];
+    const optDefs: OptionDef[] = [{ name: 'verbose', type: 'boolean' }];
     const result = parse(['--verbose', '--unknown'], argDefs, optDefs, true);
 
     expect(result.errors.length).toBeGreaterThan(0);
@@ -953,12 +858,8 @@ describe('parse', () => {
   });
 
   it('should handle options with equals separator', () => {
-    const argDefs: ArgumentDef[] = [
-      { name: 'input', required: true },
-    ];
-    const optDefs: OptionDef[] = [
-      { name: 'output', type: 'string' },
-    ];
+    const argDefs: ArgumentDef[] = [{ name: 'input', required: true }];
+    const optDefs: OptionDef[] = [{ name: 'output', type: 'string' }];
     const result = parse(['--output=dist', 'file.txt'], argDefs, optDefs);
 
     expect(result.options.output).toBe('dist');
@@ -983,9 +884,7 @@ describe('parse', () => {
   });
 
   it('should handle boolean option with yes/1/true values', () => {
-    const defs: OptionDef[] = [
-      { name: 'enabled', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'enabled', type: 'boolean' }];
     const tokens1 = tokenize(['--enabled', 'yes']);
     const result1 = parseOptions(tokens1, defs);
     expect(result1.values.enabled).toBe(true);
@@ -1000,18 +899,14 @@ describe('parse', () => {
   });
 
   it('should handle object option with empty value after equal', () => {
-    const defs: OptionDef[] = [
-      { name: 'config', type: 'object' },
-    ];
+    const defs: OptionDef[] = [{ name: 'config', type: 'object' }];
     const tokens = tokenize(['--config', 'key=']);
     const result = parseOptions(tokens, defs);
     expect(result.values.config).toEqual({ key: '' });
   });
 
   it('should handle object option with multiple equals in value', () => {
-    const defs: OptionDef[] = [
-      { name: 'config', type: 'object' },
-    ];
+    const defs: OptionDef[] = [{ name: 'config', type: 'object' }];
     const tokens = tokenize(['--config', 'url=http://example.com?a=b']);
     const result = parseOptions(tokens, defs);
     // Only the first = is used as the delimiter
@@ -1019,27 +914,21 @@ describe('parse', () => {
   });
 
   it('should handle array option with empty string', () => {
-    const defs: OptionDef[] = [
-      { name: 'items', type: 'array' },
-    ];
+    const defs: OptionDef[] = [{ name: 'items', type: 'array' }];
     const tokens = tokenize(['--items', '']);
     const result = parseOptions(tokens, defs);
     expect(result.values.items).toEqual(['']);
   });
 
   it('should handle array option with single item', () => {
-    const defs: OptionDef[] = [
-      { name: 'items', type: 'array' },
-    ];
+    const defs: OptionDef[] = [{ name: 'items', type: 'array' }];
     const tokens = tokenize(['--items', 'item1']);
     const result = parseOptions(tokens, defs);
     expect(result.values.items).toEqual(['item1']);
   });
 
   it('should handle array option with spaces (preserves full value)', () => {
-    const defs: OptionDef[] = [
-      { name: 'items', type: 'array' },
-    ];
+    const defs: OptionDef[] = [{ name: 'items', type: 'array' }];
     const tokens = tokenize(['--items', 'a, b , c']);
     const result = parseOptions(tokens, defs);
     // No comma splitting - entire string is one element
@@ -1070,45 +959,35 @@ describe('parse', () => {
   });
 
   it('should handle attached value to short flag (e.g., -p3000)', () => {
-    const defs: OptionDef[] = [
-      { name: 'port', alias: 'p', type: 'number' },
-    ];
+    const defs: OptionDef[] = [{ name: 'port', alias: 'p', type: 'number' }];
     const tokens = tokenize(['-p3000']);
     const result = parseOptions(tokens, defs);
     expect(result.values.port).toBe(3000);
   });
 
   it('should handle object type with key=value format', () => {
-    const defs: OptionDef[] = [
-      { name: 'config', type: 'object' },
-    ];
+    const defs: OptionDef[] = [{ name: 'config', type: 'object' }];
     const tokens = tokenize(['--config', 'key=value']);
     const result = parseOptions(tokens, defs);
     expect(result.values.config).toEqual({ key: 'value' });
   });
 
   it('should handle object type with just key (sets to true)', () => {
-    const defs: OptionDef[] = [
-      { name: 'flag', type: 'object' },
-    ];
+    const defs: OptionDef[] = [{ name: 'flag', type: 'object' }];
     const tokens = tokenize(['--flag', 'mykey']);
     const result = parseOptions(tokens, defs);
     expect(result.values.flag).toEqual({ mykey: true });
   });
 
   it('should use default value when option is provided without value', () => {
-    const defs: OptionDef[] = [
-      { name: 'port', type: 'string', default: '3000' },
-    ];
+    const defs: OptionDef[] = [{ name: 'port', type: 'string', default: '3000' }];
     const tokens = tokenize(['--port']);
     const result = parseOptions(tokens, defs);
     expect(result.values.port).toBe('3000');
   });
 
   it('should error when required option has no value and no default', () => {
-    const defs: OptionDef[] = [
-      { name: 'port', type: 'string' },
-    ];
+    const defs: OptionDef[] = [{ name: 'port', type: 'string' }];
     const tokens = tokenize(['--port']);
     const result = parseOptions(tokens, defs);
     expect(result.errors).toHaveLength(1);
@@ -1120,9 +999,7 @@ describe('parse', () => {
     // When --no-color is passed but only 'color' option is defined with negatable:true
     // Note: The implementation registers 'no-color' at line 62-64 when negatable is true
     // So this test verifies that the negatable form is properly registered
-    const defs: OptionDef[] = [
-      { name: 'color', type: 'boolean', negatable: true },
-    ];
+    const defs: OptionDef[] = [{ name: 'color', type: 'boolean', negatable: true }];
     const tokens = tokenize(['--no-color']);
     const result = parseOptions(tokens, defs);
     // The no-color option is registered separately, so we check for its presence
@@ -1134,36 +1011,28 @@ describe('parse', () => {
     // Test the code path at options.ts:242-243
     // The coercion returns false for values other than 'true', '1', 'yes'
     // Using = syntax to ensure the value is tokenized as 'value' type
-    const defs: OptionDef[] = [
-      { name: 'enabled', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'enabled', type: 'boolean' }];
     const tokens = tokenize(['--enabled=no']);
     const result = parseOptions(tokens, defs);
     expect(result.values.enabled).toBe(false);
   });
 
   it('should handle boolean coercion with true string value', () => {
-    const defs: OptionDef[] = [
-      { name: 'flag', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'flag', type: 'boolean' }];
     const tokens = tokenize(['--flag=true']);
     const result = parseOptions(tokens, defs);
     expect(result.values.flag).toBe(true);
   });
 
   it('should handle boolean coercion with 1 value', () => {
-    const defs: OptionDef[] = [
-      { name: 'flag', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'flag', type: 'boolean' }];
     const tokens = tokenize(['--flag=1']);
     const result = parseOptions(tokens, defs);
     expect(result.values.flag).toBe(true);
   });
 
   it('should handle boolean coercion with yes value', () => {
-    const defs: OptionDef[] = [
-      { name: 'flag', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'flag', type: 'boolean' }];
     const tokens = tokenize(['--flag=yes']);
     const result = parseOptions(tokens, defs);
     expect(result.values.flag).toBe(true);
@@ -1172,9 +1041,7 @@ describe('parse', () => {
   it('should skip already processed options', () => {
     // Test the code path at options.ts:84-86
     // When the same option is passed twice, the second occurrence should be skipped
-    const defs: OptionDef[] = [
-      { name: 'verbose', type: 'boolean' },
-    ];
+    const defs: OptionDef[] = [{ name: 'verbose', type: 'boolean' }];
     const tokens = tokenize(['--verbose', '--verbose']);
     const result = parseOptions(tokens, defs);
     // First --verbose sets it to true, second is skipped
@@ -1184,9 +1051,7 @@ describe('parse', () => {
 
   it('should skip processed negatable option when both forms are passed', () => {
     // When both --color and --no-color are passed, the second should be skipped
-    const defs: OptionDef[] = [
-      { name: 'color', type: 'boolean', negatable: true },
-    ];
+    const defs: OptionDef[] = [{ name: 'color', type: 'boolean', negatable: true }];
     const tokens = tokenize(['--color', '--no-color']);
     const result = parseOptions(tokens, defs);
     // First --color sets it to true, --no-color should be skipped via processed check

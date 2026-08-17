@@ -250,7 +250,7 @@ describe('Spinner Plugin', () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     // Wait for animation to run
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Stop the spinner to trigger clearInterval and TTY output
     spinner.succeed('Done!');

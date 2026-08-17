@@ -1,4 +1,4 @@
-import type { CLIPlugin, CLIKernel } from '../../../types.js';
+import type { CLIPlugin, CLIKernel, CommandBeforeEvent } from '../../../types.js';
 
 /**
  * Config plugin options
@@ -54,16 +54,15 @@ function parseEnv(content: string): Record<string, unknown> {
     let value: string = trimmed.slice(eqIndex + 1).trim();
 
     // Remove quotes
-    if ((value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith("'") && value.endsWith("'"))) {
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
       value = value.slice(1, -1);
     }
 
     // Handle escape sequences
-    value = value
-      .replace(/\\n/g, '\n')
-      .replace(/\\r/g, '\r')
-      .replace(/\\t/g, '\t');
+    value = value.replace(/\\n/g, '\n').replace(/\\r/g, '\r').replace(/\\t/g, '\t');
 
     result[key] = value;
   }
@@ -109,8 +108,10 @@ function parseYAML(content: string): Record<string, unknown> {
       stack.push({ indent, obj: newObj });
     } else {
       // Remove quotes
-      if ((value.startsWith('"') && value.endsWith('"')) ||
-          (value.startsWith("'") && value.endsWith("'"))) {
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
         value = value.slice(1, -1);
       }
 
@@ -176,8 +177,10 @@ function parseTOML(content: string): Record<string, unknown> {
     let value = trimmed.slice(eqIndex + 1).trim();
 
     // Parse value
-    if ((value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith("'") && value.endsWith("'"))) {
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
       currentSection[key] = value.slice(1, -1);
     } else if (value === 'true') {
       currentSection[key] = true;
@@ -192,8 +195,10 @@ function parseTOML(content: string): Record<string, unknown> {
       const arrContent = value.slice(1, -1);
       currentSection[key] = arrContent.split(',').map((v) => {
         const trimmedV = v.trim();
-        if ((trimmedV.startsWith('"') && trimmedV.endsWith('"')) ||
-            (trimmedV.startsWith("'") && trimmedV.endsWith("'"))) {
+        if (
+          (trimmedV.startsWith('"') && trimmedV.endsWith('"')) ||
+          (trimmedV.startsWith("'") && trimmedV.endsWith("'"))
+        ) {
           return trimmedV.slice(1, -1);
         }
         if (trimmedV === 'true') return true;
@@ -347,9 +352,7 @@ export class ConfigLoader {
 
     // Load from environment variables
     const envConfig: Record<string, unknown> = {};
-    const prefix = this.options.envPrefix
-      ? this.options.envPrefix.toUpperCase() + '_'
-      : '';
+    const prefix = this.options.envPrefix ? this.options.envPrefix.toUpperCase() + '_' : '';
 
     for (const [key, value] of Object.entries(process.env)) {
       if (prefix && !key.startsWith(prefix)) continue;
@@ -371,17 +374,12 @@ export class ConfigLoader {
     }
 
     // Merge: defaults < file < env
-    const config = deepMerge(
-      {},
-      this.options.defaults,
-      fileConfig,
-      envConfig
-    );
+    const config = deepMerge({}, this.options.defaults, fileConfig, envConfig);
 
     return {
       config,
       filePath: loadedFilePath,
-      source: loadedFilePath ? 'combined' : (Object.keys(envConfig).length > 0 ? 'env' : 'defaults'),
+      source: loadedFilePath ? 'combined' : Object.keys(envConfig).length > 0 ? 'env' : 'defaults',
     };
   }
 
@@ -452,7 +450,8 @@ export function configPlugin(options: ConfigPluginOptions = {}): CLIPlugin {
     },
 
     install(kernel: CLIKernel) {
-      kernel.on('command:before', async (data: any) => {
+      kernel.on('command:before', async (data: unknown) => {
+        const { context } = data as CommandBeforeEvent;
         if (!loadedConfig) {
           loadedConfig = await loader.load();
         }
@@ -469,7 +468,7 @@ export function configPlugin(options: ConfigPluginOptions = {}): CLIPlugin {
           },
         };
 
-        data.context.config = configUtils;
+        context.config = configUtils;
       });
     },
   };

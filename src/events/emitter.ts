@@ -186,9 +186,7 @@ const WILDCARD = '*';
  * });
  * ```
  */
-export class Emitter<TEvents extends EventMap = EventMap>
-  implements EmitterInstance<TEvents>
-{
+export class Emitter<TEvents extends EventMap = EventMap> implements EmitterInstance<TEvents> {
   /** Handler storage: event name -> ordered listener list */
   private store = new Map<string, ListenerEntry[]>();
 

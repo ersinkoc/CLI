@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.0] - 2026-08-16
 
 ### Removed
+
 - **Zero runtime dependencies**: Removed the `@oxog/emitter`, `@oxog/pigment`,
   `@oxog/plugin`, and `@oxog/types` peer dependencies
   - `dependencies` is now empty and `peerDependencies` no longer exist
@@ -17,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     (see Changed below)
 
 ### Added
+
 - **Object Config API**: Define CLIs declaratively with `cli({ commands: {...} })`
   - Available from the root entry and the new `@oxog/cli/config` subpath
   - Nested commands, aliases, argument/option records, defaults, middleware
@@ -30,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 31 tests for the config/decorator APIs; 86 emitter and 77 pigment tests
 
 ### Changed
+
 - The color plugin now uses the built-in pigment — always available, no dynamic
   import, identical Chalk-compatible surface
 - README and docs repositioned around zero-dependency; ecosystem packages are
@@ -38,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   96.52% branches against the >=95% thresholds
 
 ### Fixed
+
 - Global (app-level) options now parse into command action contexts
 - `hexToAnsi` handles `#abc` shorthand and invalid input without emitting NaN
 - MCP server no longer generates duplicate `cli` imports; its decorator template
@@ -50,6 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.1] - 2026-01-25
 
 ### Fixed
+
 - **Router**: Fixed command routing to allow flags before subcommands
   - `cli --verbose build` now correctly routes to the `build` command
   - Previously, options before commands would cause routing failures
@@ -81,13 +86,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Cleaner prototype chain for context objects
 
 ### Changed
+
 - Middleware tests updated to use new `_addGlobalMiddleware` interface
 - Parser tests updated for new array accumulation behavior
 - Kernel tests updated for deferred dependency resolution
 - Test count increased to 667 passing tests
 
 ### Migration Guide
+
 If you were relying on comma-separated array values:
+
 ```typescript
 // Before (2.0.0): --tags "a,b,c" -> ['a', 'b', 'c']
 // After (2.0.1): --tags "a,b,c" -> ['a,b,c']
@@ -105,16 +113,19 @@ If you were relying on comma-separated array values:
 ## [2.0.0] - 2026-01-15
 
 ### Added
+
 - Full @oxog ecosystem integration
 - Re-exports from @oxog/types, @oxog/emitter, @oxog/plugin, @oxog/pigment
 
 ### Changed
+
 - Migrated to peer dependencies for @oxog packages
 - Updated plugin interfaces to use @oxog/plugin standards
 
 ## [1.1.0] - 2026-01-07
 
 ### Added
+
 - 🎨 **promptPlugin** - Interactive command-line prompts with 10 prompt types
   - `input()` - Text input
   - `password()` - Masked password input
@@ -146,17 +157,20 @@ If you were relying on comma-separated array values:
   - Built-in `completion` command
 
 ### Changed
+
 - Added `describe()` method alias to CommandBuilder (now both `description()` and `describe()` work)
 - Improved type definitions with explicit utility interfaces
 - Updated LLMS.md documentation with new plugins
 
 ### Fixed
+
 - Fixed `ColorUtils` type not being exported from types.ts
 - Fixed fuzzyFilter return type handling in autocomplete
 
 ## [1.0.0] - 2026-01-03
 
 ### Added
+
 - 🎉 Initial release of @oxog/cli
 - ✅ Zero runtime dependencies CLI framework
 - 🔧 Fluent builder API for command definition
@@ -173,6 +187,7 @@ If you were relying on comma-separated array values:
 - 📚 Comprehensive documentation and examples
 
 ### Features
+
 - Type-safe command definitions
 - Argument parsing with validation and coercion
 - Option parsing with aliases, types, and defaults
@@ -188,6 +203,7 @@ If you were relying on comma-separated array values:
 - Levenshtein distance for command suggestions
 
 ### Examples
+
 - 17 example applications demonstrating all features
 - Basic CLI usage
 - API styles (fluent builder vs object config)
@@ -205,6 +221,7 @@ If you were relying on comma-separated array values:
 ## [0.1.0] - 2025-12-XX
 
 ### Added
+
 - Initial project setup
 - TypeScript configuration
 - Build system with tsup

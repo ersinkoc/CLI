@@ -235,8 +235,9 @@ describe('requireAuth', () => {
     const getToken = vi.fn(() => undefined);
     const middleware = requireAuth(getToken);
 
-    await expect(middleware({ options: {} } as any, async () => {}))
-      .rejects.toThrow('Authentication required');
+    await expect(middleware({ options: {} } as any, async () => {})).rejects.toThrow(
+      'Authentication required'
+    );
   });
 
   it('should use custom getToken function', async () => {
@@ -251,16 +252,18 @@ describe('requireAuth', () => {
     const getToken = () => '';
     const middleware = requireAuth(getToken);
 
-    await expect(middleware({ options: {} } as any, async () => {}))
-      .rejects.toThrow('Authentication required');
+    await expect(middleware({ options: {} } as any, async () => {})).rejects.toThrow(
+      'Authentication required'
+    );
   });
 
   it('should throw when getToken returns null', async () => {
     const getToken = () => null;
     const middleware = requireAuth(getToken);
 
-    await expect(middleware({ options: {} } as any, async () => {}))
-      .rejects.toThrow('Authentication required');
+    await expect(middleware({ options: {} } as any, async () => {})).rejects.toThrow(
+      'Authentication required'
+    );
   });
 
   it('should pass context to getToken function', async () => {

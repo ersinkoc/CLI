@@ -76,7 +76,7 @@ describe('EventBus', () => {
   it('should handle async handlers', async () => {
     let result = '';
     bus.on('test', async (...args: unknown[]) => {
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       result = 'done';
     });
     await bus.emit('test', null);

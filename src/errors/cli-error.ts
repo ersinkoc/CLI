@@ -56,11 +56,7 @@ export class UnknownCommandError extends CLIError {
   command: string;
 
   constructor(command: string) {
-    super(
-      `Command "${command}" not found`,
-      'UNKNOWN_COMMAND',
-      1
-    );
+    super(`Command "${command}" not found`, 'UNKNOWN_COMMAND', 1);
     this.name = 'UnknownCommandError';
     this.command = command;
   }
@@ -79,11 +75,7 @@ export class MissingArgumentError extends CLIError {
   argument: string;
 
   constructor(argument: string) {
-    super(
-      `Missing required argument: ${argument}`,
-      'MISSING_ARGUMENT',
-      1
-    );
+    super(`Missing required argument: ${argument}`, 'MISSING_ARGUMENT', 1);
     this.name = 'MissingArgumentError';
     this.argument = argument;
   }
@@ -133,11 +125,7 @@ export class UnknownOptionError extends CLIError {
   option: string;
 
   constructor(option: string) {
-    super(
-      `Unknown option: --${option}`,
-      'UNKNOWN_OPTION',
-      1
-    );
+    super(`Unknown option: --${option}`, 'UNKNOWN_OPTION', 1);
     this.name = 'UnknownOptionError';
     this.option = option;
   }
@@ -153,11 +141,7 @@ export class UnknownOptionError extends CLIError {
  */
 export class ValidationError extends CLIError {
   constructor(message: string) {
-    super(
-      message,
-      'VALIDATION_ERROR',
-      1
-    );
+    super(message, 'VALIDATION_ERROR', 1);
     this.name = 'ValidationError';
   }
 }

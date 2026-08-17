@@ -6,11 +6,10 @@
 
 import { cli } from '../../src/index.js';
 
-const app = cli('myapp')
-  .version('1.0.0')
-  .description('Advanced options example');
+const app = cli('myapp').version('1.0.0').description('Advanced options example');
 
-app.command('types')
+app
+  .command('types')
   .description('Various option types')
   .option('--string <value>', 'String option')
   .option('--number <value>', 'Number option', '0')
@@ -19,12 +18,16 @@ app.command('types')
   .action(async ({ options }) => {
     console.log('Parsed options:');
     console.log('  String:', options.string);
-    console.log('  Number:', typeof options.number === 'number' ? options.number : parseInt(options.number || '0'));
+    console.log(
+      '  Number:',
+      typeof options.number === 'number' ? options.number : parseInt(options.number || '0')
+    );
     console.log('  Boolean:', options.boolean === true);
     console.log('  List:', options.list ? options.list.split(',') : []);
   });
 
-app.command('defaults')
+app
+  .command('defaults')
   .description('Options with default values')
   .option('--port <number>', 'Server port', '3000')
   .option('--host <address>', 'Server host', 'localhost')
@@ -36,7 +39,8 @@ app.command('defaults')
     console.log(`  Timeout: ${options.timeout}ms`);
   });
 
-app.command('choices')
+app
+  .command('choices')
   .description('Options with limited choices')
   .option('--level <level>', 'Log level (debug, info, warn, error)')
   .option('--env <env>', 'Environment (dev, staging, prod)')
@@ -63,7 +67,8 @@ app.command('choices')
     console.log(`Environment: ${env}`);
   });
 
-app.command('arrays')
+app
+  .command('arrays')
   .description('Array and multiple value options')
   .option('--files <paths...>', 'Input files')
   .option('--ignore <patterns...>', 'Ignore patterns')
@@ -72,7 +77,8 @@ app.command('arrays')
     console.log('Ignore patterns:', options.ignore || []);
   });
 
-app.command('negatable')
+app
+  .command('negatable')
   .description('Negatable boolean flags')
   .option('--color', 'Enable colors')
   .option('--no-color', 'Disable colors')
@@ -83,7 +89,8 @@ app.command('negatable')
     console.log('Watch enabled:', options.watch !== false);
   });
 
-app.command('required')
+app
+  .command('required')
   .description('Options with required validation')
   .option('--name <value>', 'Name (required)')
   .option('--email <value>', 'Email (required)')
@@ -93,11 +100,11 @@ app.command('required')
       email: 'Email',
     };
 
-    const missing = Object.keys(required).filter(key => !options[key]);
+    const missing = Object.keys(required).filter((key) => !options[key]);
 
     if (missing.length > 0) {
       console.error('Missing required options:');
-      missing.forEach(key => {
+      missing.forEach((key) => {
         console.error(`  --${key} <${required[key]}>`);
       });
       process.exit(1);

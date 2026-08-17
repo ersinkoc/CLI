@@ -3,13 +3,7 @@
  */
 
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import {
-  CLI,
-  Command,
-  Argument,
-  Option,
-  CLIApplication,
-} from '../../src/api/decorator.js';
+import { CLI, Command, Argument, Option, CLIApplication } from '../../src/api/decorator.js';
 
 describe('Decorator API', () => {
   afterEach(() => {

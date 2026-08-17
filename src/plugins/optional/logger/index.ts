@@ -1,4 +1,4 @@
-import type { CLIPlugin, CLIKernel, LoggerUtils } from '../../../types.js';
+import type { CLIPlugin, CLIKernel, CommandBeforeEvent, LoggerUtils } from '../../../types.js';
 import { colors } from '../../../utils/ansi.js';
 
 /**
@@ -54,10 +54,11 @@ export function loggerPlugin(options: LoggerPluginOptions = {}): CLIPlugin {
 
     install(kernel: CLIKernel) {
       // Add logger utilities to action context
-      kernel.on('command:before', async (data: any) => {
+      kernel.on('command:before', async (data: unknown) => {
+        const { context } = data as CommandBeforeEvent;
         const shouldLog = (msgLevel: string) => {
           // Check global verbose flag
-          if (data.context.options?.verbose) return true;
+          if (context.options.verbose) return true;
           return getLevelPriority(msgLevel) >= minPriority;
         };
 
@@ -105,7 +106,7 @@ export function loggerPlugin(options: LoggerPluginOptions = {}): CLIPlugin {
           },
         };
 
-        data.context.logger = loggerUtils;
+        context.logger = loggerUtils;
       });
     },
   };

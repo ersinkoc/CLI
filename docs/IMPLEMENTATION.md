@@ -1,7 +1,9 @@
 # @oxog/cli - Implementation Architecture
 
 ## Version: 1.0.0
+
 ## Status: Final Architecture
+
 ## Author: Ersin Koç
 
 ---
@@ -89,21 +91,23 @@ src/
 **Purpose**: Main entry point, provides fluent builder API
 
 **Responsibilities**:
+
 - Create and configure CLI instance
 - Register commands and options
 - Load plugins
 - Execute CLI
 
 **Key Methods**:
+
 ```typescript
 class CLI {
-  constructor(options: CLIOptions)
-  version(v: string): this
-  description(d: string): this
-  command(name: string): CommandBuilder
-  option(flags: string, desc?: string, opts?: OptionDef): this
-  use(plugin: CLIPlugin): this
-  run(argv?: string[]): void | Promise<void>
+  constructor(options: CLIOptions);
+  version(v: string): this;
+  description(d: string): this;
+  command(name: string): CommandBuilder;
+  option(flags: string, desc?: string, opts?: OptionDef): this;
+  use(plugin: CLIPlugin): this;
+  run(argv?: string[]): void | Promise<void>;
 }
 ```
 
@@ -114,20 +118,22 @@ class CLI {
 **Purpose**: Core orchestration, plugin lifecycle
 
 **Responsibilities**:
+
 - Plugin registration and lifecycle
 - Event bus management
 - Error boundary
 - Configuration management
 
 **Key Methods**:
+
 ```typescript
 class CLIKernel {
-  register(plugin: CLIPlugin): void
-  unregister(name: string): void
-  emit(event: string, data: unknown): void
-  on(event: string, handler: Function): void
-  getConfig(): Readonly<Config>
-  setErrorHandler(handler: ErrorHandler): void
+  register(plugin: CLIPlugin): void;
+  unregister(name: string): void;
+  emit(event: string, data: unknown): void;
+  on(event: string, handler: Function): void;
+  getConfig(): Readonly<Config>;
+  setErrorHandler(handler: ErrorHandler): void;
 }
 ```
 
@@ -140,41 +146,47 @@ class CLIKernel {
 **Components**:
 
 #### Tokenizer
+
 ```typescript
 class Tokenizer {
-  tokenize(argv: string[]): Token[]
+  tokenize(argv: string[]): Token[];
 }
 
 // Tokens: { type: 'option'|'argument'|'flag', value: string, raw: string }
 ```
 
 **Algorithm**:
+
 1. Split on spaces (respecting quotes)
 2. Identify option prefixes (-, --)
 3. Handle option values (--opt value, --opt=value)
 4. Handle flag groups (-xyz = -x -y -z)
 
 #### Argument Parser
+
 ```typescript
 class ArgumentParser {
-  parse(tokens: Token[], defs: ArgumentDef[]): ParsedArguments
+  parse(tokens: Token[], defs: ArgumentDef[]): ParsedArguments;
 }
 ```
 
 **Algorithm**:
+
 1. Match tokens to argument definitions
 2. Validate required arguments
 3. Handle variadic arguments
 4. Apply default values
 
 #### Option Parser
+
 ```typescript
 class OptionParser {
-  parse(tokens: Token[], defs: OptionDef[]): ParsedOptions
+  parse(tokens: Token[], defs: OptionDef[]): ParsedOptions;
 }
 ```
 
 **Algorithm**:
+
 1. Extract options from tokens
 2. Handle short and long forms
 3. Parse values with type coercion
@@ -184,50 +196,54 @@ class OptionParser {
 ### 3.4 Command System
 
 #### Command Class
+
 ```typescript
 class Command {
-  name: string
-  description?: string
-  aliases: string[]
-  arguments: ArgumentDef[]
-  options: OptionDef[]
-  commands: Map<string, Command>
-  parent?: Command
-  action?: ActionHandler
-  middleware: Middleware[]
+  name: string;
+  description?: string;
+  aliases: string[];
+  arguments: ArgumentDef[];
+  options: OptionDef[];
+  commands: Map<string, Command>;
+  parent?: Command;
+  action?: ActionHandler;
+  middleware: Middleware[];
 
-  addCommand(def: CommandDef): Command
-  findCommand(path: string[]): Command | null
-  execute(ctx: ActionContext): Promise<void>
+  addCommand(def: CommandDef): Command;
+  findCommand(path: string[]): Command | null;
+  execute(ctx: ActionContext): Promise<void>;
 }
 ```
 
 #### Command Registry
+
 ```typescript
 class CommandRegistry {
-  register(command: Command): void
-  unregister(name: string): void
-  get(name: string): Command | undefined
-  list(): Command[]
-  find(name: string): Command | null  // With fuzzy search
+  register(command: Command): void;
+  unregister(name: string): void;
+  get(name: string): Command | undefined;
+  list(): Command[];
+  find(name: string): Command | null; // With fuzzy search
 }
 ```
 
 #### Command Router
+
 ```typescript
 class CommandRouter {
-  route(argv: string[]): RouteResult
+  route(argv: string[]): RouteResult;
 }
 
 interface RouteResult {
-  command: Command
-  args: ParsedArguments
-  options: ParsedOptions
-  unknown: string[]
+  command: Command;
+  args: ParsedArguments;
+  options: ParsedOptions;
+  unknown: string[];
 }
 ```
 
 **Routing Algorithm**:
+
 1. Tokenize argv
 2. Match command path (handling aliases)
 3. Parse arguments and options
@@ -266,10 +282,17 @@ interface CLIPlugin<TContext = CLIContext> {
 ### 4.3 Plugin Communication
 
 **Event Bus Pattern**:
+
 ```typescript
-kernel.on('command:before', (ctx) => { /* ... */ });
-kernel.on('command:after', (ctx) => { /* ... */ });
-kernel.on('error', (err) => { /* ... */ });
+kernel.on('command:before', (ctx) => {
+  /* ... */
+});
+kernel.on('command:after', (ctx) => {
+  /* ... */
+});
+kernel.on('error', (err) => {
+  /* ... */
+});
 kernel.emit('custom:event', data);
 ```
 
@@ -303,10 +326,7 @@ plugins/
 
 ```typescript
 function cli(nameOrOptions: string | CLIOptions): CLI {
-  return new CLI(typeof nameOrOptions === 'string'
-    ? { name: nameOrOptions }
-    : nameOrOptions
-  );
+  return new CLI(typeof nameOrOptions === 'string' ? { name: nameOrOptions } : nameOrOptions);
 }
 
 class CLI {
@@ -348,7 +368,7 @@ function cli(config: CLIConfig): CLI {
 
 ```typescript
 function CLI(config: CLIOptions) {
-  return function<T extends { run(): void }>(target: new () => T) {
+  return function <T extends { run(): void }>(target: new () => T) {
     return class extends target {
       constructor() {
         super();
@@ -361,11 +381,7 @@ function CLI(config: CLIOptions) {
 }
 
 function Command(name: string, options?: CommandOptions) {
-  return function(
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     // Store command metadata
     const commands = Reflect.getMetadata('commands', target.constructor) || [];
     commands.push({ name, method: propertyKey, options });
@@ -383,6 +399,7 @@ function Command(name: string, options?: CommandOptions) {
 **Goal**: End-to-end type safety from command definition to action handler
 
 **Approach**:
+
 1. Use generic types to track defined args/options
 2. Build typed context from command definition
 3. Infer action handler parameters
@@ -401,15 +418,14 @@ interface CommandBuilder<TArgs = {}, TOpts = {}> {
     type?: V
   ): CommandBuilder<TArgs & Record<K, V>, TOpts>;
 
-  action(
-    handler: (ctx: CommandContext<TArgs, TOpts>) => void
-  ): this;
+  action(handler: (ctx: CommandContext<TArgs, TOpts>) => void): this;
 }
 ```
 
 ### 6.2 Type Coercion
 
 **Types and Coercion Functions**:
+
 ```typescript
 type Coercer = (value: string) => unknown;
 
@@ -421,13 +437,14 @@ const coercers: Record<string, Coercer> = {
   object: (v) => {
     const [key, ...rest] = v.split('=');
     return { [key]: rest.join('=') };
-  }
+  },
 };
 ```
 
 ### 6.3 Validation
 
 **Validation Strategy**:
+
 1. Built-in type validation
 2. Choice validation
 3. Custom validators
@@ -475,10 +492,18 @@ class CLIError extends Error {
 }
 
 // Specific errors
-class UnknownCommandError extends CLIError { /* ... */ }
-class MissingArgumentError extends CLIError { /* ... */ }
-class InvalidOptionError extends CLIError { /* ... */ }
-class ValidationError extends CLIError { /* ... */ }
+class UnknownCommandError extends CLIError {
+  /* ... */
+}
+class MissingArgumentError extends CLIError {
+  /* ... */
+}
+class InvalidOptionError extends CLIError {
+  /* ... */
+}
+class ValidationError extends CLIError {
+  /* ... */
+}
 ```
 
 ### 7.2 Error Handler
@@ -571,7 +596,7 @@ const ANSI = {
     if (process.env.NO_COLOR) return false;
     if (process.env.FORCE_COLOR) return true;
     return process.stdout.isTTY;
-  }
+  },
 };
 ```
 
@@ -604,7 +629,7 @@ const terminal = {
 
   clear(): void {
     process.stdout.write(ANSI.clearScreen);
-  }
+  },
 };
 ```
 
@@ -620,7 +645,7 @@ abstract class Prompt<T> {
 
   protected readline: readline.Interface = createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
 }
 ```
@@ -653,6 +678,7 @@ class InputPrompt extends Prompt<string> {
 ### 9.3 Select Prompt
 
 **Algorithm**:
+
 1. Render choices with cursor
 2. Listen for keypress (up/down/enter)
 3. Update cursor position
@@ -690,12 +716,8 @@ class SelectPrompt extends Prompt<string> {
     process.stdout.write(ANSI.cursorUp(this.choices.length));
 
     this.choices.forEach((choice, i) => {
-      const prefix = i === this.selectedIndex
-        ? color.cyan('› ')
-        : '  ';
-      const label = i === this.selectedIndex
-        ? color.bold(choice.label)
-        : choice.label;
+      const prefix = i === this.selectedIndex ? color.cyan('› ') : '  ';
+      const label = i === this.selectedIndex ? color.bold(choice.label) : choice.label;
 
       process.stdout.write(`${prefix}${label}\n`);
     });
@@ -710,9 +732,7 @@ class SelectPrompt extends Prompt<string> {
 ### 10.1 Spinner Frames
 
 ```typescript
-const spinnerFrames = [
-  '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'
-];
+const spinnerFrames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
 const spinnerSuccess = '✔';
 const spinnerFail = '✖';
@@ -812,11 +832,8 @@ interface ColumnMetrics {
 }
 
 function measureColumns(data: Record<string, unknown>[], columns: string[]): ColumnMetrics[] {
-  return columns.map(col => {
-    const maxWidth = Math.max(
-      col.length,
-      ...data.map(row => String(row[col] ?? '').length)
-    );
+  return columns.map((col) => {
+    const maxWidth = Math.max(col.length, ...data.map((row) => String(row[col] ?? '').length));
     return { width: maxWidth + 2, align: 'left' };
   });
 }
@@ -825,10 +842,7 @@ function measureColumns(data: Record<string, unknown>[], columns: string[]): Col
 ### 12.2 Table Rendering
 
 ```typescript
-function renderTable(
-  data: Record<string, unknown>[],
-  options: TableOptions
-): string {
+function renderTable(data: Record<string, unknown>[], options: TableOptions): string {
   const metrics = measureColumns(data, options.columns);
   const lines: string[] = [];
 
@@ -840,10 +854,12 @@ function renderTable(
 
   // Data
   for (const row of data) {
-    lines.push(renderRow(
-      options.columns.map(col => String(row[col] ?? '')),
-      metrics
-    ));
+    lines.push(
+      renderRow(
+        options.columns.map((col) => String(row[col] ?? '')),
+        metrics
+      )
+    );
   }
 
   return lines.join('\n');
@@ -921,15 +937,15 @@ async function parseConfig(path: string): Promise<Record<string, unknown>> {
 function extractCompletionData(app: CLI): CompletionData {
   return {
     name: app.name,
-    commands: Array.from(app.commands.values()).map(cmd => ({
+    commands: Array.from(app.commands.values()).map((cmd) => ({
       name: cmd.name,
       description: cmd.description,
       aliases: cmd.aliases,
-      options: cmd.options.map(opt => ({
+      options: cmd.options.map((opt) => ({
         flags: formatFlags(opt),
-        description: opt.description
-      }))
-    }))
+        description: opt.description,
+      })),
+    })),
   };
 }
 ```
@@ -1079,7 +1095,7 @@ export default defineConfig({
   clean: true,
   treeshake: true,
   minify: false, // Keep readable for debugging
-  target: 'es2022'
+  target: 'es2022',
 });
 ```
 
@@ -1106,16 +1122,16 @@ export default defineConfig({
 
 ## 18. Decision Log
 
-| Decision | Rationale | Date |
-|----------|-----------|------|
-| Zero dependencies | Full control, minimal bundle | Initial |
+| Decision                  | Rationale                             | Date    |
+| ------------------------- | ------------------------------------- | ------- |
+| Zero dependencies         | Full control, minimal bundle          | Initial |
 | Micro-kernel architecture | Extensibility, separation of concerns | Initial |
-| Three API styles | Developer choice, different use cases | Initial |
-| JSDoc over separate types | Editor autocomplete, LLM friendly | Initial |
-| Vitest over Jest | Faster, ESM native | Initial |
-| tsup over tsc | Simpler config, dual build | Initial |
-| Decorator API | Class-based developers, Angular style | Initial |
-| ANSI codes directly | No chalk dependency | Initial |
+| Three API styles          | Developer choice, different use cases | Initial |
+| JSDoc over separate types | Editor autocomplete, LLM friendly     | Initial |
+| Vitest over Jest          | Faster, ESM native                    | Initial |
+| tsup over tsc             | Simpler config, dual build            | Initial |
+| Decorator API             | Class-based developers, Angular style | Initial |
+| ANSI codes directly       | No chalk dependency                   | Initial |
 
 ---
 

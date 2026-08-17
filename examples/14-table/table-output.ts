@@ -40,10 +40,10 @@ class Table {
 
   render() {
     // Calculate column widths
-    const widths = this.columns.map(col =>
+    const widths = this.columns.map((col) =>
       Math.max(
         col.width || col.header.length,
-        ...this.rows.map(row => String(row[col.key] || '').length)
+        ...this.rows.map((row) => String(row[col.key] || '').length)
       )
     );
 
@@ -54,9 +54,7 @@ class Table {
     console.log('\x1b[1m' + header + '\x1b[0m');
 
     // Render separator
-    const separator = this.columns
-      .map((_, i) => '-'.repeat(widths[i]))
-      .join('-+-');
+    const separator = this.columns.map((_, i) => '-'.repeat(widths[i])).join('-+-');
     console.log(separator);
 
     // Render rows
@@ -69,11 +67,10 @@ class Table {
   }
 }
 
-const app = cli('myapp')
-  .version('1.0.0')
-  .description('Table output example');
+const app = cli('myapp').version('1.0.0').description('Table output example');
 
-app.command('list')
+app
+  .command('list')
   .description('List items in a table')
   .action(async () => {
     const table = new Table([
@@ -92,7 +89,8 @@ app.command('list')
     table.render();
   });
 
-app.command('processes')
+app
+  .command('processes')
   .description('Show running processes')
   .action(async () => {
     const table = new Table([

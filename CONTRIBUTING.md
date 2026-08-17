@@ -75,6 +75,7 @@ Follow semantic commit messages:
 - `chore:` - Maintenance tasks
 
 Example:
+
 ```
 feat: add support for custom validators in options
 

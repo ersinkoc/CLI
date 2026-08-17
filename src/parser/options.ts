@@ -213,11 +213,7 @@ export function parseOptions(
  * // ['a', 'b', 'c']
  * ```
  */
-export function coerceOptionValue(
-  value: string,
-  def: OptionDef,
-  errors: string[]
-): unknown {
+export function coerceOptionValue(value: string, def: OptionDef, errors: string[]): unknown {
   let coerced: unknown = value;
 
   // Use custom coercion if provided
@@ -273,9 +269,7 @@ export function coerceOptionValue(
     const valuesToCheck = Array.isArray(coerced) ? coerced : [coerced];
     for (const v of valuesToCheck) {
       if (!def.choices!.includes(v)) {
-        errors.push(
-          `Option --${def.name} must be one of: ${def.choices.join(', ')} (got "${v}")`
-        );
+        errors.push(`Option --${def.name} must be one of: ${def.choices.join(', ')} (got "${v}")`);
       }
     }
   }

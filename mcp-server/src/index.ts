@@ -30,11 +30,14 @@ interface Tool {
   description: string;
   inputSchema: {
     type: 'object';
-    properties: Record<string, {
-      type: string;
-      description: string;
-      enum?: string[];
-    }>;
+    properties: Record<
+      string,
+      {
+        type: string;
+        description: string;
+        enum?: string[];
+      }
+    >;
     required?: string[];
   };
 }
@@ -49,16 +52,16 @@ const tools: Tool[] = [
       properties: {
         description: {
           type: 'string',
-          description: 'Description of the CLI to generate'
+          description: 'Description of the CLI to generate',
         },
         style: {
           type: 'string',
           description: 'API style to use',
-          enum: ['fluent', 'config', 'decorator']
-        }
+          enum: ['fluent', 'config', 'decorator'],
+        },
       },
-      required: ['description']
-    }
+      required: ['description'],
+    },
   },
   {
     name: 'cli_explain',
@@ -68,11 +71,11 @@ const tools: Tool[] = [
       properties: {
         code: {
           type: 'string',
-          description: 'CLI code to explain'
-        }
+          description: 'CLI code to explain',
+        },
       },
-      required: ['code']
-    }
+      required: ['code'],
+    },
   },
   {
     name: 'cli_migrate',
@@ -82,12 +85,12 @@ const tools: Tool[] = [
       properties: {
         code: {
           type: 'string',
-          description: 'Commander.js code to migrate'
-        }
+          description: 'Commander.js code to migrate',
+        },
       },
-      required: ['code']
-    }
-  }
+      required: ['code'],
+    },
+  },
 ];
 
 // Tool implementations
@@ -179,7 +182,10 @@ const app = cli('myapp')
   .use(spinnerPlugin());
 
 // Original Commander.js code:
-// ${code.split('\n').map(l => '// ' + l).join('\n')}
+// ${code
+    .split('\n')
+    .map((l) => '// ' + l)
+    .join('\n')}
 
 // Migrated code structure:
 app.command('example')
@@ -202,7 +208,7 @@ export async function handleRequest(request: MCPRequest): Promise<MCPResponse> {
         return {
           jsonrpc: '2.0',
           id,
-          result: { tools }
+          result: { tools },
         };
 
       case 'tools/call':
@@ -211,7 +217,9 @@ export async function handleRequest(request: MCPRequest): Promise<MCPResponse> {
 
         switch (callParams.name) {
           case 'cli_generate':
-            result = handleCliGenerate(callParams.arguments as { description: string; style?: string });
+            result = handleCliGenerate(
+              callParams.arguments as { description: string; style?: string }
+            );
             break;
           case 'cli_explain':
             result = handleCliExplain(callParams.arguments as { code: string });
@@ -226,7 +234,7 @@ export async function handleRequest(request: MCPRequest): Promise<MCPResponse> {
         return {
           jsonrpc: '2.0',
           id,
-          result: { content: [{ type: 'text', text: result }] }
+          result: { content: [{ type: 'text', text: result }] },
         };
 
       default:
@@ -235,8 +243,8 @@ export async function handleRequest(request: MCPRequest): Promise<MCPResponse> {
           id,
           error: {
             code: -32601,
-            message: 'Method not found'
-          }
+            message: 'Method not found',
+          },
         };
     }
   } catch (error) {
@@ -245,8 +253,8 @@ export async function handleRequest(request: MCPRequest): Promise<MCPResponse> {
       id,
       error: {
         code: -32603,
-        message: error instanceof Error ? error.message : 'Unknown error'
-      }
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
     };
   }
 }
@@ -275,8 +283,8 @@ async function main() {
             id: 0,
             error: {
               code: -32700,
-              message: 'Parse error'
-            }
+              message: 'Parse error',
+            },
           };
           process.stdout.write(JSON.stringify(response) + '\n');
         }

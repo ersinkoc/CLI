@@ -1,6 +1,16 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, X, ChevronRight, ChevronDown, Menu, Book, Code, Lightbulb, Terminal } from 'lucide-react';
+import {
+  Search,
+  X,
+  ChevronRight,
+  ChevronDown,
+  Menu,
+  Book,
+  Code,
+  Lightbulb,
+  Terminal,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { docsNavigation, apiNavigation, examplesNavigation } from '@/lib/constants';
 

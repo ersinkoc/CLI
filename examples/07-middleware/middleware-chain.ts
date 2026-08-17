@@ -28,7 +28,8 @@ const app = cli('myapp')
   });
 
 // Add command with specific middleware
-app.command('build')
+app
+  .command('build')
   .description('Build the project')
   .use(async (context, next) => {
     console.log('[Build Middleware] Validating build config...');
@@ -36,11 +37,12 @@ app.command('build')
   })
   .action(async ({ args, options }) => {
     console.log('Building...');
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     console.log('Build complete!');
   });
 
-app.command('deploy')
+app
+  .command('deploy')
   .description('Deploy to production')
   .option('--env', 'Environment to deploy to')
   .action(async ({ options }) => {

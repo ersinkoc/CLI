@@ -2,13 +2,13 @@
 
 ## Package Identity
 
-| Field | Value |
-|-------|-------|
-| **NPM Package** | `@oxog/cli` |
-| **GitHub Repository** | `https://github.com/ersinkoc/cli` |
-| **Documentation Site** | `https://cli.oxog.dev` |
-| **License** | MIT |
-| **Author** | Ersin Koç (ersinkoc) |
+| Field                  | Value                             |
+| ---------------------- | --------------------------------- |
+| **NPM Package**        | `@oxog/cli`                       |
+| **GitHub Repository**  | `https://github.com/ersinkoc/cli` |
+| **Documentation Site** | `https://cli.oxog.dev`            |
+| **License**            | MIT                               |
+| **Author**             | Ersin Koç (ersinkoc)              |
 
 > **NO social media, Discord, email, or external links allowed.**
 
@@ -30,7 +30,7 @@ These rules are **ABSOLUTE** and must be followed without exception.
 
 ```json
 {
-  "dependencies": {}  // MUST BE EMPTY - NO EXCEPTIONS
+  "dependencies": {} // MUST BE EMPTY - NO EXCEPTIONS
 }
 ```
 
@@ -40,6 +40,7 @@ These rules are **ABSOLUTE** and must be followed without exception.
 - If you think you need a dependency, you don't
 
 **Allowed devDependencies only:**
+
 ```json
 {
   "devDependencies": {
@@ -91,6 +92,7 @@ All packages MUST use plugin-based architecture:
 ```
 
 **Kernel responsibilities (minimal):**
+
 - Command registration and routing
 - Argument/option parsing (basic tokenization)
 - Plugin registration and lifecycle
@@ -103,7 +105,7 @@ All packages MUST use plugin-based architecture:
 Create these documents **FIRST**, before any code:
 
 1. **SPECIFICATION.md** - Complete package specification
-2. **IMPLEMENTATION.md** - Architecture and design decisions  
+2. **IMPLEMENTATION.md** - Architecture and design decisions
 3. **TASKS.md** - Ordered task list with dependencies
 
 Only after all three documents are complete, implement code following TASKS.md sequentially.
@@ -155,33 +157,37 @@ Package must be designed for both humans AND AI assistants:
 The framework supports three distinct API styles to accommodate different developer preferences.
 
 **Fluent Builder API (Primary):**
+
 ```typescript
 import { cli } from '@oxog/cli';
 
 const app = cli('myapp')
   .version('1.0.0')
   .description('My awesome CLI')
-  
+
   .command('init')
-    .description('Initialize a new project')
-    .argument('<name>', 'Project name')
-    .option('-t, --template <type>', 'Template to use', 'default')
-    .option('-f, --force', 'Overwrite existing files')
-    .action(async ({ args, options, prompt, spinner }) => {
-      const name = args.name;
-      const template = options.template ?? await prompt.select({
+  .description('Initialize a new project')
+  .argument('<name>', 'Project name')
+  .option('-t, --template <type>', 'Template to use', 'default')
+  .option('-f, --force', 'Overwrite existing files')
+  .action(async ({ args, options, prompt, spinner }) => {
+    const name = args.name;
+    const template =
+      options.template ??
+      (await prompt.select({
         message: 'Choose a template',
-        choices: ['default', 'typescript', 'react']
-      });
-      const spin = spinner.start('Creating project...');
-      // ...implementation
-      spin.succeed('Project created!');
-    });
+        choices: ['default', 'typescript', 'react'],
+      }));
+    const spin = spinner.start('Creating project...');
+    // ...implementation
+    spin.succeed('Project created!');
+  });
 
 app.run();
 ```
 
 **Object Config API:**
+
 ```typescript
 import { cli } from '@oxog/cli';
 
@@ -192,27 +198,29 @@ const app = cli({
     init: {
       description: 'Initialize a new project',
       arguments: {
-        name: { type: 'string', required: true, description: 'Project name' }
+        name: { type: 'string', required: true, description: 'Project name' },
       },
       options: {
         template: { type: 'string', alias: 't', default: 'default' },
-        force: { type: 'boolean', alias: 'f' }
+        force: { type: 'boolean', alias: 'f' },
       },
-      action: async (ctx) => { /* ... */ }
-    }
-  }
+      action: async (ctx) => {
+        /* ... */
+      },
+    },
+  },
 });
 
 app.run();
 ```
 
 **Decorator API:**
+
 ```typescript
 import { CLI, Command, Argument, Option } from '@oxog/cli';
 
 @CLI({ name: 'myapp', version: '1.0.0' })
 class MyApp {
-  
   @Command('init', { description: 'Initialize a new project' })
   async init(
     @Argument('name') name: string,
@@ -232,21 +240,25 @@ Full-featured command system with nested subcommands, aliases, and middleware.
 
 ```typescript
 // Nested subcommands
-app.command('config')
+app
+  .command('config')
   .description('Manage configuration')
   .command('get')
-    .argument('<key>', 'Config key')
-    .action(({ args }) => console.log(getConfig(args.key)))
+  .argument('<key>', 'Config key')
+  .action(({ args }) => console.log(getConfig(args.key)))
   .parent()
   .command('set')
-    .argument('<key>', 'Config key')
-    .argument('<value>', 'Config value')
-    .action(({ args }) => setConfig(args.key, args.value));
+  .argument('<key>', 'Config key')
+  .argument('<value>', 'Config value')
+  .action(({ args }) => setConfig(args.key, args.value));
 
 // Command aliases
-app.command('install')
+app
+  .command('install')
   .alias('i', 'add')
-  .action(() => { /* ... */ });
+  .action(() => {
+    /* ... */
+  });
 
 // Global options
 app.option('-v, --verbose', 'Enable verbose output');
@@ -272,7 +284,7 @@ Robust argument parsing with type coercion and validation.
 .option('-D, --define <key=value...>', 'Define variables', { type: 'object' })
 
 // Coercion
-.option('-d, --date <date>', 'Date', { 
+.option('-d, --date <date>', 'Date', {
   coerce: (v) => new Date(v),
   validate: (d) => !isNaN(d.getTime())
 })
@@ -294,22 +306,22 @@ const color = await prompt.select({
   choices: [
     { value: 'red', label: 'Red', hint: 'A warm color' },
     { value: 'blue', label: 'Blue' },
-    { value: 'green', label: 'Green' }
-  ]
+    { value: 'green', label: 'Green' },
+  ],
 });
 
 const features = await prompt.multiselect({
   message: 'Select features:',
   choices: ['TypeScript', 'ESLint', 'Prettier', 'Tests'],
   min: 1,
-  max: 3
+  max: 3,
 });
 
 // Autocomplete with fuzzy search
 const framework = await prompt.autocomplete({
   message: 'Framework:',
   choices: ['React', 'Vue', 'Angular', 'Svelte', 'Solid'],
-  limit: 5
+  limit: 5,
 });
 
 // Numeric input
@@ -317,19 +329,19 @@ const age = await prompt.number({
   message: 'Your age:',
   min: 0,
   max: 150,
-  step: 1
+  step: 1,
 });
 
 // Date picker
 const birthday = await prompt.date({
   message: 'Birthday:',
-  format: 'YYYY-MM-DD'
+  format: 'YYYY-MM-DD',
 });
 
 // Editor (opens $EDITOR)
 const content = await prompt.editor({
   message: 'Description:',
-  extension: '.md'
+  extension: '.md',
 });
 
 // Multi-step wizard
@@ -337,16 +349,16 @@ const result = await prompt.wizard({
   steps: [
     { name: 'name', prompt: { type: 'input', message: 'Name:' } },
     { name: 'email', prompt: { type: 'input', message: 'Email:' } },
-    { 
-      name: 'plan', 
-      prompt: { 
-        type: 'select', 
+    {
+      name: 'plan',
+      prompt: {
+        type: 'select',
         message: 'Plan:',
-        choices: ['free', 'pro', 'enterprise']
+        choices: ['free', 'pro', 'enterprise'],
       },
-      when: (answers) => answers.name.length > 0
-    }
-  ]
+      when: (answers) => answers.name.length > 0,
+    },
+  ],
 });
 ```
 
@@ -373,7 +385,7 @@ spin.succeed('Done!');
 // Progress bars
 const bar = progress.create({
   total: 100,
-  format: '{bar} {percentage}% | {value}/{total}'
+  format: '{bar} {percentage}% | {value}/{total}',
 });
 bar.update(50);
 bar.increment(10);
@@ -382,13 +394,15 @@ bar.stop();
 // Tables
 const data = [
   { name: 'Alice', age: 30, city: 'NYC' },
-  { name: 'Bob', age: 25, city: 'LA' }
+  { name: 'Bob', age: 25, city: 'LA' },
 ];
-console.log(table(data, {
-  columns: ['name', 'age', 'city'],
-  header: true,
-  border: 'rounded' // 'none', 'single', 'double', 'rounded'
-}));
+console.log(
+  table(data, {
+    columns: ['name', 'age', 'city'],
+    header: true,
+    border: 'rounded', // 'none', 'single', 'double', 'rounded'
+  })
+);
 ```
 
 ### 6. Config File Support
@@ -406,12 +420,12 @@ const config = await loadConfig({
     '.myapprc.json',
     '.myapprc.yaml',
     '.myapprc.toml',
-    'package.json'
+    'package.json',
   ],
   defaults: {
     port: 3000,
-    verbose: false
-  }
+    verbose: false,
+  },
 });
 
 // Environment variable support
@@ -423,7 +437,8 @@ const config = await loadConfig({
 Generate shell completion scripts for bash, zsh, and fish.
 
 ```typescript
-app.command('completion')
+app
+  .command('completion')
   .description('Generate shell completion')
   .argument('[shell]', 'Shell type', { choices: ['bash', 'zsh', 'fish'] })
   .action(({ args }) => {
@@ -449,11 +464,13 @@ Levenshtein distance-based typo correction.
 Check for package updates and notify users.
 
 ```typescript
-app.use(updateNotifier({
-  pkg: { name: '@oxog/cli', version: '1.0.0' },
-  checkInterval: '1d', // Check once per day
-  message: 'Update available: {current} → {latest}'
-}));
+app.use(
+  updateNotifier({
+    pkg: { name: '@oxog/cli', version: '1.0.0' },
+    checkInterval: '1d', // Check once per day
+    message: 'Update available: {current} → {latest}',
+  })
+);
 ```
 
 ### 10. Middleware System
@@ -470,10 +487,13 @@ app.use(async (ctx, next) => {
 });
 
 // Command-specific middleware
-app.command('deploy')
+app
+  .command('deploy')
   .use(requireAuth)
   .use(checkPermissions('deploy'))
-  .action(async (ctx) => { /* ... */ });
+  .action(async (ctx) => {
+    /* ... */
+  });
 ```
 
 ---
@@ -482,12 +502,12 @@ app.command('deploy')
 
 ### Plugin Interface
 
-```typescript
+````typescript
 /**
  * Plugin interface for extending CLI kernel functionality.
- * 
+ *
  * @typeParam TContext - Shared context type between plugins
- * 
+ *
  * @example
  * ```typescript
  * const myPlugin: CLIPlugin = {
@@ -499,66 +519,66 @@ app.command('deploy')
  *     });
  *   }
  * };
- * 
+ *
  * app.use(myPlugin);
  * ```
  */
 export interface CLIPlugin<TContext = CLIContext> {
   /** Unique plugin identifier (kebab-case) */
   name: string;
-  
+
   /** Semantic version (e.g., "1.0.0") */
   version: string;
-  
+
   /** Other plugins this plugin depends on */
   dependencies?: string[];
-  
+
   /**
    * Called when plugin is registered.
    * @param kernel - The CLI kernel instance
    */
   install: (kernel: CLIKernel<TContext>) => void;
-  
+
   /**
    * Called after all plugins are installed.
    * @param context - Shared context object
    */
   onInit?: (context: TContext) => void | Promise<void>;
-  
+
   /**
    * Called when plugin is unregistered.
    */
   onDestroy?: () => void | Promise<void>;
-  
+
   /**
    * Called on error in this plugin.
    * @param error - The error that occurred
    */
   onError?: (error: Error) => void;
 }
-```
+````
 
 ### Core Plugins (Always Loaded)
 
-| Plugin | Description |
-|--------|-------------|
-| `help` | Auto-generated help output with colors, usage examples |
-| `version` | Version display (`--version`, `-V`) |
-| `validation` | Type validation for arguments and options |
+| Plugin       | Description                                            |
+| ------------ | ------------------------------------------------------ |
+| `help`       | Auto-generated help output with colors, usage examples |
+| `version`    | Version display (`--version`, `-V`)                    |
+| `validation` | Type validation for arguments and options              |
 
 ### Optional Plugins (Opt-in)
 
-| Plugin | Description | Enable |
-|--------|-------------|--------|
-| `prompt` | Full interactive prompts (input, select, confirm, password, autocomplete, wizard, etc.) | `app.use(promptPlugin)` |
-| `spinner` | Loading spinners and progress bars | `app.use(spinnerPlugin)` |
-| `color` | ANSI colorized output | `app.use(colorPlugin)` |
-| `table` | Table formatting with borders | `app.use(tablePlugin)` |
-| `config` | Config file support (.json, .yaml, .toml, .env) | `app.use(configPlugin)` |
-| `completion` | Shell autocompletion (bash, zsh, fish) | `app.use(completionPlugin)` |
-| `update-notifier` | Version update checker | `app.use(updateNotifierPlugin)` |
-| `logger` | Leveled logging (debug, info, warn, error) | `app.use(loggerPlugin)` |
-| `middleware` | Command middleware/hooks system | `app.use(middlewarePlugin)` |
+| Plugin            | Description                                                                             | Enable                          |
+| ----------------- | --------------------------------------------------------------------------------------- | ------------------------------- |
+| `prompt`          | Full interactive prompts (input, select, confirm, password, autocomplete, wizard, etc.) | `app.use(promptPlugin)`         |
+| `spinner`         | Loading spinners and progress bars                                                      | `app.use(spinnerPlugin)`        |
+| `color`           | ANSI colorized output                                                                   | `app.use(colorPlugin)`          |
+| `table`           | Table formatting with borders                                                           | `app.use(tablePlugin)`          |
+| `config`          | Config file support (.json, .yaml, .toml, .env)                                         | `app.use(configPlugin)`         |
+| `completion`      | Shell autocompletion (bash, zsh, fish)                                                  | `app.use(completionPlugin)`     |
+| `update-notifier` | Version update checker                                                                  | `app.use(updateNotifierPlugin)` |
+| `logger`          | Leveled logging (debug, info, warn, error)                                              | `app.use(loggerPlugin)`         |
+| `middleware`      | Command middleware/hooks system                                                         | `app.use(middlewarePlugin)`     |
 
 ---
 
@@ -570,15 +590,13 @@ export interface CLIPlugin<TContext = CLIContext> {
 import { cli } from '@oxog/cli';
 
 // Fluent Builder
-const app = cli('myapp')
-  .version('1.0.0')
-  .description('My CLI application');
+const app = cli('myapp').version('1.0.0').description('My CLI application');
 
 // Object Config
 const app = cli({
   name: 'myapp',
   version: '1.0.0',
-  description: 'My CLI application'
+  description: 'My CLI application',
 });
 
 // Run the CLI
@@ -708,24 +726,21 @@ export type ActionHandler = (ctx: ActionContext) => void | Promise<void>;
 /**
  * Middleware function
  */
-export type Middleware = (
-  ctx: ActionContext, 
-  next: () => Promise<void>
-) => void | Promise<void>;
+export type Middleware = (ctx: ActionContext, next: () => Promise<void>) => void | Promise<void>;
 ```
 
 ---
 
 ## TECHNICAL REQUIREMENTS
 
-| Requirement | Value |
-|-------------|-------|
-| Runtime | Node.js 18+, Deno, Bun (Universal ESM) |
-| Module Format | ESM + CJS dual build |
-| Node.js Version | >= 18 |
-| TypeScript Version | >= 5.0 |
-| Bundle Size (core) | < 5KB gzipped |
-| Bundle Size (all plugins) | < 25KB gzipped |
+| Requirement               | Value                                  |
+| ------------------------- | -------------------------------------- |
+| Runtime                   | Node.js 18+, Deno, Bun (Universal ESM) |
+| Module Format             | ESM + CJS dual build                   |
+| Node.js Version           | >= 18                                  |
+| TypeScript Version        | >= 5.0                                 |
+| Bundle Size (core)        | < 5KB gzipped                          |
+| Bundle Size (all plugins) | < 25KB gzipped                         |
 
 ---
 
@@ -735,7 +750,7 @@ export type Middleware = (
 
 Create `/llms.txt` in project root (< 2000 tokens):
 
-```markdown
+````markdown
 # @oxog/cli
 
 > Zero-dependency CLI framework with type-safe commands, beautiful output, and plugin architecture
@@ -745,6 +760,7 @@ Create `/llms.txt` in project root (< 2000 tokens):
 ```bash
 npm install @oxog/cli
 ```
+````
 
 ## Basic Usage
 
@@ -752,13 +768,17 @@ npm install @oxog/cli
 import { cli } from '@oxog/cli';
 
 const app = cli('myapp').version('1.0.0');
-app.command('greet').argument('<name>').action(({ args }) => console.log(`Hello, ${args.name}!`));
+app
+  .command('greet')
+  .argument('<name>')
+  .action(({ args }) => console.log(`Hello, ${args.name}!`));
 app.run();
 ```
 
 ## API Summary
 
 ### Core
+
 - `cli(name | options)` - Create CLI application
 - `.version(v)` - Set version
 - `.description(d)` - Set description
@@ -770,11 +790,13 @@ app.run();
 - `.run(argv?)` - Execute CLI
 
 ### Core Plugins
+
 - `help` - Auto-generated help output
 - `version` - Version display
 - `validation` - Type validation
 
 ### Optional Plugins
+
 - `prompt` - Interactive prompts (input, select, confirm, password, autocomplete, wizard)
 - `spinner` - Loading spinners & progress bars
 - `color` - ANSI colorized output
@@ -788,8 +810,10 @@ app.run();
 ## Common Patterns
 
 ### Basic Command
+
 ```typescript
-app.command('init')
+app
+  .command('init')
   .description('Initialize project')
   .argument('<name>', 'Project name')
   .option('-t, --template <type>', 'Template', 'default')
@@ -799,42 +823,43 @@ app.command('init')
 ```
 
 ### Interactive Prompt
+
 ```typescript
-app.command('create')
-  .action(async ({ prompt }) => {
-    const name = await prompt.input({ message: 'Project name:' });
-    const type = await prompt.select({
-      message: 'Type:',
-      choices: ['app', 'library', 'cli']
-    });
+app.command('create').action(async ({ prompt }) => {
+  const name = await prompt.input({ message: 'Project name:' });
+  const type = await prompt.select({
+    message: 'Type:',
+    choices: ['app', 'library', 'cli'],
   });
+});
 ```
 
 ### With Spinner
+
 ```typescript
-app.command('deploy')
-  .action(async ({ spinner }) => {
-    const s = spinner.start('Deploying...');
-    await deploy();
-    s.succeed('Deployed!');
-  });
+app.command('deploy').action(async ({ spinner }) => {
+  const s = spinner.start('Deploying...');
+  await deploy();
+  s.succeed('Deployed!');
+});
 ```
 
 ## Errors
 
-| Code | Meaning | Solution |
-|------|---------|----------|
-| `UNKNOWN_COMMAND` | Command not found | Check command name, see help |
-| `MISSING_ARGUMENT` | Required argument missing | Provide required argument |
-| `INVALID_OPTION` | Invalid option value | Check option type/choices |
-| `UNKNOWN_OPTION` | Unknown option | Check option name |
-| `VALIDATION_ERROR` | Validation failed | Check value format |
+| Code               | Meaning                   | Solution                     |
+| ------------------ | ------------------------- | ---------------------------- |
+| `UNKNOWN_COMMAND`  | Command not found         | Check command name, see help |
+| `MISSING_ARGUMENT` | Required argument missing | Provide required argument    |
+| `INVALID_OPTION`   | Invalid option value      | Check option type/choices    |
+| `UNKNOWN_OPTION`   | Unknown option            | Check option name            |
+| `VALIDATION_ERROR` | Validation failed         | Check value format           |
 
 ## Links
 
 - Docs: https://cli.oxog.dev
 - GitHub: https://github.com/ersinkoc/cli
-```
+
+````
 
 ### 2. API Naming Standards
 
@@ -858,7 +883,7 @@ arg()
 opt()
 exec()
 go()
-```
+````
 
 ### 3. Example Categories
 
@@ -895,24 +920,25 @@ examples/
 ### 4. JSDoc Requirements
 
 Every public API must have:
+
 - Description
 - @param for each parameter
 - @returns description
 - @example with working code
 - @default for optional parameters
 
-```typescript
+````typescript
 /**
  * Creates a new CLI application instance.
- * 
+ *
  * @param nameOrOptions - Application name or configuration object
  * @returns CLI application instance
- * 
+ *
  * @example
  * ```typescript
  * // With name
  * const app = cli('myapp');
- * 
+ *
  * // With options
  * const app = cli({
  *   name: 'myapp',
@@ -924,7 +950,7 @@ Every public API must have:
 export function cli(nameOrOptions: string | CLIOptions): CLI {
   // ...
 }
-```
+````
 
 ---
 
@@ -1103,6 +1129,7 @@ cli/
 ## WEBSITE SPECIFICATION
 
 ### Technology Stack
+
 - **Framework**: React 18+ with TypeScript
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS
@@ -1111,7 +1138,9 @@ cli/
 - **Domain**: cli.oxog.dev
 
 ### IDE-Style Code Blocks
+
 All code blocks MUST have:
+
 - Line numbers (muted, non-selectable)
 - Syntax highlighting
 - Header bar with filename/language
@@ -1120,6 +1149,7 @@ All code blocks MUST have:
 - Dark/light theme support
 
 ### Theme System
+
 - Dark mode (default)
 - Light mode
 - Toggle button in navbar
@@ -1127,6 +1157,7 @@ All code blocks MUST have:
 - Respect system preference on first visit
 
 ### Required Pages
+
 1. **Home** - Hero, features, install, example
 2. **Getting Started** - Installation, basic usage, API styles
 3. **API Reference** - Complete documentation
@@ -1135,6 +1166,7 @@ All code blocks MUST have:
 6. **Playground** - Interactive code editor
 
 ### Footer
+
 - Package name: @oxog/cli
 - MIT License
 - © 2025 Ersin Koç
@@ -1160,7 +1192,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: 'pages'
   cancel-in-progress: true
 
 jobs:
@@ -1168,35 +1200,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run tests
         run: npm run test:coverage
-      
+
       - name: Build package
         run: npm run build
-      
+
       - name: Build website
         working-directory: ./website
         run: |
           npm ci
           npm run build
-      
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
-      
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: './website/dist'
-  
+
   deploy:
     environment:
       name: github-pages
@@ -1243,14 +1275,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: [
-        'node_modules/',
-        'tests/',
-        'website/',
-        'examples/',
-        'mcp-server/',
-        '*.config.*',
-      ],
+      exclude: ['node_modules/', 'tests/', 'website/', 'examples/', 'mcp-server/', '*.config.*'],
       thresholds: {
         lines: 100,
         functions: 100,
@@ -1351,12 +1376,14 @@ export default defineConfig({
 ## IMPLEMENTATION CHECKLIST
 
 ### Before Starting
+
 - [ ] Create SPECIFICATION.md with complete spec
 - [ ] Create IMPLEMENTATION.md with architecture
 - [ ] Create TASKS.md with ordered task list
 - [ ] All three documents reviewed and complete
 
 ### During Implementation
+
 - [ ] Follow TASKS.md sequentially
 - [ ] Write tests before or with each feature
 - [ ] Maintain 100% coverage throughout
@@ -1364,6 +1391,7 @@ export default defineConfig({
 - [ ] Create examples as features are built
 
 ### Package Completion
+
 - [ ] All tests passing (100%)
 - [ ] Coverage at 100% (lines, branches, functions)
 - [ ] No TypeScript errors
@@ -1371,6 +1399,7 @@ export default defineConfig({
 - [ ] Package builds without errors
 
 ### LLM-Native Completion
+
 - [ ] llms.txt created (< 2000 tokens)
 - [ ] llms.txt copied to website/public/
 - [ ] README first 500 tokens optimized
@@ -1381,6 +1410,7 @@ export default defineConfig({
 - [ ] MCP server implemented
 
 ### Website Completion
+
 - [ ] All pages implemented
 - [ ] IDE-style code blocks with line numbers
 - [ ] Copy buttons working
@@ -1390,6 +1420,7 @@ export default defineConfig({
 - [ ] Footer with Ersin Koç, MIT, GitHub only
 
 ### Final Verification
+
 - [ ] `npm run build` succeeds
 - [ ] `npm run test:coverage` shows 100%
 - [ ] Website builds without errors
@@ -1410,6 +1441,7 @@ Then create **TASKS.md** with ordered, numbered tasks.
 Only after all three documents are complete, begin implementing code by following TASKS.md sequentially.
 
 **Remember:**
+
 - This package will be published to npm
 - It must be production-ready
 - Zero runtime dependencies

@@ -41,7 +41,7 @@ async function simulateProgress() {
 
   for (let i = 0; i <= total; i++) {
     bar.render(i, total, 'Processing...');
-    await new Promise(resolve => setTimeout(resolve, 30));
+    await new Promise((resolve) => setTimeout(resolve, 30));
   }
 }
 
@@ -59,27 +59,28 @@ async function simulateSteps() {
 
   for (let i = 0; i < steps.length; i++) {
     bar.render(i + 1, steps.length, steps[i]);
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
   }
 }
 
-const app = cli('myapp')
-  .version('1.0.0')
-  .description('Progress bar example');
+const app = cli('myapp').version('1.0.0').description('Progress bar example');
 
-app.command('progress')
+app
+  .command('progress')
   .description('Show a simple progress bar')
   .action(async () => {
     await simulateProgress();
   });
 
-app.command('steps')
+app
+  .command('steps')
   .description('Show progress with step labels')
   .action(async () => {
     await simulateSteps();
   });
 
-app.command('multiple')
+app
+  .command('multiple')
   .description('Show multiple progress bars')
   .action(async () => {
     console.log('Processing multiple files:\n');
@@ -98,7 +99,7 @@ app.command('multiple')
         process.stdout.write(`\x1b[${files.length}F`);
       }
 
-      await new Promise(resolve => setTimeout(resolve, 30));
+      await new Promise((resolve) => setTimeout(resolve, 30));
     }
 
     console.log('\nAll files processed!');

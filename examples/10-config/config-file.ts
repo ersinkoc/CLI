@@ -33,7 +33,8 @@ const app = cli('myapp')
   .option('--host <address>', 'Server host')
   .option('-d, --debug', 'Enable debug mode');
 
-app.command('start')
+app
+  .command('start')
   .description('Start the server with config')
   .action(async ({ options }) => {
     // Load config from file
@@ -56,11 +57,12 @@ app.command('start')
     console.log(`  Output: ${config.output}`);
 
     // Simulate server start
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     console.log('Server started!');
   });
 
-app.command('config')
+app
+  .command('config')
   .description('Show current configuration')
   .option('-c, --config <path>', 'Path to config file', './config.json')
   .action(async ({ options }) => {
